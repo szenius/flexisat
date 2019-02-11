@@ -1,9 +1,11 @@
 class Variable {
+    private int id;
     private int value;
     private int decisionLevel;
     private Variable ancestor;
 
-    public Variable() {
+    public Variable(int id) {
+        this.id = id;
         this.value = -1;
         this.decisionLevel = -1;
         this.ancestor = null;
@@ -19,6 +21,10 @@ class Variable {
 
     public void setAncestor(Variable ancestor) {
         this.ancestor = ancestor;
+    }
+
+    public int getId() {
+        return this.id;
     }
     
     public int getValue() {

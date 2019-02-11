@@ -1,3 +1,5 @@
+package data_structures;
+
 class Formula {
     private List<Clause> clauses;
 
