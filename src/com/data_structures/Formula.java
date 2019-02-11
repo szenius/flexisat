@@ -1,4 +1,4 @@
-package data_structures;
+package com.data_structures;
 
 class Formula {
     private List<Clause> clauses;

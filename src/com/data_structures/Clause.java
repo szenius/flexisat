@@ -1,3 +1,5 @@
+package com.data_structures;
+
 class Clause {
     private List<Literal> literals;
 

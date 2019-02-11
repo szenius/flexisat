@@ -1,3 +1,5 @@
+package com.data_structures;
+
 class Variable {
     private int id;
     private int value;
