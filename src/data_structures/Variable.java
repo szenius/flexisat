@@ -1,6 +1,6 @@
-package com.data_structures;
+package data_structures;
 
-class Variable {
+public class Variable {
     private int id;
     private int value;
     private int decisionLevel;

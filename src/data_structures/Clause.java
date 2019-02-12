@@ -1,6 +1,8 @@
-package com.data_structures;
+package data_structures;
 
-class Clause {
+import java.util.List;
+
+public class Clause {
     private List<Literal> literals;
 
     public Clause(List<Literal> literals) {

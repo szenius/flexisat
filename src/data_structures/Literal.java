@@ -1,6 +1,6 @@
-package com.data_structures;
+package data_structures;
 
-class Literal {
+public class Literal {
     private Variable variable;
     private boolean isNegated;
 
