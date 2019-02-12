@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Parser {
 
-    final static int CNF_TYPE = 3;
+    private final static int CNF_TYPE = 3;
 
     public static Formula parse(String filePath) {
         File file = new File(filePath);
@@ -32,8 +32,8 @@ public class Parser {
             // Second line: p
             line = br.readLine();
             String[] secondLine = line.split(" ");
-            int numVariables = Integer.parseInt(secondLine[1]);
-            int numClauses = Integer.parseInt(secondLine[2]);
+            int numVariables = Integer.parseInt(secondLine[2]);
+            int numClauses = Integer.parseInt(secondLine[3]);
 
             List<Clause> clauses = new ArrayList<Clause>();
             for (int i = 0 ; i < numClauses; i++ ) {
@@ -47,6 +47,7 @@ public class Parser {
             }
             Formula form = new Formula(clauses);
             br.close();
+            System.out.println("Done!");
             return form;
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,8 +61,13 @@ public class Parser {
             throw new Exception("Clause does not exist.");
         }  
         String[] splitLine = line.split(" ");
-        if (splitLine.length != CNF_TYPE) {
+        // The last number of each line should be 0
+        if (splitLine.length != CNF_TYPE + 1) {
+            System.out.println(splitLine.length);
             throw new Exception("Clause size is not 3.");
+        }
+        if (Integer.parseInt(splitLine[3]) != 0) {
+            throw new Exception("Format of clause is incorrect. Last number of the line should be 0.");
         }
         List<Literal> literals = new ArrayList<Literal>();
         for (int i = 0; i < CNF_TYPE; i++ ) {
@@ -80,6 +86,4 @@ public class Parser {
         }
         return literal;
     }
-
 }
-// # Have a predefined list of CNF formulas
