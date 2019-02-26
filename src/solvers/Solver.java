@@ -1,10 +1,8 @@
 package solvers;
 
-import data_structures.Formula;
-import data_structures.Variable;
-
-import java.util.List;
+import data_structures.Assignment;
+import data_structures.Clauses;
 
 interface Solver {
-    boolean solve(Formula form, List<Variable> vars);
+    boolean solve(Clauses clauses, Assignment assignment, int decisionLevel);
 }

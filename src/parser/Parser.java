@@ -1,7 +1,7 @@
 package parser;
 
 import data_structures.Clause;
-import data_structures.Formula;
+import data_structures.Clauses;
 import data_structures.Literal;
 import data_structures.Variable;
 
@@ -13,7 +13,7 @@ public class Parser {
 
     private final static int CNF_TYPE = 3;
 
-    public static Formula parse(String filePath) {
+    public static Clauses parse(String filePath) {
         File file = new File(filePath);
         FileInputStream fis = null;
         try {
@@ -45,7 +45,7 @@ public class Parser {
                     System.exit(1);
                 }
             }
-            Formula form = new Formula(clauses);
+            Clauses form = new Clauses(clauses);
             br.close();
             System.out.println("Done!");
             return form;
