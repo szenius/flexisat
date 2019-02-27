@@ -1,10 +1,10 @@
 package data_structures;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+/**
+ * TODO: make assignment and decision level the same variable so we don't have to maintain two equivalent maps
+ */
 public class Assignment {
     private Set<Integer> varIds;
     private Map<Integer, Boolean> assignments;
@@ -21,6 +21,7 @@ public class Assignment {
      *
      * @param varId integer ID corresponding to a variable
      * @param assignment true/false
+     * @param decisionLevel decision level of assignment
      * @return false if an alternative assignments already exists, otherwise true.
      */
     public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
@@ -29,6 +30,31 @@ public class Assignment {
         }
         assignments.put(varId, assignment);
         decisionLevels.put(varId, decisionLevel);
+        return true;
+    }
+
+    /**
+     * Tries to change the add an assignment if it doesn't already exist.
+     * If it already exists and is a true assignment, change it to false.
+     * if it already exists and is a false assignment, it indicates we have tried both assignments.
+     *  So return false to indicate conflict.
+     *
+     * @param varId integer ID corresponding to a variable
+     * @param decisionLevel decision level of assignment
+     * @return false if there is an existing false assignment. True otherwise.
+     */
+    public boolean changeAssignment(int varId, int decisionLevel) {
+        if (assignments.containsKey(varId)) {
+            boolean existingAssignment = assignments.get(varId);
+            if (!existingAssignment) {
+                return false;
+            }
+            assignments.replace(varId, false);
+            decisionLevels.replace(varId, decisionLevel);
+        } else {
+            assignments.put(varId, true);
+            decisionLevels.put(varId, decisionLevel);
+        }
         return true;
     }
 
@@ -45,4 +71,10 @@ public class Assignment {
         return result;
     }
 
+    /**
+     * @return All varIDs with an assignment
+     */
+    public Set<Integer> getAssignedVarIds() {
+        return assignments.keySet();
+    }
 }

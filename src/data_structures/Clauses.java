@@ -37,7 +37,21 @@ public class Clauses {
         return false;
     }
 
-    public void resolve(int unitLiteralVarId, boolean b, int decisionLevel) {
-        // todo: stub
+    /**
+     * Given the current assignment, remove the assigned variables and try to infer new assignments.
+     *
+     * @param assignment current assignments
+     * @param decisionLevel decision level at which this resolution is being invoked
+     */
+    public void resolve(Assignment assignment, int decisionLevel) {
+        for (Clause clause : clauses) {
+            for (Literal literal : clause.getLiterals()) {
+                if (assignment.getAssignedVarIds().contains(literal.getVariable().getId())) {
+                    if (clause.getLiterals().size() == 2) {
+                        // todo: stub omg this makes my head hurt
+                    }
+                }
+            }
+        }
     }
 }
