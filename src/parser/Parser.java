@@ -7,13 +7,31 @@ import data_structures.Variable;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Parser {
 
-    private final static int CNF_TYPE = 3;
+    private final static int EXPECTED_CLAUSE_SIZE = 3;
 
-    public static Formula parse(String filePath) {
+    private Formula form;
+    private Set<Variable> variables;
+
+    public Parser(String filePath) {
+        this.variables = new HashSet<Variable>();
+        this.parse(filePath);
+    }
+
+    public Formula getFormula() {
+        return this.form;
+    }
+
+    public Set<Variable> getVariables() {
+        return this.variables;
+    }
+
+    public Formula parse(String filePath) {
         File file = new File(filePath);
         FileInputStream fis = null;
         try {
@@ -41,11 +59,11 @@ public class Parser {
                 try {
                     clauses.add(createClause(line));
                 } catch (Exception e){
-                    System.out.print(e.getMessage());
+                    e.printStackTrace();
                     System.exit(1);
                 }
             }
-            Formula form = new Formula(clauses);
+            this.form = new Formula(clauses);
             br.close();
             System.out.println("Done!");
             return form;
@@ -56,21 +74,27 @@ public class Parser {
         return null;
     }
 
-    private static Clause createClause(String line) throws Exception { 
+    private Clause createClause(String line) throws Exception {
         if (line == null){
             throw new Exception("Clause does not exist.");
         }  
         String[] splitLine = line.split(" ");
         // The last number of each line should be 0
-        if (splitLine.length != CNF_TYPE + 1) {
+        if (splitLine.length != EXPECTED_CLAUSE_SIZE + 1) {
             System.out.println(splitLine.length);
-            throw new Exception("Clause size is not 3.");
+            throw new Exception("Clause size is not " + EXPECTED_CLAUSE_SIZE);
         }
         if (Integer.parseInt(splitLine[3]) != 0) {
             throw new Exception("Format of clause is incorrect. Last number of the line should be 0.");
         }
         List<Literal> literals = new ArrayList<Literal>();
-        for (int i = 0; i < CNF_TYPE; i++ ) {
+        // Temporarily stores the variables
+        for (int i = 0; i < EXPECTED_CLAUSE_SIZE; i++ ) {
+            int literalValue = Integer.parseInt(splitLine[i]);
+            Variable variable = new Variable(Math.abs(literalValue));
+            if (!this.variables.contains(variable)) {
+                this.variables.add(variable);
+            }
             literals.add(createLiteral(Integer.parseInt(splitLine[i])));
         }   
         return new Clause(literals);
