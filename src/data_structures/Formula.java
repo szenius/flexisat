@@ -1,6 +1,8 @@
 package data_structures;
 
-class Formula {
+import java.util.List;
+
+public class Formula {
     private List<Clause> clauses;
 
     public Formula(List<Clause> clauses) {
@@ -11,7 +13,7 @@ class Formula {
         this.clauses.add(clause);
     }
 
-    public List<Clauses> getClauses() {
+    public List<Clause> getClauses() {
         return this.clauses;
     }
 }

@@ -1,3 +1,10 @@
+package solvers;
+
+import data_structures.Formula;
+import data_structures.Variable;
+
+import java.util.List;
+
 public class CDCLSolver implements Solver {
 
     @Override
@@ -16,7 +23,7 @@ public class CDCLSolver implements Solver {
                 if (assertionLevel < 0) {
                     return false;
                 } else {
-                    backtrack(formula, vars, assertionLevel);
+                    backtrack(form, vars, assertionLevel);
                     decisionLevel = assertionLevel;
                 }
             }
@@ -36,6 +43,10 @@ public class CDCLSolver implements Solver {
     private void pickBranchingVariable(Formula formula, List<Variable> vars, int decisionLevel) {
         // todo: Pick Branching Variable
         // todo: Set Decision Level of picked variable to decisionLevel
+    }
+
+    private int conflictAnalysis(Formula form, List<Variable> vars) {
+        return -1; // todo: stub
     }
 
     private void backtrack(Formula formula, List<Variable> vars, int assertionLevel) {

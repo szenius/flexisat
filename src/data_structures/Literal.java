@@ -1,4 +1,6 @@
-class Literal {
+package data_structures;
+
+public class Literal {
     private Variable variable;
     private boolean isNegated;
 
