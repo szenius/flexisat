@@ -10,6 +10,10 @@ public class Assignment {
     private Map<Integer, Boolean> assignments;
     private Map<Integer, Integer> decisionLevels;
 
+    public enum AssignmentStatus {
+        UNSAT, NO_UNIT_CLAUSES, SUCCESS
+    }
+
     public Assignment(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
@@ -65,7 +69,7 @@ public class Assignment {
      * @param clause clause to be checked
      * @return null if clause is not a unit clause. Variable otherwise.
      */
-    public boolean findAndAssignVariable(Clause clause, int decisionLevel) {
+    public AssignmentStatus findAndAssignVariable(Clause clause, int decisionLevel) {
         List<Literal> clauseLiterals = clause.getLiterals();
         boolean isUnitClause = false;
         Literal literalToBeAssigned = null;
@@ -77,24 +81,27 @@ public class Assignment {
                     isUnitClause = true;
                     literalToBeAssigned = literal;
                 } else {    // >= 2 Literals are unassigned.
-                    return false;
+                    return AssignmentStatus.NO_UNIT_CLAUSES;
                 }
             } else if (this.assignments.containsKey(literal.getVariable().getId()) ) {
                 if (literal.isTrue(this.assignments.get(literal.getVariable().getId()))) {
-                    return false;
+                    return AssignmentStatus.NO_UNIT_CLAUSES;
                 }
             }
         }
-        assignVariable(literalToBeAssigned, decisionLevel);
-        return true;
+        boolean success = assignVariable(literalToBeAssigned, decisionLevel);
+        if (success) {
+            return AssignmentStatus.SUCCESS;
+        }
+        return AssignmentStatus.UNSAT;
     }
 
 
-    private void assignVariable(Literal literal, int decisionLevel) {
+    private boolean assignVariable(Literal literal, int decisionLevel) {
         if (literal.isNegated()) {
-            addAssignment(literal.getVariable().getId(),false, decisionLevel);
+            return addAssignment(literal.getVariable().getId(),false, decisionLevel);
         } else {
-            addAssignment(literal.getVariable().getId(), true, decisionLevel);
+            return addAssignment(literal.getVariable().getId(), true, decisionLevel);
         }
     }
 

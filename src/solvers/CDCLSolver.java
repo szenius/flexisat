@@ -23,6 +23,7 @@ public class CDCLSolver implements Solver {
         if (!performUnitResolution(clauses, assignment, decisionLevel)) {
             return false;
         }
+        // note(lowjiansheng): Don't think we'll need this here anymore. 
         clauses.resolve(assignment, decisionLevel);
 
         // Check if any more variables to assign
@@ -51,17 +52,7 @@ public class CDCLSolver implements Solver {
     }
 
     private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
-        for (Clause clause : clauses.getUnitClauses()) {
-            // At this point each clause should already be of size 1.
-            int unitLiteralVarId = clause.getLiterals().get(0).getVariable().getId();
-            boolean success = assignment.addAssignment(unitLiteralVarId, true, decisionLevel);
-            if (!success) {
-                return false;
-            }
-            // When we resolve the rest of the clauses, we need to re-get the list of unit clauses.
-            clauses.resolve(assignment, decisionLevel);
-        }
-        return true;
+        return clauses.resolve(assignment, decisionLevel);
     }
 
     private int pickBranchingVariable(Assignment assignment) {
