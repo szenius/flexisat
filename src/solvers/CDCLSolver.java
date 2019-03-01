@@ -52,14 +52,15 @@ public class CDCLSolver implements Solver {
 
     private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
         for (Clause clause : clauses.getUnitClauses()) {
+            // At this point each clause should already be of size 1.
             int unitLiteralVarId = clause.getLiterals().get(0).getVariable().getId();
             boolean success = assignment.addAssignment(unitLiteralVarId, true, decisionLevel);
             if (!success) {
                 return false;
             }
+            // When we resolve the rest of the clauses, we need to re-get the list of unit clauses.
             clauses.resolve(assignment, decisionLevel);
         }
-
         return true;
     }
 

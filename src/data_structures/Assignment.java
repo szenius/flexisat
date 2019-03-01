@@ -58,6 +58,47 @@ public class Assignment {
         return true;
     }
 
+
+    /**
+     * Iterates through the literals in a clause to check if it is a
+     * unit clause (1 literal left unassigned).
+     * @param clause clause to be checked
+     * @return null if clause is not a unit clause. Variable otherwise.
+     */
+    public boolean findAndAssignVariable(Clause clause, int decisionLevel) {
+        List<Literal> clauseLiterals = clause.getLiterals();
+        boolean isUnitClause = false;
+        Literal literalToBeAssigned = null;
+        for (int i = 0 ; i < clauseLiterals.size(); i++) {
+            Literal literal = clauseLiterals.get(i);
+            // Literal not assigned yet.
+            if (!this.assignments.containsKey(literal.getVariable().getId())) {
+                if (isUnitClause == false ){
+                    isUnitClause = true;
+                    literalToBeAssigned = literal;
+                } else {    // >= 2 Literals are unassigned.
+                    return false;
+                }
+            } else if (this.assignments.containsKey(literal.getVariable().getId()) ) {
+                if (literal.isTrue(this.assignments.get(literal.getVariable().getId()))) {
+                    return false;
+                }
+            }
+        }
+        assignVariable(literalToBeAssigned, decisionLevel);
+        return true;
+    }
+
+
+    private void assignVariable(Literal literal, int decisionLevel) {
+        if (literal.isNegated()) {
+            addAssignment(literal.getVariable().getId(),false, decisionLevel);
+        } else {
+            addAssignment(literal.getVariable().getId(), true, decisionLevel);
+        }
+    }
+
+
     /**
      * @return All varIDs without an assignment
      */
