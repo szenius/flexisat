@@ -1,60 +1,69 @@
 package solvers;
 
-import data_structures.Formula;
-import data_structures.Variable;
+import data_structures.*;
 
-import java.util.List;
-
+/**
+ * TODO: add conflict analysis
+ */
 public class CDCLSolver implements Solver {
 
     @Override
-    public boolean solve(Formula form, List<Variable> vars) {
-        if (unitPropagation(form, vars).equals(AssignmentStatus.CONFLICT)) {
+    public boolean solve(Clauses clauses, Assignment assignment, int decisionLevel) {
+        // Check if formula is empty
+        if (clauses.getClauses().isEmpty()) {
+            return true;
+        }
+
+        // Check if there is any empty clause
+        if (clauses.hasEmptyClause()) {
             return false;
         }
 
-        int decisionLevel = 0;
+        // Perform unit resolution + infer new assignments
+        if (!performUnitResolution(clauses, assignment, decisionLevel)) {
+            return false;
+        }
+        clauses.resolve(assignment, decisionLevel);
 
-        while(!allVarAssigned(form, vars)) {
-            pickBranchingVariable(form, vars, decisionLevel);
-            decisionLevel++;
-            if (unitPropagation(form, vars).equals(AssignmentStatus.CONFLICT)) {
-                int assertionLevel = conflictAnalysis(form, vars);
-                if (assertionLevel < 0) {
-                    return false;
-                } else {
-                    backtrack(form, vars, assertionLevel);
-                    decisionLevel = assertionLevel;
-                }
+        // Check if any more variables to assign
+        if (assignment.getUnassignedVarIds().isEmpty()) {
+            return true;
+        }
+
+        // Pick a new variable to assign
+        int varId = pickBranchingVariable(assignment);
+        if(!assignment.addAssignment(varId, true, decisionLevel)) {
+            return false;
+        }
+        if (solve(clauses, assignment, decisionLevel + 1)) {
+            return true;
+        }
+
+        // Change assignment of picked variable
+        if(!assignment.changeAssignment(varId, decisionLevel)) {
+            return false;
+        }
+        if (solve(clauses, assignment, decisionLevel + 1)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
+        for (Clause clause : clauses.getUnitClauses()) {
+            int unitLiteralVarId = clause.getLiterals().get(0).getVariable().getId();
+            boolean success = assignment.addAssignment(unitLiteralVarId, true, decisionLevel);
+            if (!success) {
+                return false;
             }
+            clauses.resolve(assignment, decisionLevel);
         }
 
         return true;
     }
 
-    private AssignmentStatus unitPropagation(Formula form, List<Variable> vars) {
-        return AssignmentStatus.CONFLICT; // todo: stub
-    }
-
-    private boolean allVarAssigned(Formula form, List<Variable> vars) {
-        return true; // todo: stub
-    }
-
-    private void pickBranchingVariable(Formula formula, List<Variable> vars, int decisionLevel) {
-        // todo: Pick Branching Variable
-        // todo: Set Decision Level of picked variable to decisionLevel
-    }
-
-    private int conflictAnalysis(Formula form, List<Variable> vars) {
-        return -1; // todo: stub
-    }
-
-    private void backtrack(Formula formula, List<Variable> vars, int assertionLevel) {
-        // todo:
-    }
-
-    private enum AssignmentStatus {
-        OKAY,
-        CONFLICT;
+    private int pickBranchingVariable(Assignment assignment) {
+        return (int) assignment.getUnassignedVarIds().toArray()[0];
     }
 }

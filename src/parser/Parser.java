@@ -1,7 +1,7 @@
 package parser;
 
 import data_structures.Clause;
-import data_structures.Formula;
+import data_structures.Clauses;
 import data_structures.Literal;
 import data_structures.Variable;
 
@@ -15,7 +15,7 @@ public class Parser {
 
     private final static int EXPECTED_CLAUSE_SIZE = 3;
 
-    private Formula form;
+    private Clauses form;
     private Set<Variable> variables;
 
     public Parser(String filePath) {
@@ -23,7 +23,7 @@ public class Parser {
         this.parse(filePath);
     }
 
-    public Formula getFormula() {
+    public Clauses getClauses() {
         return this.form;
     }
 
@@ -31,7 +31,8 @@ public class Parser {
         return this.variables;
     }
 
-    public Formula parse(String filePath) {
+    public Clauses parse(String filePath) {
+
         File file = new File(filePath);
         FileInputStream fis = null;
         try {
@@ -63,7 +64,7 @@ public class Parser {
                     System.exit(1);
                 }
             }
-            this.form = new Formula(clauses);
+            this.form = new Clauses(clauses);
             br.close();
             System.out.println("Done!");
             return form;

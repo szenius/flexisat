@@ -1,4 +1,5 @@
-import data_structures.Formula;
+
+import data_structures.Clauses;
 import data_structures.Variable;
 import parser.Parser;
 
@@ -9,5 +10,7 @@ class Main {
     public static void main(String[] args) {
         String filename = args[0]; // todo: if this gets complicated, we can define an object class for input args
         Parser parser = new Parser(filename);
+        Set<Variable> testVariables = parser.getVariables();
+        Clauses form = parser.getClauses();
     }
 }
