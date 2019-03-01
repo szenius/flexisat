@@ -18,16 +18,6 @@ public class Clauses {
         return this.clauses;
     }
 
-    public List<Clause> getUnitClauses() {
-        List<Clause> result = new ArrayList<>();
-        for (Clause clause : clauses) {
-            if (clause.isUnitClause()) {
-                result.add(clause);
-            }
-        }
-        return result;
-    }
-
     public boolean hasEmptyClause() {
         for (Clause clause : clauses) {
             if (clause.getLiterals().isEmpty()) {

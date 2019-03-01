@@ -12,8 +12,4 @@ public class Clause {
     public List<Literal> getLiterals() {
         return this.literals;
     }
-
-    public boolean isUnitClause() {
-        return this.literals.size() == 1;
-    }
 }
