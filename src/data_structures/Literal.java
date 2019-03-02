@@ -16,4 +16,14 @@ public class Literal {
     public boolean isNegated() {
         return this.isNegated;
     }
+
+    /**
+     * Does a xor on assignment and literal negation to evaluate
+     * a literal's value.
+     * @param assignment
+     * @return evaluation of this literal with its assignment
+     */
+    public boolean isTrue(boolean assignment) {
+        return this.isNegated ^ assignment;
+    }
 }
