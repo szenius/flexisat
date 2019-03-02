@@ -71,14 +71,14 @@ public class Assignment {
      */
     public AssignmentStatus findAndAssignVariable(Clause clause, int decisionLevel) {
         List<Literal> clauseLiterals = clause.getLiterals();
-        boolean isUnitClause = false;
+        boolean foundUnassigned = false;
         Literal literalToBeAssigned = null;
         for (int i = 0 ; i < clauseLiterals.size(); i++) {
             Literal literal = clauseLiterals.get(i);
             // Literal not assigned yet.
             if (!this.assignments.containsKey(literal.getVariable().getId())) {
-                if (isUnitClause == false ){
-                    isUnitClause = true;
+                if (foundUnassigned == false ){
+                    foundUnassigned = true;
                     literalToBeAssigned = literal;
                 } else {    // >= 2 Literals are unassigned.
                     return AssignmentStatus.NO_UNIT_CLAUSES;
