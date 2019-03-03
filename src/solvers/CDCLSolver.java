@@ -23,8 +23,6 @@ public class CDCLSolver implements Solver {
         if (!performUnitResolution(clauses, assignment, decisionLevel)) {
             return false;
         }
-        // note(lowjiansheng): Don't think we'll need this here anymore. 
-        clauses.resolve(assignment, decisionLevel);
 
         // Check if any more variables to assign
         if (assignment.getUnassignedVarIds().isEmpty()) {
