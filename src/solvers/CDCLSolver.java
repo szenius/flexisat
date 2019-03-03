@@ -55,7 +55,10 @@ public class CDCLSolver implements Solver {
         for (Clause clause : clauses.getClauses()) {
             if (assignment.assignUnitClause(clause, decisionLevel)) {
                 boolean success = clauses.resolve(assignment, decisionLevel);
-                if (!success) return false;
+                if (!success) {
+                    assignment.revertLastAssignment();
+                    return false;
+                }
             }
         }
         return true;

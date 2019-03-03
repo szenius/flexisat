@@ -9,15 +9,13 @@ public class Assignment {
     private Set<Integer> varIds;
     private Map<Integer, Boolean> assignments;
     private Map<Integer, Integer> decisionLevels;
-
-    public boolean getAssignment(int id) {
-        return assignments.get(id);
-    }
+    private Stack<Integer> lastAssignedId;
 
     public Assignment(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
         this.decisionLevels = new HashMap<>();
+        this.lastAssignedId = new Stack<>();
     }
 
     /**
@@ -35,6 +33,7 @@ public class Assignment {
         }
         assignments.put(varId, assignment);
         decisionLevels.put(varId, decisionLevel);
+        lastAssignedId.push(varId);
         return true;
     }
 
@@ -60,6 +59,7 @@ public class Assignment {
             assignments.put(varId, true);
             decisionLevels.put(varId, decisionLevel);
         }
+        lastAssignedId.push(varId);
         return true;
     }
 
@@ -110,5 +110,14 @@ public class Assignment {
      */
     public Set<Integer> getAssignedVarIds() {
         return assignments.keySet();
+    }
+
+    public boolean getAssignment(int id) {
+        return assignments.get(id);
+    }
+
+    public void revertLastAssignment() {
+        assignments.remove(lastAssignedId.pop());
+        decisionLevels.remove(lastAssignedId.pop());
     }
 }
