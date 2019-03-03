@@ -20,7 +20,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Perform unit resolution + infer new assignments
-        if (!performUnitResolution(clauses, assignment, decisionLevel)) {
+        if (!performUnitPropagation(clauses, assignment, decisionLevel)) {
             return false;
         }
 
@@ -49,7 +49,7 @@ public class CDCLSolver implements Solver {
         return false;
     }
 
-    private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
+    private boolean performUnitPropagation(Clauses clauses, Assignment assignment, int decisionLevel) {
         return clauses.resolve(assignment, decisionLevel);
     }
 
