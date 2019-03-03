@@ -19,8 +19,8 @@ public class CDCLSolver implements Solver {
             return false;
         }
 
-        // Perform unit resolution + infer new assignments
-        if (!performUnitResolution(clauses, assignment, decisionLevel)) {
+        // Perform unit resolution
+        if (!performUnitResolution(clauses, assignment, decisionLevel - 1)) {
             return false;
         }
 
@@ -51,11 +51,20 @@ public class CDCLSolver implements Solver {
         return false;
     }
 
+    /**
+     * Tries to perform unit resolution for whichever unit clause found.
+     * After performing unit resolution, check if the assignment is satisfiable. If not, revert the assignment.
+     *
+     * @param clauses
+     * @param assignment
+     * @param decisionLevel
+     * @return True if unit resolution was done and the resulting assignment is satisfiable,
+     *          OR if unit resolution was not done at all. Otherwise return False.
+     */
     private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
         for (Clause clause : clauses.getClauses()) {
             if (assignment.assignUnitClause(clause, decisionLevel)) {
-                boolean success = clauses.resolve(assignment, decisionLevel);
-                if (!success) {
+                if (!clauses.resolve(assignment, decisionLevel)) {
                     assignment.revertLastAssignment();
                     return false;
                 }

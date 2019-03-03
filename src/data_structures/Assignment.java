@@ -27,7 +27,7 @@ public class Assignment {
      * @return false if an alternative assignments already exists, otherwise true.
      */
     public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
-        System.out.println("Assignment: Trying to add assign " + varId + " " + String.valueOf(assignment));
+        System.out.println("Assignment: Trying to add assignment of " + varId + "@" + decisionLevel + "=" + String.valueOf(assignment));
         if (assignments.containsKey(varId)) {
             return assignments.get(varId) == assignment;
         }
@@ -48,6 +48,7 @@ public class Assignment {
      * @return false if there is an existing false assignment. True otherwise.
      */
     public boolean changeAssignment(int varId, int decisionLevel) {
+        System.out.println("Assignment: Trying to change assignment of " + varId);
         if (assignments.containsKey(varId)) {
             boolean existingAssignment = assignments.get(varId);
             if (!existingAssignment) {
