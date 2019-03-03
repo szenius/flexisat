@@ -20,7 +20,8 @@ public class CDCLSolver implements Solver {
         }
 
         // Perform unit resolution
-        if (!performUnitResolution(clauses, assignment, decisionLevel - 1)) {
+        int unitResolutionDecisionLevel = decisionLevel == 0? decisionLevel : decisionLevel - 1;
+        if (!performUnitResolution(clauses, assignment, unitResolutionDecisionLevel)) {
             return false;
         }
 
@@ -62,11 +63,17 @@ public class CDCLSolver implements Solver {
      *          OR if unit resolution was not done at all. Otherwise return False.
      */
     private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
-        for (Clause clause : clauses.getClauses()) {
-            if (assignment.assignUnitClause(clause, decisionLevel)) {
-                if (!clauses.resolve(assignment, decisionLevel)) {
-                    assignment.revertLastAssignment();
-                    return false;
+        boolean performedUnitResolution = true;
+        while (performedUnitResolution) {
+            performedUnitResolution = false;
+            // Try to perform unit resolution until a pass where no unit resolution was performed
+            for (Clause clause : clauses.getClauses()) {
+                if (assignment.assignUnitClause(clause, decisionLevel)) {
+                    performedUnitResolution = true;
+                    if (!clauses.resolve(assignment, decisionLevel)) {
+                        assignment.revertLastAssignment();
+                        return false;
+                    }
                 }
             }
         }

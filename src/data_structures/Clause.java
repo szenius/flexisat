@@ -21,7 +21,7 @@ public class Clause {
                 // There are still unassigned variables, cannot determine SAT
                 return true;
             }
-            clauseVal |= (assignment.getAssignment(literal.getVariable().getId()) ^ literal.isNegated());
+            clauseVal |= literal.getValue(assignment.getAssignment(literal.getVariable().getId()));
         }
         System.out.println("Clause: Checked clause " + toString() + "... sat? " + clauseVal);
         return clauseVal;
