@@ -23,7 +23,7 @@ public class Clause {
             }
             clauseVal |= (assignment.getAssignment(literal.getVariable().getId()) ^ literal.isNegated());
         }
-        System.out.println("Checked clause " + toString() + " " + clauseVal);
+        System.out.println("Clause: Checked clause " + toString() + "... sat? " + clauseVal);
         return clauseVal;
     }
 

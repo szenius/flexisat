@@ -1,11 +1,8 @@
 
 import data_structures.Assignment;
 import data_structures.Clauses;
-import data_structures.Variable;
 import parser.Parser;
 import solvers.CDCLSolver;
-
-import java.util.Set;
 
 class Main {
     public static void main(String[] args) {

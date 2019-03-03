@@ -31,7 +31,7 @@ public class CDCLSolver implements Solver {
 
         // Pick a new variable to assign
         int varId = pickBranchingVariable(assignment);
-        System.out.println("Assigning " + varId + " to TRUE");
+        System.out.println("Solver: Try assigning " + varId + " to TRUE");
         if(!assignment.addAssignment(varId, true, decisionLevel)) {
             return false;
         }
@@ -40,7 +40,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Change assignment of picked variable
-        System.out.println("Assigning " + varId + " to FALSE");
+        System.out.println("Solver: Try assigning " + varId + " to FALSE");
         if(!assignment.changeAssignment(varId, decisionLevel)) {
             return false;
         }

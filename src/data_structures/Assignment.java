@@ -27,7 +27,7 @@ public class Assignment {
      * @return false if an alternative assignments already exists, otherwise true.
      */
     public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
-        System.out.println("Trying to assign " + varId + " " + String.valueOf(assignment));
+        System.out.println("Assignment: Trying to add assign " + varId + " " + String.valueOf(assignment));
         if (assignments.containsKey(varId)) {
             return assignments.get(varId) == assignment;
         }
