@@ -1,4 +1,4 @@
-c First CNF test case
+c Second CNF test case
 p cnf 3 8
 1 2 3 0
 1 2 -3 0
