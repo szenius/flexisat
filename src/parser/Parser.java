@@ -17,6 +17,7 @@ public class Parser {
 
     private Clauses form;
     private Set<Variable> variables;
+    private Set<Integer> varIds;
 
     public Parser(String filePath) {
         this.variables = new HashSet<Variable>();
@@ -29,6 +30,10 @@ public class Parser {
 
     public Set<Variable> getVariables() {
         return this.variables;
+    }
+
+    public Set<Integer> getVarIds() {
+        return this.varIds;
     }
 
     public Clauses parse(String filePath) {
@@ -93,9 +98,8 @@ public class Parser {
         for (int i = 0; i < EXPECTED_CLAUSE_SIZE; i++ ) {
             int literalValue = Integer.parseInt(splitLine[i]);
             Variable variable = new Variable(Math.abs(literalValue));
-            if (!this.variables.contains(variable)) {
-                this.variables.add(variable);
-            }
+            this.variables.add(variable);
+            this.varIds.add(Math.abs(literalValue));
             literals.add(createLiteral(Integer.parseInt(splitLine[i])));
         }   
         return new Clause(literals);

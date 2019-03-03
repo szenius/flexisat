@@ -72,12 +72,12 @@ public class Assignment {
     public AssignmentStatus findAndAssignVariable(Clause clause, int decisionLevel) {
         List<Literal> clauseLiterals = clause.getLiterals();
         boolean foundUnassigned = false;
-        Literal literalToBeAssigned = null;
+        Literal literalToBeAssigned = null; // TODO: @jiansheng - if this remains null what is the expected return behaviour?
         for (int i = 0 ; i < clauseLiterals.size(); i++) {
             Literal literal = clauseLiterals.get(i);
             // Literal not assigned yet.
             if (!this.assignments.containsKey(literal.getVariable().getId())) {
-                if (foundUnassigned == false ){
+                if (!foundUnassigned){
                     foundUnassigned = true;
                     literalToBeAssigned = literal;
                 } else {    // >= 2 Literals are unassigned.
