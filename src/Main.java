@@ -1,14 +1,20 @@
 
+import data_structures.Assignment;
 import data_structures.Clauses;
-import data_structures.Variable;
 import parser.Parser;
-
-import java.util.Set;
+import solvers.CDCLSolver;
 
 class Main {
     public static void main(String[] args) {
-        String filename = args[0]; // todo: if this gets complicated, we can define an object class for input args
+        String filename = args[0]; // TODO: if this gets complicated, we can define an object class for input args
         Parser parser = new Parser(filename);
-        Clauses form = parser.getClauses();
+        Clauses clauses = parser.getClauses();
+        Assignment assignment = new Assignment(parser.getVarIds());
+        CDCLSolver solver = new CDCLSolver();
+        if (solver.solve(clauses, assignment, 0)) {
+            System.out.println("SAT");
+        } else {
+            System.out.println("UNSAT");
+        }
     }
 }

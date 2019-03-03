@@ -9,15 +9,13 @@ public class Assignment {
     private Set<Integer> varIds;
     private Map<Integer, Boolean> assignments;
     private Map<Integer, Integer> decisionLevels;
-
-    public enum AssignmentStatus {
-        UNSAT, NO_UNIT_CLAUSES, SUCCESS
-    }
+    private Stack<Integer> lastAssignedIds;
 
     public Assignment(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
         this.decisionLevels = new HashMap<>();
+        this.lastAssignedIds = new Stack<>();
     }
 
     /**
@@ -29,11 +27,13 @@ public class Assignment {
      * @return false if an alternative assignments already exists, otherwise true.
      */
     public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
+        System.out.println("Assignment: Trying to add assignment of " + varId + "@" + decisionLevel + "=" + String.valueOf(assignment));
         if (assignments.containsKey(varId)) {
             return assignments.get(varId) == assignment;
         }
         assignments.put(varId, assignment);
         decisionLevels.put(varId, decisionLevel);
+        lastAssignedIds.push(varId);
         return true;
     }
 
@@ -48,6 +48,7 @@ public class Assignment {
      * @return false if there is an existing false assignment. True otherwise.
      */
     public boolean changeAssignment(int varId, int decisionLevel) {
+        System.out.println("Assignment: Trying to change assignment of " + varId);
         if (assignments.containsKey(varId)) {
             boolean existingAssignment = assignments.get(varId);
             if (!existingAssignment) {
@@ -59,52 +60,38 @@ public class Assignment {
             assignments.put(varId, true);
             decisionLevels.put(varId, decisionLevel);
         }
+        lastAssignedIds.push(varId);
         return true;
     }
 
-
     /**
-     * Iterates through the literals in a clause to check if it is a
-     * unit clause (1 literal left unassigned).
-     * @param clause clause to be checked
-     * @return null if clause is not a unit clause. Variable otherwise.
+     * Tries to assign any unit literal in this clause so that its value is TRUE.
+     *
+     * @param clause
+     * @return True if an unit literal was assigned, False otherwise.
      */
-    public AssignmentStatus findAndAssignVariable(Clause clause, int decisionLevel) {
-        List<Literal> clauseLiterals = clause.getLiterals();
-        boolean foundUnassigned = false;
-        Literal literalToBeAssigned = null;
-        for (int i = 0 ; i < clauseLiterals.size(); i++) {
-            Literal literal = clauseLiterals.get(i);
-            // Literal not assigned yet.
-            if (!this.assignments.containsKey(literal.getVariable().getId())) {
-                if (foundUnassigned == false ){
-                    foundUnassigned = true;
-                    literalToBeAssigned = literal;
-                } else {    // >= 2 Literals are unassigned.
-                    return AssignmentStatus.NO_UNIT_CLAUSES;
-                }
-            } else if (this.assignments.containsKey(literal.getVariable().getId()) ) {
-                if (literal.isTrue(this.assignments.get(literal.getVariable().getId()))) {
-                    return AssignmentStatus.NO_UNIT_CLAUSES;
+    public boolean assignUnitClause(Clause clause, int decisionLevel) {
+        // Find unit literal, if any
+        Literal unitLiteral = null;
+        for (Literal literal : clause.getLiterals()) {
+            if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
+                if (unitLiteral == null) {
+                    unitLiteral = literal;
+                } else {
+                    // This is not a unit clause
+                    return false;
                 }
             }
         }
-        boolean success = assignVariable(literalToBeAssigned, decisionLevel);
-        if (success) {
-            return AssignmentStatus.SUCCESS;
+
+        if (unitLiteral == null) {
+            // Did not find any unassigned variable
+            return false;
         }
-        return AssignmentStatus.UNSAT;
+
+        // Assign the literal so its value is true
+        return addAssignment(unitLiteral.getVariable().getId(), !unitLiteral.isNegated(), decisionLevel);
     }
-
-
-    private boolean assignVariable(Literal literal, int decisionLevel) {
-        if (literal.isNegated()) {
-            return addAssignment(literal.getVariable().getId(),false, decisionLevel);
-        } else {
-            return addAssignment(literal.getVariable().getId(), true, decisionLevel);
-        }
-    }
-
 
     /**
      * @return All varIDs without an assignment
@@ -124,5 +111,15 @@ public class Assignment {
      */
     public Set<Integer> getAssignedVarIds() {
         return assignments.keySet();
+    }
+
+    public boolean getAssignment(int id) {
+        return assignments.get(id);
+    }
+
+    public void revertLastAssignment() {
+        int lastAssignedId = lastAssignedIds.pop();
+        assignments.remove(lastAssignedId);
+        decisionLevels.remove(lastAssignedId);
     }
 }

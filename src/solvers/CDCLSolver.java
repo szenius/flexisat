@@ -19,12 +19,11 @@ public class CDCLSolver implements Solver {
             return false;
         }
 
-        // Perform unit resolution + infer new assignments
-        if (!performUnitResolution(clauses, assignment, decisionLevel)) {
+        // Perform unit resolution
+        int unitResolutionDecisionLevel = decisionLevel == 0? decisionLevel : decisionLevel - 1;
+        if (!performUnitResolution(clauses, assignment, unitResolutionDecisionLevel)) {
             return false;
         }
-        // note(lowjiansheng): Don't think we'll need this here anymore. 
-        clauses.resolve(assignment, decisionLevel);
 
         // Check if any more variables to assign
         if (assignment.getUnassignedVarIds().isEmpty()) {
@@ -33,6 +32,7 @@ public class CDCLSolver implements Solver {
 
         // Pick a new variable to assign
         int varId = pickBranchingVariable(assignment);
+        System.out.println("Solver: Try assigning " + varId + " to TRUE");
         if(!assignment.addAssignment(varId, true, decisionLevel)) {
             return false;
         }
@@ -41,6 +41,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Change assignment of picked variable
+        System.out.println("Solver: Try assigning " + varId + " to FALSE");
         if(!assignment.changeAssignment(varId, decisionLevel)) {
             return false;
         }
@@ -51,8 +52,32 @@ public class CDCLSolver implements Solver {
         return false;
     }
 
+    /**
+     * Tries to perform unit resolution for whichever unit clause found.
+     * After performing unit resolution, check if the assignment is satisfiable. If not, revert the assignment.
+     *
+     * @param clauses
+     * @param assignment
+     * @param decisionLevel
+     * @return True if unit resolution was done and the resulting assignment is satisfiable,
+     *          OR if unit resolution was not done at all. Otherwise return False.
+     */
     private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
-        return clauses.resolve(assignment, decisionLevel);
+        boolean performedUnitResolution = true;
+        while (performedUnitResolution) {
+            performedUnitResolution = false;
+            // Try to perform unit resolution until a pass where no unit resolution was performed
+            for (Clause clause : clauses.getClauses()) {
+                if (assignment.assignUnitClause(clause, decisionLevel)) {
+                    performedUnitResolution = true;
+                    if (!clauses.resolve(assignment, decisionLevel)) {
+                        assignment.revertLastAssignment();
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private int pickBranchingVariable(Assignment assignment) {

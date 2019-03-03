@@ -15,20 +15,26 @@ public class Parser {
 
     private final static int EXPECTED_CLAUSE_SIZE = 3;
 
-    private Clauses form;
+    private Clauses clauses;
     private Set<Variable> variables;
+    private Set<Integer> varIds;
 
     public Parser(String filePath) {
-        this.variables = new HashSet<Variable>();
+        this.variables = new HashSet<>();
+        this.varIds = new HashSet<>();
         this.parse(filePath);
     }
 
     public Clauses getClauses() {
-        return this.form;
+        return this.clauses;
     }
 
     public Set<Variable> getVariables() {
         return this.variables;
+    }
+
+    public Set<Integer> getVarIds() {
+        return this.varIds;
     }
 
     public Clauses parse(String filePath) {
@@ -64,10 +70,10 @@ public class Parser {
                     System.exit(1);
                 }
             }
-            this.form = new Clauses(clauses);
+            this.clauses = new Clauses(clauses);
             br.close();
             System.out.println("Done!");
-            return form;
+            return this.clauses;
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -93,9 +99,8 @@ public class Parser {
         for (int i = 0; i < EXPECTED_CLAUSE_SIZE; i++ ) {
             int literalValue = Integer.parseInt(splitLine[i]);
             Variable variable = new Variable(Math.abs(literalValue));
-            if (!this.variables.contains(variable)) {
-                this.variables.add(variable);
-            }
+            this.variables.add(variable);
+            this.varIds.add(Math.abs(literalValue));
             literals.add(createLiteral(Integer.parseInt(splitLine[i])));
         }   
         return new Clause(literals);
