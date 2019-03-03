@@ -20,7 +20,8 @@ public class Parser {
     private Set<Integer> varIds;
 
     public Parser(String filePath) {
-        this.variables = new HashSet<Variable>();
+        this.variables = new HashSet<>();
+        this.varIds = new HashSet<>();
         this.parse(filePath);
     }
 
