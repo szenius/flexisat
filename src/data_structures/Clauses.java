@@ -35,17 +35,9 @@ public class Clauses {
      * @return false if any UNSAT in assignments. true otherwise.
      */
     public boolean resolve(Assignment assignment, int decisionLevel) {
-        int currentClauseIndex = 0;
-        while (currentClauseIndex != clauses.size() - 1) {
-            Assignment.AssignmentStatus status =
-                    assignment.findAndAssignVariable(clauses.get(currentClauseIndex), decisionLevel);
-            if (status == Assignment.AssignmentStatus.SUCCESS) {
-                currentClauseIndex = 0;
-            } else if (status == Assignment.AssignmentStatus.NO_UNIT_CLAUSES){
-                currentClauseIndex++;
-            } else {
-                return false;
-            }
+        for (Clause clause : clauses) {
+            boolean sat = clause.checkSAT(assignment);
+            if (!sat) return false;
         }
         return true;
     }

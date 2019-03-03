@@ -20,7 +20,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Perform unit resolution + infer new assignments
-        if (!performUnitPropagation(clauses, assignment, decisionLevel)) {
+        if (!performUnitResolution(clauses, assignment, decisionLevel)) {
             return false;
         }
 
@@ -31,6 +31,7 @@ public class CDCLSolver implements Solver {
 
         // Pick a new variable to assign
         int varId = pickBranchingVariable(assignment);
+        System.out.println("Assigning " + varId + " to TRUE");
         if(!assignment.addAssignment(varId, true, decisionLevel)) {
             return false;
         }
@@ -39,6 +40,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Change assignment of picked variable
+        System.out.println("Assigning " + varId + " to FALSE");
         if(!assignment.changeAssignment(varId, decisionLevel)) {
             return false;
         }
@@ -49,8 +51,14 @@ public class CDCLSolver implements Solver {
         return false;
     }
 
-    private boolean performUnitPropagation(Clauses clauses, Assignment assignment, int decisionLevel) {
-        return clauses.resolve(assignment, decisionLevel);
+    private boolean performUnitResolution(Clauses clauses, Assignment assignment, int decisionLevel) {
+        for (Clause clause : clauses.getClauses()) {
+            if (assignment.assignUnitClause(clause, decisionLevel)) {
+                boolean success = clauses.resolve(assignment, decisionLevel);
+                if (!success) return false;
+            }
+        }
+        return true;
     }
 
     private int pickBranchingVariable(Assignment assignment) {

@@ -15,7 +15,7 @@ public class Parser {
 
     private final static int EXPECTED_CLAUSE_SIZE = 3;
 
-    private Clauses form;
+    private Clauses clauses;
     private Set<Variable> variables;
     private Set<Integer> varIds;
 
@@ -26,7 +26,7 @@ public class Parser {
     }
 
     public Clauses getClauses() {
-        return this.form;
+        return this.clauses;
     }
 
     public Set<Variable> getVariables() {
@@ -70,10 +70,10 @@ public class Parser {
                     System.exit(1);
                 }
             }
-            this.form = new Clauses(clauses);
+            this.clauses = new Clauses(clauses);
             br.close();
             System.out.println("Done!");
-            return form;
+            return this.clauses;
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
