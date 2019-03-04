@@ -19,10 +19,9 @@ public class Parser {
     private Set<Variable> variables;
     private Set<Integer> varIds;
 
-    public Parser(String filePath) {
+    public Parser() {
         this.variables = new HashSet<>();
         this.varIds = new HashSet<>();
-        this.parse(filePath);
     }
 
     public Clauses getClauses() {
@@ -81,7 +80,7 @@ public class Parser {
         return null;
     }
 
-    private Clause createClause(String line) throws Exception {
+    protected Clause createClause(String line) throws Exception {
         if (line == null){
             throw new Exception("Clause does not exist.");
         }  
@@ -106,7 +105,7 @@ public class Parser {
         return new Clause(literals);
     }       
 
-    private static Literal createLiteral(int value) {
+    protected static Literal createLiteral(int value) {
         Variable variable = new Variable(Math.abs(value));
         Literal literal;
         if (value < 0) {
