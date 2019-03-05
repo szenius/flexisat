@@ -80,7 +80,7 @@ public class Parser {
         return null;
     }
 
-    protected Clause createClause(String line) throws Exception {
+    private Clause createClause(String line) throws Exception {
         if (line == null){
             throw new Exception("Clause does not exist.");
         }  
@@ -105,7 +105,7 @@ public class Parser {
         return new Clause(literals);
     }       
 
-    protected static Literal createLiteral(int value) {
+    private static Literal createLiteral(int value) {
         Variable variable = new Variable(Math.abs(value));
         Literal literal;
         if (value < 0) {
