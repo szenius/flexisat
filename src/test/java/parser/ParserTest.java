@@ -1,14 +1,13 @@
 package parser;
 
 import data_structures.Clause;
-import data_structures.Clauses;
 import data_structures.Literal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserTest {
 
