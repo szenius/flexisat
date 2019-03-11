@@ -1,6 +1,9 @@
 package solvers;
 
 import data_structures.*;
+import data_structures.Assignment;
+import data_structures.Clause;
+import data_structures.Clauses;
 
 /**
  * TODO: add conflict analysis

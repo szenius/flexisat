@@ -19,10 +19,9 @@ public class Parser {
     private Set<Variable> variables;
     private Set<Integer> varIds;
 
-    public Parser(String filePath) {
+    public Parser() {
         this.variables = new HashSet<>();
         this.varIds = new HashSet<>();
-        this.parse(filePath);
     }
 
     public Clauses getClauses() {

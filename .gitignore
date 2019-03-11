@@ -3,3 +3,7 @@
 *.vscode
 .idea/*
 *.iml
+
+# Gradle related
+.gradle
+/build
