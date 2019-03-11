@@ -7,8 +7,9 @@ import java.util.*;
  */
 public class Assignment {
     private Set<Integer> varIds;
-    private Map<Integer, Boolean> assignments;
+    // private Map<Integer, Boolean> assignments;
     private Map<Integer, Integer> decisionLevels;
+    private Map<Integer, AssignmentUnit> assignments;
     private Stack<Integer> lastAssignedIds;
 
     public Assignment(Set<Integer> varIds) {
@@ -29,9 +30,10 @@ public class Assignment {
     public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
         System.out.println("Assignment: Trying to add assignment of " + varId + "@" + decisionLevel + "=" + String.valueOf(assignment));
         if (assignments.containsKey(varId)) {
-            return assignments.get(varId) == assignment;
+            return assignments.get(varId).getAssignment() == assignment;
         }
-        assignments.put(varId, assignment);
+        AssignmentUnit assignmentUnit = new AssignmentUnit(varId, assignment, decisionLevel);
+        assignments.put(varId, assignmentUnit);
         decisionLevels.put(varId, decisionLevel);
         lastAssignedIds.push(varId);
         return true;
@@ -50,14 +52,15 @@ public class Assignment {
     public boolean changeAssignment(int varId, int decisionLevel) {
         System.out.println("Assignment: Trying to change assignment of " + varId);
         if (assignments.containsKey(varId)) {
-            boolean existingAssignment = assignments.get(varId);
+            boolean existingAssignment = assignments.get(varId).getAssignment();
             if (!existingAssignment) {
                 return false;
             }
-            assignments.replace(varId, false);
+            assignments.get(varId).replaceAssignment(false);
             decisionLevels.replace(varId, decisionLevel);
         } else {
-            assignments.put(varId, true);
+            AssignmentUnit assignmentUnit = new AssignmentUnit(varId, true, decisionLevel);
+            assignments.put(varId, assignmentUnit);
             decisionLevels.put(varId, decisionLevel);
         }
         lastAssignedIds.push(varId);
@@ -114,7 +117,11 @@ public class Assignment {
     }
 
     public boolean getAssignment(int id) {
-        return assignments.get(id);
+        return assignments.get(id).getAssignment();
+    }
+
+    public int getLastAssignment() {
+        return lastAssignedIds.peek();
     }
 
     public void revertLastAssignment() {

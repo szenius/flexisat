@@ -27,7 +27,7 @@ public class Clauses {
     }
 
     /**
-     * Given the current assignment, try to infer new assignments.
+     * Check if the entire formula is SAT given the current assignments.
      *
      * @param assignment current assignments
      * @param decisionLevel decision level at which this resolution is being invoked

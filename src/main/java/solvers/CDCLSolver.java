@@ -25,6 +25,8 @@ public class CDCLSolver implements Solver {
         // Perform unit resolution
         int unitResolutionDecisionLevel = decisionLevel == 0? decisionLevel : decisionLevel - 1;
         if (!performUnitResolution(clauses, assignment, unitResolutionDecisionLevel)) {
+            // DO CONFLICT RESOLUTION HERE
+
             return false;
         }
 
@@ -74,6 +76,7 @@ public class CDCLSolver implements Solver {
                 if (assignment.assignUnitClause(clause, decisionLevel)) {
                     performedUnitResolution = true;
                     if (!clauses.resolve(assignment, decisionLevel)) {
+                        conflictResolution(assignment);
                         assignment.revertLastAssignment();
                         return false;
                     }
@@ -81,6 +84,12 @@ public class CDCLSolver implements Solver {
             }
         }
         return true;
+    }
+
+    // How to track that a variable picked is the one that contributed to the UNSAT.
+    private void conflictResolution(Assignment assignment) {
+        int lastAssignedId = assignment.getLastAssignment();
+        assignment.revertLastAssignment();
     }
 
     private int pickBranchingVariable(Assignment assignment) {
