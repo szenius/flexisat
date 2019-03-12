@@ -16,15 +16,15 @@ public class AssignmentUnit {
         this.assignment = assignment;
         this.decisionLevel = decisionLevel;
         this.impliedAssignments = new ArrayList<AssignmentUnit>();
-        this.impliedBy = new ArrayList<AssignmentUnit>();
     }
 
     public void addImpliedAssignment(AssignmentUnit impliedAssignment) {
         this.impliedAssignments.add(impliedAssignment);
     }
 
-    public void addImpliedBy(AssignmentUnit impliedBy) {
-        this.impliedBy.add(impliedBy);
+    public void addImpliedBy(List<AssignmentUnit> impliedBy) {
+        // There is an assumption here that the implied by list is immutable after this assignment.
+        this.impliedBy = impliedBy;
     }
 
     public void replaceAssignment(Boolean assignment) {

@@ -23,7 +23,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Perform unit resolution
-        int unitResolutionDecisionLevel = decisionLevel == 0? decisionLevel : decisionLevel - 1;
+        int unitResolutionDecisionLevel = decisionLevel == 0 ? decisionLevel : decisionLevel - 1;
         if (!performUnitResolution(clauses, assignment, unitResolutionDecisionLevel)) {
             // DO CONFLICT RESOLUTION HERE
 
@@ -38,7 +38,7 @@ public class CDCLSolver implements Solver {
         // Pick a new variable to assign
         int varId = pickBranchingVariable(assignment);
         System.out.println("Solver: Try assigning " + varId + " to TRUE");
-        if(!assignment.addAssignment(varId, true, decisionLevel)) {
+        if(!assignment.addAssignment(varId, true, decisionLevel, null)) {
             return false;
         }
         if (solve(clauses, assignment, decisionLevel + 1)) {

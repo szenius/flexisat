@@ -7,7 +7,6 @@ import java.util.*;
  */
 public class Assignment {
     private Set<Integer> varIds;
-    // private Map<Integer, Boolean> assignments;
     private Map<Integer, Integer> decisionLevels;
     private Map<Integer, AssignmentUnit> assignments;
     private Stack<Integer> lastAssignedIds;
@@ -27,17 +26,21 @@ public class Assignment {
      * @param decisionLevel decision level of assignment
      * @return false if an alternative assignments already exists, otherwise true.
      */
-    public boolean addAssignment(int varId, boolean assignment, int decisionLevel) {
+    public boolean addAssignment(int varId, boolean assignment, int decisionLevel, List<AssignmentUnit> impliedBy) {
         System.out.println("Assignment: Trying to add assignment of " + varId + "@" + decisionLevel + "=" + String.valueOf(assignment));
         if (assignments.containsKey(varId)) {
             return assignments.get(varId).getAssignment() == assignment;
         }
         AssignmentUnit assignmentUnit = new AssignmentUnit(varId, assignment, decisionLevel);
+        if (impliedBy != null) {
+            assignmentUnit.addImpliedBy(impliedBy);
+        }
         assignments.put(varId, assignmentUnit);
         decisionLevels.put(varId, decisionLevel);
         lastAssignedIds.push(varId);
         return true;
     }
+
 
     /**
      * Tries to change the add an assignment if it doesn't already exist.
@@ -69,6 +72,7 @@ public class Assignment {
 
     /**
      * Tries to assign any unit literal in this clause so that its value is TRUE.
+     * This function will only ever be called during assignment inference.
      *
      * @param clause
      * @return True if an unit literal was assigned, False otherwise.
@@ -76,6 +80,7 @@ public class Assignment {
     public boolean assignUnitClause(Clause clause, int decisionLevel) {
         // Find unit literal, if any
         Literal unitLiteral = null;
+        List<AssignmentUnit> impliedBy = new ArrayList<>();
         for (Literal literal : clause.getLiterals()) {
             if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
                 if (unitLiteral == null) {
@@ -84,6 +89,8 @@ public class Assignment {
                     // This is not a unit clause
                     return false;
                 }
+            } else {
+                impliedBy.add(assignments.get(literal.getVariable().getId()));
             }
         }
 
@@ -93,7 +100,7 @@ public class Assignment {
         }
 
         // Assign the literal so its value is true
-        return addAssignment(unitLiteral.getVariable().getId(), !unitLiteral.isNegated(), decisionLevel);
+        return addAssignment(unitLiteral.getVariable().getId(), !unitLiteral.isNegated(), decisionLevel, impliedBy);
     }
 
     /**
