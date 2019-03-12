@@ -6,6 +6,7 @@ import data_structures.Clause;
 import data_structures.Clauses;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -29,8 +30,8 @@ public class CDCLSolver implements Solver {
         // Perform unit resolution
         int unitResolutionDecisionLevel = decisionLevel == 0 ? decisionLevel : decisionLevel - 1;
         if (!performUnitResolution(clauses, variables, assignment, unitResolutionDecisionLevel)) {
-            // DO CONFLICT RESOLUTION HERE
-
+            // conflict resolution should have happened
+            // we now need a way to propagate the decision level backwards
             return false;
         }
 
@@ -48,6 +49,8 @@ public class CDCLSolver implements Solver {
         if (solve(clauses, variables, assignment, decisionLevel + 1)) {
             return true;
         }
+        // Decision level might have changed to a lower level
+        decisionLevel = assignment.getHighestDecisionLevel();
 
         // Change assignment of picked variable
         System.out.println("Solver: Try assigning " + varId + " to FALSE");
@@ -94,8 +97,8 @@ public class CDCLSolver implements Solver {
         int lastAssignedId = assignment.getLastAssignment();
         List<Integer> affectedVariables = getAffectedVariables(clauses, assignment, lastAssignedId);
         List<Literal> listOfLiterals = formNewClauseWithAffectedVariables(affectedVariables, assignment, variables);
-        Clause clause = new Clause(listOfLiterals);
-        clauses.addClause(clause);
+        clauses.addClause(new Clause(listOfLiterals));
+        revertAssignments(assignment, listOfLiterals);
         assignment.revertLastAssignment();
     }
 
@@ -107,6 +110,7 @@ public class CDCLSolver implements Solver {
 
     /**
      * Get the affected variable assignments that caused the UNSAT conflict.
+     * As of now the affected variables are defined as the root variables.
      *
      * @param clauses
      * @param assignment
@@ -119,6 +123,19 @@ public class CDCLSolver implements Solver {
         List<Integer> affectedVariables = new ArrayList<>();
         getRootVariables(affectedVariables, conflictVariableUnit);
         return affectedVariables;
+    }
+
+
+    private void revertAssignments(Assignment assignment, List<Literal> listOfLiterals) {
+        int smallestDecisionLevel = Integer.MAX_VALUE;
+        for (Literal literal : listOfLiterals) {
+            int assignmentDecisionLevel =
+                    assignment.getAssignmentUnit(literal.getVariable().getId()).getDecisionLevel();
+            if (assignmentDecisionLevel < smallestDecisionLevel) {
+                smallestDecisionLevel = assignmentDecisionLevel;
+            }
+        }
+        assignment.removeAssignmentsAboveDecisionLevel(smallestDecisionLevel);
     }
 
 

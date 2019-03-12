@@ -5,11 +5,11 @@ import java.util.List;
 
 public class AssignmentUnit {
 
-    Integer varId;
-    Boolean assignment;
-    Integer decisionLevel;
-    List<AssignmentUnit> impliedAssignments;
-    List<AssignmentUnit> impliedBy;
+    private Integer varId;
+    private Boolean assignment;
+    private Integer decisionLevel;
+    private List<AssignmentUnit> impliedAssignments;
+    private List<AssignmentUnit> impliedBy;
 
     public AssignmentUnit(int varId, Boolean assignment, int decisionLevel) {
         this.varId = varId;

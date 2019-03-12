@@ -8,11 +8,14 @@ import java.util.*;
 public class Assignment {
     private Set<Integer> varIds;
     private Map<Integer, AssignmentUnit> assignments;
+    // This map is for quick access to each variable's decision level
+    private Map<Integer, List<Integer>> decisionLevelToVariables;
     private Stack<Integer> lastAssignedIds;
 
     public Assignment(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
+        this.decisionLevelToVariables = new HashMap<>();
         this.lastAssignedIds = new Stack<>();
     }
 
@@ -23,17 +26,24 @@ public class Assignment {
      * @return false if an alternative assignments already exists, otherwise true.
      */
     public boolean addAssignment(AssignmentUnit assignmentUnit, List<AssignmentUnit> impliedBy) {
-        System.out.println("Assignment: Trying to add assignment of " + assignmentUnit.varId + "@" +
-                assignmentUnit.decisionLevel + "=" + String.valueOf(assignmentUnit.assignment));
-        if (assignments.containsKey(assignmentUnit.varId)) {
-            return assignments.get(assignmentUnit.varId).getAssignment() ==
-                    assignmentUnit.assignment;
+        System.out.println("Assignment: Trying to add assignment of " + assignmentUnit.getVarId() + "@" +
+                assignmentUnit.getDecisionLevel() + "=" + String.valueOf(assignmentUnit.getAssignment()));
+        if (assignments.containsKey(assignmentUnit.getVarId())) {
+            return assignments.get(assignmentUnit.getVarId()).getAssignment() ==
+                    assignmentUnit.getAssignment();
         }
         if (impliedBy != null) {
             assignmentUnit.addImpliedBy(impliedBy);
         }
-        assignments.put(assignmentUnit.varId, assignmentUnit);
-        lastAssignedIds.push(assignmentUnit.varId);
+        assignments.put(assignmentUnit.getVarId(), assignmentUnit);
+        if (decisionLevelToVariables.containsKey(assignmentUnit.getDecisionLevel())) {
+            decisionLevelToVariables.get(assignmentUnit.getDecisionLevel()).add(assignmentUnit.getVarId());
+        } else {
+            List<Integer> varIds = new ArrayList<>();
+            varIds.add(assignmentUnit.getVarId());
+            decisionLevelToVariables.put(assignmentUnit.getDecisionLevel(), varIds);
+        }
+        lastAssignedIds.push(assignmentUnit.getVarId());
         return true;
     }
 
@@ -141,8 +151,36 @@ public class Assignment {
         return lastAssignedIds.peek();
     }
 
+    public int getHighestDecisionLevel() {
+        if (this.decisionLevelToVariables.size() == 0) {
+            return 0;
+        }
+        return Collections.max(this.decisionLevelToVariables.keySet());
+    }
+
+    public List<Integer> getVariablesInDecisionLevel(Integer decisionLevel) {
+        return this.decisionLevelToVariables.get(decisionLevel);
+    }
+
     public void revertLastAssignment() {
         int lastAssignedId = lastAssignedIds.pop();
         assignments.remove(lastAssignedId);
+    }
+
+    /**
+     * Removes all assignments above a particular decision level.
+     * @param decisionLevel
+     */
+    public void removeAssignmentsAboveDecisionLevel(Integer decisionLevel) {
+        Integer maxDecisionLevel = getHighestDecisionLevel();
+        System.out.println("Max decision leve = " + maxDecisionLevel);
+        for (int i = decisionLevel; i <= maxDecisionLevel; i++ ){
+            System.out.println("Decision level = " + i);
+            List<Integer> varIds = this.decisionLevelToVariables.get(i);
+            for (Integer varId : varIds) {
+                this.assignments.remove(varId);
+            }
+            this.decisionLevelToVariables.remove(decisionLevel);
+        }
     }
 }
