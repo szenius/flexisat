@@ -133,6 +133,10 @@ public class Assignment {
         return assignments.get(id).getAssignment();
     }
 
+    public AssignmentUnit getAssignmentUnit(int id) {
+        return assignments.get(id);
+    }
+
     public int getLastAssignment() {
         return lastAssignedIds.peek();
     }
