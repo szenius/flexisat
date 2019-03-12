@@ -31,6 +31,10 @@ public class AssignmentUnit {
         this.assignment = assignment;
     }
 
+    public void replaceDecisionLevel(Integer decisionLevel) {
+        this.decisionLevel = decisionLevel;
+    }
+
     public List<AssignmentUnit> getImpliedAssignmentsList() {
         return this.impliedAssignments;
     }

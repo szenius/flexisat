@@ -7,37 +7,33 @@ import java.util.*;
  */
 public class Assignment {
     private Set<Integer> varIds;
-    private Map<Integer, Integer> decisionLevels;
     private Map<Integer, AssignmentUnit> assignments;
     private Stack<Integer> lastAssignedIds;
 
     public Assignment(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
-        this.decisionLevels = new HashMap<>();
         this.lastAssignedIds = new Stack<>();
     }
 
     /**
      * Tries to add an assignment to a variable by its integer ID.
      *
-     * @param varId integer ID corresponding to a variable
-     * @param assignment true/false
-     * @param decisionLevel decision level of assignment
+     * @param assignmentUnit assignmentUnit corresponding to a variable and its assignment
      * @return false if an alternative assignments already exists, otherwise true.
      */
-    public boolean addAssignment(int varId, boolean assignment, int decisionLevel, List<AssignmentUnit> impliedBy) {
-        System.out.println("Assignment: Trying to add assignment of " + varId + "@" + decisionLevel + "=" + String.valueOf(assignment));
-        if (assignments.containsKey(varId)) {
-            return assignments.get(varId).getAssignment() == assignment;
+    public boolean addAssignment(AssignmentUnit assignmentUnit, List<AssignmentUnit> impliedBy) {
+        System.out.println("Assignment: Trying to add assignment of " + assignmentUnit.varId + "@" +
+                assignmentUnit.decisionLevel + "=" + String.valueOf(assignmentUnit.assignment));
+        if (assignments.containsKey(assignmentUnit.varId)) {
+            return assignments.get(assignmentUnit.varId).getAssignment() ==
+                    assignmentUnit.assignment;
         }
-        AssignmentUnit assignmentUnit = new AssignmentUnit(varId, assignment, decisionLevel);
         if (impliedBy != null) {
             assignmentUnit.addImpliedBy(impliedBy);
         }
-        assignments.put(varId, assignmentUnit);
-        decisionLevels.put(varId, decisionLevel);
-        lastAssignedIds.push(varId);
+        assignments.put(assignmentUnit.varId, assignmentUnit);
+        lastAssignedIds.push(assignmentUnit.varId);
         return true;
     }
 
@@ -60,11 +56,10 @@ public class Assignment {
                 return false;
             }
             assignments.get(varId).replaceAssignment(false);
-            decisionLevels.replace(varId, decisionLevel);
+            assignments.get(varId).replaceDecisionLevel(decisionLevel);
         } else {
             AssignmentUnit assignmentUnit = new AssignmentUnit(varId, true, decisionLevel);
             assignments.put(varId, assignmentUnit);
-            decisionLevels.put(varId, decisionLevel);
         }
         lastAssignedIds.push(varId);
         return true;
@@ -99,8 +94,19 @@ public class Assignment {
             return false;
         }
 
+        // Update the variables that implied the assignment of this variable
+        AssignmentUnit assignmentUnit = new AssignmentUnit(unitLiteral.getVariable().getId(),
+                                            !unitLiteral.isNegated(), decisionLevel);
+        // TODO: This might not be the most efficient as we are
+        //  reiterating through the clause.
+        for (Literal literal : clause.getLiterals()) {
+            if (!getUnassignedVarIds().contains(literal.getVariable().getId())) {
+                assignments.get(literal.getVariable().getId()).addImpliedAssignment(assignmentUnit);
+            }
+        }
+
         // Assign the literal so its value is true
-        return addAssignment(unitLiteral.getVariable().getId(), !unitLiteral.isNegated(), decisionLevel, impliedBy);
+        return addAssignment(assignmentUnit, impliedBy);
     }
 
     /**
@@ -134,6 +140,5 @@ public class Assignment {
     public void revertLastAssignment() {
         int lastAssignedId = lastAssignedIds.pop();
         assignments.remove(lastAssignedId);
-        decisionLevels.remove(lastAssignedId);
     }
 }
