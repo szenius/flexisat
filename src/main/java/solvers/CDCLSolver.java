@@ -97,7 +97,6 @@ public class CDCLSolver implements Solver {
         List<Literal> listOfLiterals = formNewClauseWithAffectedVariables(affectedVariables, assignment, variables);
         clauses.addClause(new Clause(listOfLiterals));
         revertAssignments(assignment, listOfLiterals);
-        //assignment.revertLastAssignment();
     }
 
 
