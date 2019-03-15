@@ -1,6 +1,5 @@
 package data_structures;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AssignmentUnit {
@@ -8,7 +7,9 @@ public class AssignmentUnit {
     private Integer varId;
     private Boolean assignment;
     private Integer decisionLevel;
-    private List<AssignmentUnit> impliedBy;
+    // By our current implementation, we will cut off the tree at the root.
+    // Might have better heuristics that can improve performance.
+    private List<Integer> rootImplicationNodes;
 
     public AssignmentUnit(int varId, Boolean assignment, int decisionLevel) {
         this.varId = varId;
@@ -17,9 +18,9 @@ public class AssignmentUnit {
     }
 
 
-    public void addImpliedBy(List<AssignmentUnit> impliedBy) {
+    public void addRootImpliedNode(List<Integer> impliedByRootNode) {
         // There is an assumption here that the implied by list is immutable after this assignment.
-        this.impliedBy = impliedBy;
+        this.rootImplicationNodes = impliedByRootNode;
     }
 
     public void replaceAssignment(Boolean assignment) {
@@ -30,9 +31,8 @@ public class AssignmentUnit {
         this.decisionLevel = decisionLevel;
     }
 
-
-    public List<AssignmentUnit> getImpliedByList() {
-        return this.impliedBy;
+    public List<Integer> getImpliedByRootNodeList() {
+        return this.rootImplicationNodes;
     }
 
     public Boolean getAssignment() {

@@ -6,7 +6,6 @@ import data_structures.Clause;
 import data_structures.Clauses;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +29,7 @@ public class CDCLSolver implements Solver {
         // Perform unit resolution
         int unitResolutionDecisionLevel = decisionLevel == 0 ? decisionLevel : decisionLevel - 1;
         if (!performUnitResolution(clauses, variables, assignment, unitResolutionDecisionLevel)) {
-            // conflict resolution should have happened
-            // we now need a way to propagate the decision level backwards
+            // Conflict resolution should have happened
             return false;
         }
 
@@ -99,7 +97,7 @@ public class CDCLSolver implements Solver {
         List<Literal> listOfLiterals = formNewClauseWithAffectedVariables(affectedVariables, assignment, variables);
         clauses.addClause(new Clause(listOfLiterals));
         revertAssignments(assignment, listOfLiterals);
-        assignment.revertLastAssignment();
+        //assignment.revertLastAssignment();
     }
 
 
@@ -120,8 +118,7 @@ public class CDCLSolver implements Solver {
     private List<Integer> getAffectedVariables(Clauses clauses, Assignment assignment, Integer unSatVarId) {
         // Case 1: All assigned but caused UNSAT
         AssignmentUnit conflictVariableUnit = assignment.getAssignmentUnit(unSatVarId);
-        List<Integer> affectedVariables = new ArrayList<>();
-        getRootVariables(affectedVariables, conflictVariableUnit);
+        List<Integer> affectedVariables = conflictVariableUnit.getImpliedByRootNodeList();
         return affectedVariables;
     }
 
@@ -138,17 +135,6 @@ public class CDCLSolver implements Solver {
         assignment.removeAssignmentsAboveDecisionLevel(smallestDecisionLevel);
     }
 
-
-    private void getRootVariables(List<Integer> rootVariables, AssignmentUnit assignmentUnit) {
-        if (assignmentUnit.getImpliedByList() == null) {
-            rootVariables.add(assignmentUnit.getVarId());
-            return;
-        }
-        for (AssignmentUnit unit : assignmentUnit.getImpliedByList()) {
-            getRootVariables(rootVariables, unit);
-        }
-        return;
-    }
 
     private List<Literal> formNewClauseWithAffectedVariables(List<Integer> affectedVariables,
                                                       Assignment assignment, Set<Variable> variables) {

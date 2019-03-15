@@ -25,7 +25,7 @@ public class Assignment {
      * @param assignmentUnit assignmentUnit corresponding to a variable and its assignment
      * @return false if an alternative assignments already exists, otherwise true.
      */
-    public boolean addAssignment(AssignmentUnit assignmentUnit, List<AssignmentUnit> impliedBy) {
+    public boolean addAssignment(AssignmentUnit assignmentUnit, List<Integer> impliedBy) {
         System.out.println("Assignment: Trying to add assignment of " + assignmentUnit.getVarId() + "@" +
                 assignmentUnit.getDecisionLevel() + "=" + String.valueOf(assignmentUnit.getAssignment()));
         if (assignments.containsKey(assignmentUnit.getVarId())) {
@@ -33,7 +33,7 @@ public class Assignment {
                     assignmentUnit.getAssignment();
         }
         if (impliedBy != null) {
-            assignmentUnit.addImpliedBy(impliedBy);
+            assignmentUnit.addRootImpliedNode(impliedBy);
         }
         assignments.put(assignmentUnit.getVarId(), assignmentUnit);
         if (decisionLevelToVariables.containsKey(assignmentUnit.getDecisionLevel())) {
@@ -85,7 +85,7 @@ public class Assignment {
     public boolean assignUnitClause(Clause clause, int decisionLevel) {
         // Find unit literal, if any
         Literal unitLiteral = null;
-        List<AssignmentUnit> impliedBy = new ArrayList<>();
+        List<Integer> impliedBy = new ArrayList<>();
         for (Literal literal : clause.getLiterals()) {
             if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
                 if (unitLiteral == null) {
@@ -95,7 +95,13 @@ public class Assignment {
                     return false;
                 }
             } else {
-                impliedBy.add(assignments.get(literal.getVariable().getId()));
+                AssignmentUnit unit = assignments.get(literal.getVariable().getId());
+                if (unit.getImpliedByRootNodeList() == null) {
+                    impliedBy.add(literal.getVariable().getId());
+                } else {
+                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImpliedByRootNodeList();
+                    impliedBy.addAll(rootNodes);
+                }
             }
         }
 
@@ -153,11 +159,6 @@ public class Assignment {
 
     public List<Integer> getVariablesInDecisionLevel(Integer decisionLevel) {
         return this.decisionLevelToVariables.get(decisionLevel);
-    }
-
-    public void revertLastAssignment() {
-        int lastAssignedId = lastAssignedIds.pop();
-        assignments.remove(lastAssignedId);
     }
 
     /**
