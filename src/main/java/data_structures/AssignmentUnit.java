@@ -8,19 +8,14 @@ public class AssignmentUnit {
     private Integer varId;
     private Boolean assignment;
     private Integer decisionLevel;
-    private List<AssignmentUnit> impliedAssignments;
     private List<AssignmentUnit> impliedBy;
 
     public AssignmentUnit(int varId, Boolean assignment, int decisionLevel) {
         this.varId = varId;
         this.assignment = assignment;
         this.decisionLevel = decisionLevel;
-        this.impliedAssignments = new ArrayList<AssignmentUnit>();
     }
 
-    public void addImpliedAssignment(AssignmentUnit impliedAssignment) {
-        this.impliedAssignments.add(impliedAssignment);
-    }
 
     public void addImpliedBy(List<AssignmentUnit> impliedBy) {
         // There is an assumption here that the implied by list is immutable after this assignment.
@@ -35,9 +30,6 @@ public class AssignmentUnit {
         this.decisionLevel = decisionLevel;
     }
 
-    public List<AssignmentUnit> getImpliedAssignmentsList() {
-        return this.impliedAssignments;
-    }
 
     public List<AssignmentUnit> getImpliedByList() {
         return this.impliedBy;

@@ -107,13 +107,6 @@ public class Assignment {
         // Update the variables that implied the assignment of this variable
         AssignmentUnit assignmentUnit = new AssignmentUnit(unitLiteral.getVariable().getId(),
                                             !unitLiteral.isNegated(), decisionLevel);
-        // TODO: This might not be the most efficient as we are
-        //  reiterating through the clause.
-        for (Literal literal : clause.getLiterals()) {
-            if (!getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                assignments.get(literal.getVariable().getId()).addImpliedAssignment(assignmentUnit);
-            }
-        }
 
         // Assign the literal so its value is true
         return addAssignment(assignmentUnit, impliedBy);
