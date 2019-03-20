@@ -11,9 +11,9 @@ class Main {
         parser.parse(filename);
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
-        Assignment assignment = new Assignment(parser.getVarIds());
+        Assignments assignments = new Assignments(parser.getVarIds());
         CDCLSolver solver = new CDCLSolver();
-        if (solver.solve(clauses, variables, assignment, 0)) {
+        if (solver.solve(clauses, variables, assignments, 0)) {
             System.out.println("SAT");
         } else {
             // Print test to make sure that UNSAT assignments get added into our Clauses as part of the CDCL algorithm.
