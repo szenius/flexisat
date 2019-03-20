@@ -16,6 +16,7 @@ class Main {
         if (solver.solve(clauses, variables, assignment, 0)) {
             System.out.println("SAT");
         } else {
+            // Print test to make sure that UNSAT assignments get added into our Clauses as part of the CDCL algorithm.
             for (Clause clause : clauses.getClauses()) {
                 for (Literal literal : clause.getLiterals()) {
                     System.out.println(literal.getVariable().getId());

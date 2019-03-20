@@ -1,180 +1,50 @@
 package data_structures;
 
-import java.util.*;
+import java.util.List;
 
-/**
- * TODO: make assignment and decision level the same variable so we don't have to maintain two equivalent maps
- */
 public class Assignment {
-    private Set<Integer> varIds;
-    private Map<Integer, AssignmentUnit> assignments;
-    // This map is for quick access to each variable's decision level
-    private Map<Integer, List<Integer>> decisionLevelToVariables;
-    private Stack<Integer> lastAssignedIds;
 
-    public Assignment(Set<Integer> varIds) {
-        this.varIds = varIds;
-        this.assignments = new HashMap<>();
-        this.decisionLevelToVariables = new HashMap<>();
-        this.lastAssignedIds = new Stack<>();
-    }
+    private Integer varId;
+    private Boolean assignmentValue;
+    private Integer decisionLevel;
+    // By our current implementation, we will cut off the tree at the root.
+    // TODO: Might have better heuristics that can improve performance.
+    private List<Integer> rootImplicationNodes;
 
-    /**
-     * Tries to add an assignment to a variable by its integer ID.
-     *
-     * @param assignmentUnit assignmentUnit corresponding to a variable and its assignment
-     * @return false if an alternative assignments already exists, otherwise true.
-     */
-    public boolean addAssignment(AssignmentUnit assignmentUnit, List<Integer> impliedBy) {
-        System.out.println("Assignment: Trying to add assignment of " + assignmentUnit.getVarId() + "@" +
-                assignmentUnit.getDecisionLevel() + "=" + String.valueOf(assignmentUnit.getAssignment()));
-        if (assignments.containsKey(assignmentUnit.getVarId())) {
-            return assignments.get(assignmentUnit.getVarId()).getAssignment() ==
-                    assignmentUnit.getAssignment();
-        }
-        if (impliedBy != null) {
-            assignmentUnit.addRootImpliedNode(impliedBy);
-        }
-        assignments.put(assignmentUnit.getVarId(), assignmentUnit);
-        if (decisionLevelToVariables.containsKey(assignmentUnit.getDecisionLevel())) {
-            decisionLevelToVariables.get(assignmentUnit.getDecisionLevel()).add(assignmentUnit.getVarId());
-        } else {
-            List<Integer> varIds = new ArrayList<>();
-            varIds.add(assignmentUnit.getVarId());
-            decisionLevelToVariables.put(assignmentUnit.getDecisionLevel(), varIds);
-        }
-        lastAssignedIds.push(assignmentUnit.getVarId());
-        return true;
+    public Assignment(int varId, Boolean assignmentValue, int decisionLevel, List<Integer> impliedByVariables) {
+        this.varId = varId;
+        this.assignmentValue = assignmentValue;
+        this.decisionLevel = decisionLevel;
+        this.rootImplicationNodes = impliedByVariables;
     }
 
 
-    /**
-     * Tries to change the add an assignment if it doesn't already exist.
-     * If it already exists and is a true assignment, change it to false.
-     * if it already exists and is a false assignment, it indicates we have tried both assignments.
-     *  So return false to indicate conflict.
-     *
-     * @param varId integer ID corresponding to a variable
-     * @param decisionLevel decision level of assignment
-     * @return false if there is an existing false assignment. True otherwise.
-     */
-    public boolean changeAssignment(int varId, int decisionLevel) {
-        System.out.println("Assignment: Trying to change assignment of " + varId);
-        if (assignments.containsKey(varId)) {
-            boolean existingAssignment = assignments.get(varId).getAssignment();
-            if (!existingAssignment) {
-                return false;
-            }
-            assignments.get(varId).replaceAssignment(false);
-            assignments.get(varId).replaceDecisionLevel(decisionLevel);
-        } else {
-            AssignmentUnit assignmentUnit = new AssignmentUnit(varId, true, decisionLevel);
-            assignments.put(varId, assignmentUnit);
-        }
-        lastAssignedIds.push(varId);
-        return true;
+    public void addRootImpliedNode(List<Integer> impliedByRootNode) {
+        // There is an assumption here that the implied by list is immutable after this assignmentValue.
+        this.rootImplicationNodes = impliedByRootNode;
     }
 
-    /**
-     * Tries to assign any unit literal in this clause so that its value is TRUE.
-     * This function will only ever be called during assignment inference.
-     *
-     * @param clause
-     * @return True if an unit literal was assigned, False otherwise.
-     */
-    public boolean assignUnitClause(Clause clause, int decisionLevel) {
-        // Find unit literal, if any
-        Literal unitLiteral = null;
-        List<Integer> impliedBy = new ArrayList<>();
-        for (Literal literal : clause.getLiterals()) {
-            if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                if (unitLiteral == null) {
-                    unitLiteral = literal;
-                } else {
-                    // This is not a unit clause
-                    return false;
-                }
-            } else {
-                AssignmentUnit unit = assignments.get(literal.getVariable().getId());
-                if (unit.getImpliedByRootNodeList() == null) {
-                    impliedBy.add(literal.getVariable().getId());
-                } else {
-                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImpliedByRootNodeList();
-                    impliedBy.addAll(rootNodes);
-                }
-            }
-        }
-
-        if (unitLiteral == null) {
-            // Did not find any unassigned variable
-            return false;
-        }
-
-        // Update the variables that implied the assignment of this variable
-        AssignmentUnit assignmentUnit = new AssignmentUnit(unitLiteral.getVariable().getId(),
-                                            !unitLiteral.isNegated(), decisionLevel);
-
-        // Assign the literal so its value is true
-        return addAssignment(assignmentUnit, impliedBy);
+    public void swapAssignment() {
+        this.assignmentValue = !this.assignmentValue;
     }
 
-    /**
-     * @return All varIDs without an assignment
-     */
-    public Set<Integer> getUnassignedVarIds() {
-        Set<Integer> result = new HashSet<>();
-        for (Integer id : varIds) {
-            if (!assignments.containsKey(id)) {
-                result.add(id);
-            }
-        }
-        return result;
+    public void setDecisionLevel(int decisionLevel) {
+        this.decisionLevel = decisionLevel;
     }
 
-    /**
-     * @return All varIDs with an assignment
-     */
-    public Set<Integer> getAssignedVarIds() {
-        return assignments.keySet();
+    public List<Integer> getImpliedByRootNodeList() {
+        return this.rootImplicationNodes;
     }
 
-    public boolean getAssignment(int id) {
-        return assignments.get(id).getAssignment();
+    public Boolean getAssignmentValue() {
+        return this.assignmentValue;
     }
 
-    public AssignmentUnit getAssignmentUnit(int id) {
-        return assignments.get(id);
+    public Integer getVarId() {
+        return this.varId;
     }
 
-    public int getLastAssignment() {
-        return lastAssignedIds.peek();
-    }
-
-    public int getHighestDecisionLevel() {
-        if (this.decisionLevelToVariables.size() == 0) {
-            return 0;
-        }
-        return Collections.max(this.decisionLevelToVariables.keySet());
-    }
-
-    public List<Integer> getVariablesInDecisionLevel(Integer decisionLevel) {
-        return this.decisionLevelToVariables.get(decisionLevel);
-    }
-
-    /**
-     * Removes all assignments above a particular decision level.
-     * @param decisionLevel
-     */
-    public void removeAssignmentsAboveDecisionLevel(Integer decisionLevel) {
-        Integer maxDecisionLevel = getHighestDecisionLevel();
-        System.out.println("Max decision leve = " + maxDecisionLevel);
-        for (int i = decisionLevel; i <= maxDecisionLevel; i++ ){
-            System.out.println("Decision level = " + i);
-            List<Integer> varIds = this.decisionLevelToVariables.get(i);
-            for (Integer varId : varIds) {
-                this.assignments.remove(varId);
-            }
-            this.decisionLevelToVariables.remove(decisionLevel);
-        }
+    public Integer getDecisionLevel() {
+        return this.decisionLevel;
     }
 }
