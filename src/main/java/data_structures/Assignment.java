@@ -9,19 +9,19 @@ public class Assignment {
     private Integer decisionLevel;
     // By our current implementation, we will cut off the tree at the root.
     // TODO: Might have better heuristics that can improve performance.
-    private List<Integer> rootImplicationNodes;
+    private List<Integer> implicationGraphRoots;
 
-    public Assignment(int varId, Boolean assignmentValue, int decisionLevel, List<Integer> impliedByVariables) {
+    public Assignment(int varId, Boolean assignmentValue, int decisionLevel, List<Integer> implicationGraphRoots) {
         this.varId = varId;
         this.assignmentValue = assignmentValue;
         this.decisionLevel = decisionLevel;
-        this.rootImplicationNodes = impliedByVariables;
+        this.implicationGraphRoots = implicationGraphRoots;
     }
 
 
-    public void addRootImpliedNode(List<Integer> impliedByRootNode) {
+    public void addImplicationGraphRoot(List<Integer> implicationGraphRoot) {
         // There is an assumption here that the implied by list is immutable after this assignmentValue.
-        this.rootImplicationNodes = impliedByRootNode;
+        this.implicationGraphRoots = implicationGraphRoot;
     }
 
     public void swapAssignment() {
@@ -32,8 +32,8 @@ public class Assignment {
         this.decisionLevel = decisionLevel;
     }
 
-    public List<Integer> getImpliedByRootNodeList() {
-        return this.rootImplicationNodes;
+    public List<Integer> getImplicationGraphRoots() {
+        return this.implicationGraphRoots;
     }
 
     public Boolean getAssignmentValue() {

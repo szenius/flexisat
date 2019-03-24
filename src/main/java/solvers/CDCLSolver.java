@@ -58,7 +58,6 @@ public class CDCLSolver implements Solver {
         if (solve(clauses, variables, assignments, decisionLevel + 1)) {
             return true;
         }
-
         return false;
     }
 
@@ -115,7 +114,7 @@ public class CDCLSolver implements Solver {
      */
     private List<Integer> getVariablesThatImpliedUNSATAssignment(Clauses clauses, Assignments assignments, Integer unSatVarId) {
         Assignment conflictVariableUnit = assignments.getAssignment(unSatVarId);
-        List<Integer> affectedVariables = conflictVariableUnit.getImpliedByRootNodeList();
+        List<Integer> affectedVariables = conflictVariableUnit.getImplicationGraphRoots();
         return affectedVariables;
     }
 

@@ -10,13 +10,11 @@ public class Assignments {
     private Map<Integer, Assignment> assignments;
     // This map is for quick access to each variable's decision level
     private Map<Integer, List<Integer>> decisionLevelToVariables;
-    private Stack<Integer> lastAssignedIds;
 
     public Assignments(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
         this.decisionLevelToVariables = new HashMap<>();
-        this.lastAssignedIds = new Stack<>();
     }
 
     /**
@@ -38,7 +36,6 @@ public class Assignments {
         // We will add the variable to decisionLevelToVariable to 'cache' it at the particular decision level key.
         addVarIdToDecisionLevelMap(assignment.getVarId(), assignment.getDecisionLevel());
 
-        lastAssignedIds.push(assignment.getVarId());
         return true;
     }
 
@@ -65,9 +62,8 @@ public class Assignments {
         } else {
             Assignment assignment = new Assignment(varId, true, decisionLevel, null);
             assignments.put(varId, assignment);
-
+            addVarIdToDecisionLevelMap(varId, decisionLevel);
         }
-        lastAssignedIds.push(varId);
         return true;
     }
 
@@ -100,7 +96,7 @@ public class Assignments {
     public boolean assignUnitClause(Clause clause, int decisionLevel) {
         // Find unit literal, if any
         Literal unitLiteral = null;
-        List<Integer> impliedBy = new ArrayList<>();
+        List<Integer> impliedByGraphRoots = new ArrayList<>();
         for (Literal literal : clause.getLiterals()) {
             if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
                 if (unitLiteral == null) {
@@ -115,12 +111,12 @@ public class Assignments {
                 // implied the literal's (the only non-assigned variable in the clause) assignment.
                 Assignment unit = assignments.get(literal.getVariable().getId());
                 // The variable is a root variable itself. Add its own variable Id into the list.
-                if (unit.getImpliedByRootNodeList() == null) {
-                    impliedBy.add(literal.getVariable().getId());
+                if (unit.getImplicationGraphRoots() == null) {
+                    impliedByGraphRoots.add(literal.getVariable().getId());
                 } else {
                     // Retrieve the entire list of root variables that implied this variable's assignment.
-                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImpliedByRootNodeList();
-                    impliedBy.addAll(rootNodes);
+                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImplicationGraphRoots();
+                    impliedByGraphRoots.addAll(rootNodes);
                 }
             }
         }
@@ -132,7 +128,7 @@ public class Assignments {
 
         // Update the variables that implied the assignment of this variable
         Assignment assignment = new Assignment(unitLiteral.getVariable().getId(),
-                                            !unitLiteral.isNegated(), decisionLevel, impliedBy);
+                                            !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
 
         // Assign the literal so its value is true
         return addAssignment(assignment);
@@ -167,7 +163,12 @@ public class Assignments {
     }
 
     public int getLastAssignment() {
-        return lastAssignedIds.peek();
+        // There is an assumption here that for assignments that are implied, they are
+        // the list in each decisionLevelToVariable map's decision level is updated sequentially.
+        int highestDecisionLevel = getHighestDecisionLevel();
+        List<Integer> variablesInHighestDecisionLevel = decisionLevelToVariables.get(highestDecisionLevel);
+        // Getting the last element in the list
+        return variablesInHighestDecisionLevel.get(variablesInHighestDecisionLevel.size() - 1);
     }
 
     public int getHighestDecisionLevel() {
