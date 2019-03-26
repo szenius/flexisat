@@ -6,6 +6,7 @@ import data_structures.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
+import performance.PerformanceTester;
 import solvers.CDCLSolver;
 import solvers.Solver;
 
@@ -46,8 +47,14 @@ public class IntegrationTest {
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
         Assignments assignments = new Assignments(parser.getVarIds());
-        return solver.solve(clauses, variables, assignments, 0);
+        PerformanceTester perfTester = new PerformanceTester();
+
+        perfTester.startTimer();
+        boolean sat = solver.solve(clauses, variables, assignments, 0, perfTester);
+        perfTester.stopTimer();
+
+        perfTester.printExecutionTime();
+        perfTester.printNumPickBranchingVariablesCalled();
+        return sat;
     }
-
-
 }
