@@ -6,6 +6,6 @@ import data_structures.Variable;
 
 import java.util.Set;
 
-interface Solver {
+public interface Solver {
     boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel);
 }
