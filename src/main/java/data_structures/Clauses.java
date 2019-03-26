@@ -27,15 +27,15 @@ public class Clauses {
     }
 
     /**
-     * Given the current assignment, try to infer new assignments.
+     * Check if the entire formula is SAT given the current assignments.
      *
-     * @param assignment current assignments
+     * @param assignments current assignments
      * @param decisionLevel decision level at which this resolution is being invoked
      * @return false if any UNSAT in assignments. true otherwise.
      */
-    public boolean resolve(Assignment assignment, int decisionLevel) {
+    public boolean resolve(Assignments assignments, int decisionLevel) {
         for (Clause clause : clauses) {
-            boolean sat = clause.checkSAT(assignment);
+            boolean sat = clause.checkSAT(assignments);
             if (!sat) return false;
         }
         return true;

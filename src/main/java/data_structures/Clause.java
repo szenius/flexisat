@@ -14,14 +14,14 @@ public class Clause {
         return this.literals;
     }
 
-    public boolean checkSAT(Assignment assignment) {
+    public boolean checkSAT(Assignments assignments) {
         boolean clauseVal = false;
         for (Literal literal : literals) {
-            if (assignment.getUnassignedVarIds().contains(literal.getVariable().getId())) {
+            if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {
                 // There are still unassigned variables, cannot determine SAT
                 return true;
             }
-            clauseVal |= literal.getValue(assignment.getAssignment(literal.getVariable().getId()));
+            clauseVal |= literal.getValue(assignments.getAssignmentValue(literal.getVariable().getId()));
         }
         System.out.println("Clause: Checked clause " + toString() + "... sat? " + clauseVal);
         return clauseVal;
