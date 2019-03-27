@@ -55,12 +55,6 @@ public class IntegrationTest {
         Assignments assignments = new Assignments(parser.getVarIds());
         PerformanceTester perfTester = new PerformanceTester();
 
-        perfTester.startTimer();
-        boolean sat = solver.solve(clauses, variables, assignments, 0, perfTester);
-        perfTester.stopTimer();
-
-        perfTester.printExecutionTime();
-        perfTester.printNumPickBranchingVariablesCalled();
-        return sat;
+        return solver.solveWithTimer(clauses, variables, assignments, 0, perfTester);
     }
 }

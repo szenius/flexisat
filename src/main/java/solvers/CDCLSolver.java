@@ -63,6 +63,19 @@ public class CDCLSolver implements Solver {
         return false;
     }
 
+    @Override
+    public boolean solveWithTimer(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
+                         PerformanceTester perfTester) {
+
+        perfTester.startTimer();
+        boolean isSat = this.solve(clauses, variables, assignments, 0, perfTester);
+        perfTester.stopTimer();
+
+        perfTester.printExecutionTime();
+        perfTester.printNumPickBranchingVariablesCalled();
+        return isSat;
+    }
+
     /**
      * Tries to perform unit resolution for whichever unit clause found.
      * After performing unit resolution, check if the assignment is satisfiable. If not, revert the assignment.

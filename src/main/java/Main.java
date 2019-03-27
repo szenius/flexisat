@@ -2,6 +2,7 @@ import data_structures.*;
 import parser.Parser;
 import performance.PerformanceTester;
 import solvers.CDCLSolver;
+import solvers.Solver;
 
 import java.util.Set;
 
@@ -16,13 +17,7 @@ class Main {
         PerformanceTester perfTester = new PerformanceTester();
         CDCLSolver solver = new CDCLSolver();
 
-        perfTester.startTimer();
         boolean isSat = solver.solve(clauses, variables, assignments, 0, perfTester);
-        perfTester.stopTimer();
-
-        perfTester.printExecutionTime();
-        perfTester.printNumPickBranchingVariablesCalled();
-
         if (isSat) {
             System.out.println("SAT");
         } else {
