@@ -1,5 +1,6 @@
 package data_structures;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -14,6 +15,10 @@ public class Clause {
         return this.literals;
     }
 
+    // These two extra information is used for the 2-literals clause heuristics
+    private boolean isTwoClause;
+    private List<Integer> variablesInTwoClause;
+
     public boolean checkSAT(Assignments assignments) {
         boolean clauseVal = false;
         for (Literal literal : literals) {
@@ -25,6 +30,29 @@ public class Clause {
         }
         System.out.println("Clause: Checked clause " + toString() + "... sat? " + clauseVal);
         return clauseVal;
+    }
+
+    public void updateTwoClauseStatus(Assignments assignments) {
+        int currentUnassignedVars = 0;
+        List<Integer> unassignedVariablesInClause = new ArrayList<>();
+        for (Literal literal : literals) {
+            if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {
+                unassignedVariablesInClause.add(literal.getVariable().getId());
+                currentUnassignedVars++;
+            }
+        }
+        if (currentUnassignedVars == 2) {
+            this.isTwoClause = true;
+            this.variablesInTwoClause = unassignedVariablesInClause;
+        }
+    }
+
+    public boolean isTwoClause() {
+        return this.isTwoClause;
+    }
+
+    public List<Integer> getVariablesInTwoClause() {
+        return this.variablesInTwoClause;
     }
 
     @Override

@@ -12,7 +12,7 @@ class Main {
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
         Assignments assignments = new Assignments(parser.getVarIds());
-        CDCLSolver solver = new CDCLSolver();
+        CDCLSolver solver = new CDCLSolver(CDCLSolver.PickBranchingVariableHeuristics.TWO_LITERALS_CLAUSE);
         if (solver.solve(clauses, variables, assignments, 0)) {
             System.out.println("SAT");
         } else {

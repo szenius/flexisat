@@ -59,11 +59,13 @@ public class Assignments {
             }
             assignments.get(varId).swapAssignment();
             assignments.get(varId).setDecisionLevel(decisionLevel);
-        } else {
+        }
+        /*
+        else {
             Assignment assignment = new Assignment(varId, true, decisionLevel, null);
             assignments.put(varId, assignment);
             addVarIdToDecisionLevelMap(varId, decisionLevel);
-        }
+        }*/
         return true;
     }
 
