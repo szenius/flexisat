@@ -17,13 +17,13 @@ class Main {
         CDCLSolver solver = new CDCLSolver();
 
         perfTester.startTimer();
-        boolean sat = solver.solve(clauses, variables, assignments, 0, perfTester);
+        boolean isSat = solver.solve(clauses, variables, assignments, 0, perfTester);
         perfTester.stopTimer();
 
         perfTester.printExecutionTime();
         perfTester.printNumPickBranchingVariablesCalled();
 
-        if (sat) {
+        if (isSat) {
             System.out.println("SAT");
         } else {
             System.out.println("UNSAT");
