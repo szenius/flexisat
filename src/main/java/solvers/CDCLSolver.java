@@ -137,7 +137,7 @@ public class CDCLSolver implements Solver {
         Map<Integer, Integer> varIdToNumOccurrence = new HashMap<>();
         for (Clause clause : clauses.getClauses()) {
             if (clause.isTwoClause()) {
-                for (Integer varId : clause.getVariablesInTwoClause()) {
+                for (int varId : clause.getVariablesInTwoClause()) {
                     int numOccurrence = varIdToNumOccurrence.getOrDefault(varId, 0);
                     numOccurrence++;
                     if (numOccurrence >= maxOccurrence) {
