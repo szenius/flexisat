@@ -4,6 +4,7 @@ import data_structures.*;
 import data_structures.Assignments;
 import data_structures.Clause;
 import data_structures.Clauses;
+import performance.PerformanceTester;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,8 @@ import java.util.Set;
 public class CDCLSolver implements Solver {
 
     @Override
-    public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
+    public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
+                         PerformanceTester perfTester) {
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
             return true;
@@ -39,12 +41,12 @@ public class CDCLSolver implements Solver {
         }
 
         // Pick a new variable to assign
-        int varId = pickBranchingVariable(assignments);
+        int varId = pickBranchingVariable(assignments, perfTester);
         System.out.println("Solver: Try assigning " + varId + " to TRUE");
         if(!assignments.addAssignment(new Assignment(varId, true, decisionLevel, null))) {
             return false;
         }
-        if (solve(clauses, variables, assignments, decisionLevel + 1)) {
+        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
             return true;
         }
         // Decision level might have changed to a lower level
@@ -55,10 +57,23 @@ public class CDCLSolver implements Solver {
         if(!assignments.changeAssignment(varId, decisionLevel)) {
             return false;
         }
-        if (solve(clauses, variables, assignments, decisionLevel + 1)) {
+        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean solveWithTimer(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
+                         PerformanceTester perfTester) {
+
+        perfTester.startTimer();
+        boolean isSat = this.solve(clauses, variables, assignments, 0, perfTester);
+        perfTester.stopTimer();
+
+        perfTester.printExecutionTime();
+        perfTester.printNumPickBranchingVariablesCalled();
+        return isSat;
     }
 
     /**
@@ -98,7 +113,8 @@ public class CDCLSolver implements Solver {
     }
 
 
-    private int pickBranchingVariable(Assignments assignments) {
+    private int pickBranchingVariable(Assignments assignments, PerformanceTester performanceTester) {
+        performanceTester.pickBranchingVariablesCalled();
         return (int) assignments.getUnassignedVarIds().toArray()[0];
     }
 
