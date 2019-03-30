@@ -14,6 +14,19 @@ public class Clause {
         return this.literals;
     }
 
+    public Literal getUnitLiteral(Assignments assignments) {
+        Literal unitLiteral = null;
+        for (Literal literal : literals) {
+            if (assignments.hasAssignedVariable(literal.getVariable().getId())) {
+                if (unitLiteral != null) {
+                    return null;
+                }
+                unitLiteral = literal;
+            }
+        }
+        return unitLiteral;
+    }
+
     public boolean checkSAT(Assignments assignments) {
         boolean clauseVal = false;
         for (Literal literal : literals) {
