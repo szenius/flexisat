@@ -35,9 +35,8 @@ public class Clause {
                 }
                 if (!foundEdgeDueToThisClause) {
                     unitLiteral = literal;
-                } else {
-                    clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
                 }
+                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
             }
         }
         if (clauseValue) {
