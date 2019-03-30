@@ -63,7 +63,7 @@ public class Assignments2 {
     }
 
     public void addVariableAssignment(Variable variable, boolean assignment) {
-        variableAssignments.put(variable, assignment);
+        addVariableAssignment(variable, assignment, true);
     }
 
     public void addRoot(Variable variable, Node root) {
@@ -76,5 +76,13 @@ public class Assignments2 {
 
     public Node getNode(Variable variable) {
         return implicationGraphNodes.get(variable);
+    }
+
+    public void addVariableAssignment(Variable variable, boolean assignment, boolean shouldOverride) {
+        if (shouldOverride) {
+            variableAssignments.put(variable, assignment);
+        } else {
+            variableAssignments.putIfAbsent(variable, assignment);
+        }
     }
 }

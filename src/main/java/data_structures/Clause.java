@@ -25,7 +25,19 @@ public class Clause {
                 }
                 unitLiteral = literal;
             } else {
-                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
+                List<Edge> edges = assignments.getNode(literal.getVariable()).getInEdges();
+                boolean foundEdgeDueToThisClause = false;
+                for (Edge edge : edges) {
+                    if (!edge.getDueToClause().equals(this)) {
+                        foundEdgeDueToThisClause = true;
+                        break;
+                    }
+                }
+                if (!foundEdgeDueToThisClause) {
+                    unitLiteral = literal;
+                } else {
+                    clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
+                }
             }
         }
         if (clauseValue) {
@@ -34,16 +46,29 @@ public class Clause {
         return unitLiteral;
     }
 
-    public boolean checkSAT(Assignments assignments) {
+    public boolean checkVALID(Assignments assignments) {
         boolean clauseVal = false;
         for (Literal literal : literals) {
             if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                // There are still unassigned variables, cannot determine SAT
+                // There are still unassigned variables, cannot determine VALID
                 return true;
             }
             clauseVal |= literal.getValue(assignments.getAssignmentValue(literal.getVariable().getId()));
         }
-        System.out.println("Clause: Checked clause " + toString() + "... sat? " + clauseVal);
+        System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
+        return clauseVal;
+    }
+
+    public boolean checkVALID(Assignments2 assignments) {
+        boolean clauseVal = false;
+        for (Literal literal : literals) {
+            if (!assignments.hasAssignedVariable(literal)) {
+                // There are still unassigned variables, cannot determine VALID
+                return true;
+            }
+            clauseVal |= literal.getValue(assignments.getVariableAssignment(literal));
+        }
+        System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
         return clauseVal;
     }
 

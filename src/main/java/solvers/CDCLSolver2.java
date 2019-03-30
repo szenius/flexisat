@@ -132,7 +132,7 @@ public class CDCLSolver2 {
             performedUnitResolution = false;
 
             for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments);
+                Literal unitLiteral = clause.getUnitLiteral(assignments); 
 
                 if (unitLiteral != null) {
                     // Found unit literal, do unit resolution
@@ -143,7 +143,7 @@ public class CDCLSolver2 {
                     lastInferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
 
                     // Check if assignment is conflicting
-                    if(assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
+                    if(isConflict(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true);
@@ -152,11 +152,17 @@ public class CDCLSolver2 {
                         // Not conflicting, add assignment
                         assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
                     }
+
+                    performedUnitResolution = true;
                 }
             }
         }
 
         return new UnitResolutionResult(lastInferredNode, false);
+    }
+
+    private boolean isConflict(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
+        return assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment);
     }
 
     /**
@@ -171,7 +177,7 @@ public class CDCLSolver2 {
         Node lastInferredNode = new Node(unitLiteralVariable, decisionLevel);
         for (Literal literal : dueToClause.getLiterals()) {
             if (literal.getVariable() != unitLiteralVariable) {
-                Node fromNode = assignments.getNode(unitLiteralVariable);
+                Node fromNode = assignments.getNode(literal.getVariable());
                 Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
                 fromNode.addOutEdge(newEdge);
                 lastInferredNode.addInEdge(newEdge);

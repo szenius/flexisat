@@ -27,15 +27,29 @@ public class Clauses {
     }
 
     /**
-     * Check if the entire formula is SAT given the current assignments.
+     * Check if the entire formula is VALID given the current assignments.
      *
      * @param assignments current assignments
      * @return false if any UNSAT in assignments. true otherwise.
      */
-    public boolean resolve(Assignments assignments) {
+    public boolean checkVALID(Assignments assignments) {
         for (Clause clause : clauses) {
-            boolean sat = clause.checkSAT(assignments);
-            if (!sat) return false;
+            boolean valid = clause.checkVALID(assignments);
+            if (!valid) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check if the entire formula is VALID given the current assignments.
+     *
+     * @param assignments current assignments
+     * @return false if any UNSAT in assignments. true otherwise.
+     */
+    public boolean checkVALID(Assignments2 assignments) {
+        for (Clause clause : clauses) {
+            boolean valid = clause.checkVALID(assignments);
+            if (!valid) return false;
         }
         return true;
     }
