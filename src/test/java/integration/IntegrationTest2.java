@@ -19,7 +19,7 @@ public class IntegrationTest2 {
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return SAT returns SAT.")
-    void satCDCLSolverTest() {
+    void testValidCNF() {
         String[] satTestInputs = {
                 "input/sat_input1.cnf",
                 "input/sat_input2.cnf",
@@ -33,7 +33,7 @@ public class IntegrationTest2 {
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return UNSAT returns UNSAT.")
-    void unsatCDCLSolverTest() {
+    void testUnsatCNF() {
         Solver solver = new CDCLSolver();
         String[] unsatTestInputs = {
                 "input/unsat_input1.cnf",
