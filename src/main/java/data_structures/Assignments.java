@@ -11,28 +11,10 @@ public class Assignments {
     // This map is for quick access to each variable's decision level
     private Map<Integer, List<Integer>> decisionLevelToVariables;
 
-    private Map<Variable, Node> implicationGraphRoots;
-    private Map<Variable, Node> implicationGraphNodes;
-    private Map<Variable, Boolean> variableAssignments;
-
-    public Assignments(Set<Integer> varIds, Set<Variable> variables) {
+    public Assignments(Set<Integer> varIds) {
         this.varIds = varIds;
         this.assignments = new HashMap<>();
         this.decisionLevelToVariables = new HashMap<>();
-        this.implicationGraphRoots = new HashMap<>();
-        this.implicationGraphNodes = new HashMap<>();
-    }
-
-    public Map<Variable, Node> getImplicationGraphRoots() {
-        return this.implicationGraphRoots;
-    }
-
-    public Map<Variable, Node> getImplicationGraphNodes() {
-        return this.implicationGraphNodes;
-    }
-
-    public Map<Variable, Boolean> getVariableAssignments() {
-        return this.variableAssignments;
     }
 
     /**

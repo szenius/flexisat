@@ -15,17 +15,17 @@ public class Clause {
         return this.literals;
     }
 
-    public Literal getUnitLiteral(Assignments assignments) {
+    public Literal getUnitLiteral(Assignments2 assignments) {
         Literal unitLiteral = null;
         boolean clauseValue = false;
         for (Literal literal : literals) {
-            if (!assignments.hasAssignedVariable(literal.getVariable().getId())) {
+            if (!assignments.hasAssignedVariable(literal)) {
                 if (unitLiteral != null) {
                     return null;
                 }
                 unitLiteral = literal;
             } else {
-                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getAssignmentValue(literal.getVariable().getId()));
+                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
             }
         }
         if (clauseValue) {
