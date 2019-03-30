@@ -34,7 +34,6 @@ public class IntegrationTest2 {
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return UNSAT returns UNSAT.")
     void testUnsatCNF() {
-        Solver solver = new CDCLSolver();
         String[] unsatTestInputs = {
                 "input/unsat_input1.cnf",
                 "input/unsat_input2.cnf",
