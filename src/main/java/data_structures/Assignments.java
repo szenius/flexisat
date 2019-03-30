@@ -13,6 +13,7 @@ public class Assignments {
 
     private Map<Variable, Node> implicationGraphRoots;
     private Map<Variable, Node> implicationGraphNodes;
+    private Map<Variable, Boolean> variableAssignments;
 
     public Assignments(Set<Integer> varIds, Set<Variable> variables) {
         this.varIds = varIds;
@@ -28,6 +29,10 @@ public class Assignments {
 
     public Map<Variable, Node> getImplicationGraphNodes() {
         return this.implicationGraphNodes;
+    }
+
+    public Map<Variable, Boolean> getVariableAssignments() {
+        return this.variableAssignments;
     }
 
     /**

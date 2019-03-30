@@ -29,7 +29,7 @@ public class CDCLSolver implements Solver {
         // Perform unit resolution
         int unitResolutionDecisionLevel = decisionLevel == 0 ? decisionLevel : decisionLevel - 1;
         if (!performUnitResolution(clauses, variables, assignments, unitResolutionDecisionLevel)) {
-            // Conflict resolution should have happened
+            // UnitResolutionResult resolution should have happened
             return false;
         }
 

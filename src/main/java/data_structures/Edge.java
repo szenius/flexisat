@@ -2,12 +2,12 @@ package data_structures;
 
 public class Edge {
     private Clause dueToClause;
-    private Node fromEdge;
-    private Node toEdge;
+    private Node fromNode;
+    private Node toNode;
 
-    public Edge(Node fromEdge, Node toEdge, Clause dueToClause) {
-        this.fromEdge = fromEdge;
-        this.toEdge = toEdge;
+    public Edge(Node fromNode, Node toNode, Clause dueToClause) {
+        this.fromNode = fromNode;
+        this.toNode = toNode;
         this.dueToClause = dueToClause;
     }
 
@@ -15,11 +15,30 @@ public class Edge {
         return dueToClause;
     }
 
-    public Node getFromEdge() {
-        return fromEdge;
+    public Node getFromNode() {
+        return fromNode;
     }
 
-    public Node getToEdge() {
-        return toEdge;
+    public Node getToNode() {
+        return toNode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        if (((Edge) obj).getFromNode() == this.getFromNode()
+                && ((Edge) obj).getToNode() == this.getToNode()
+                && ((Edge) obj).getDueToClause() == this.getDueToClause()) {
+            return true;
+        }
+        return false;
     }
 }

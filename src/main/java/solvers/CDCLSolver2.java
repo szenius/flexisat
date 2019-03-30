@@ -28,7 +28,7 @@ public class CDCLSolver2 {
 
         // Perform unit resolution
         int decisionLevel = 0;
-        if (!unitPropagation(decisionLevel)) {
+        if (unitPropagation(decisionLevel).isConflict()) {
             return false;
         }
 
@@ -36,10 +36,10 @@ public class CDCLSolver2 {
             Variable pickedVariable = pickBranchingVariable();
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
-            assignments.getImplicationGraphNodes().put(pickedVariable, newNode);
-            assignments.getImplicationGraphRoots().put(pickedVariable, newNode);
-            if (!unitPropagation(decisionLevel)) {
-                int assertionLevel = conflictAnalysis();
+            addAssignment(pickedVariable, newNode, true);
+            UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
+            if (unitResolutionResult.isConflict()) {
+                int assertionLevel = conflictAnalysis(unitResolutionResult);
                 if (assertionLevel < 0) {
                     return false;
                 } else {
@@ -51,42 +51,79 @@ public class CDCLSolver2 {
         return true;
     }
 
+    private void addAssignment(Variable variable, Node node, boolean assignment) {
+        assignments.getImplicationGraphNodes().put(variable, node);
+        assignments.getImplicationGraphRoots().put(variable, node);
+        assignments.getVariableAssignments().put(variable, assignment);
+    }
+
     private void backtrack(int assertionLevel) {
-        // TODO:
-    }
-
-    private int conflictAnalysis() {
-        return 0; // TODO:
-    }
-
-    private boolean unitPropagation(int decisionLevel) {
-        boolean performedUnitResolution = true;
-
-        while (performedUnitResolution) {
-            performedUnitResolution = false;
-
-            // Perform unit resolution while possible
-            for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments);
-                if (unitLiteral != null) {
-                    boolean hasConflict = buildImplicationGraph(clause, unitLiteral);
-                    while (hasConflict) {
-                        hasConflict = buildImplicationGraph(clause, unitLiteral);
-                    }
-                    performedUnitResolution = true;
+        for (Node node : assignments.getImplicationGraphNodes().values()) {
+            if (node.getDecisionLevel() > assertionLevel) {
+                for (Edge inEdge : node.getInEdges()) {
+                    inEdge.getFromNode().removeOutEdge(inEdge);
                 }
             }
         }
-        return true;
     }
 
-    private boolean buildImplicationGraph(Clause clause, Literal unitLiteral) {
-        Node existingNode = assignments.getImplicationGraphNodes().getOrDefault(unitLiteral.getVariable(), null);
-        if (existingNode != null) {
-            // TODO: conflict
+    private int conflictAnalysis(UnitResolutionResult conflict) {
+        Node inferredNode = conflict.getInferredNode();
+        Node conflictingNode = conflict.getConflictingNode();
+        Set<Edge> cutEdges = new HashSet<>(conflictingNode.getInEdges());
+        cutEdges.addAll(inferredNode.getInEdges());
+        List<Literal> learntLiterals = new ArrayList<>();
+        int assertionLevel = -1;
+        for (Edge cutEdge : cutEdges) {
+            learntLiterals.add(new Literal(cutEdge.getFromNode().getVariable(),
+                    !assignments.getVariableAssignments().get(cutEdge.getFromNode())));
+            assertionLevel = Math.max(cutEdge.getToNode().getDecisionLevel(), assertionLevel);
         }
-        // TODO:
+        clauses.addClause(new Clause(learntLiterals));
+        return assertionLevel;
+    }
 
+    private UnitResolutionResult unitPropagation(int decisionLevel) {
+        boolean performedUnitResolution = true;
+        Node lastInferredNode = null;
+
+        // If for any round of going through all clauses we did unit resolution, we go another round to check
+        // for possibility for unit resolution again.
+        while (performedUnitResolution) {
+            performedUnitResolution = false;
+
+            for (Clause clause : clauses.getClauses()) {
+                Literal unitLiteral = clause.getUnitLiteral(assignments);
+
+                if (unitLiteral != null) {
+                    // Found unit literal, do unit resolution
+                    Variable unitLiteralVariable = unitLiteral.getVariable();
+                    lastInferredNode = new Node(unitLiteralVariable, decisionLevel);
+                    boolean inferredNodeAssignment = !unitLiteral.isNegated();
+
+                    // Add to implication graph
+                    for (Literal literal : clause.getLiterals()) {
+                        if (literal.getVariable() != unitLiteralVariable) {
+                            Node fromNode = assignments.getImplicationGraphNodes().get(unitLiteralVariable);
+                            Edge newEdge = new Edge(fromNode, lastInferredNode, clause);
+                            fromNode.addOutEdge(newEdge);
+                            lastInferredNode.addInEdge(newEdge);
+                        }
+                    }
+
+                    if(assignments.getVariableAssignments().getOrDefault(unitLiteralVariable, inferredNodeAssignment)
+                            != inferredNodeAssignment) {
+                        // Conflicting assignment
+                        Node conflictingNode = assignments.getImplicationGraphNodes().get(unitLiteralVariable);
+                        return new UnitResolutionResult(lastInferredNode, conflictingNode, true);
+                    } else {
+                        // Not conflicting, add assignment
+                        addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment);
+                    }
+                }
+            }
+        }
+        return new UnitResolutionResult(lastInferredNode, false);
     }
 
     /**

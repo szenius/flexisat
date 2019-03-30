@@ -3,6 +3,7 @@ package data_structures;
 import java.util.List;
 import java.util.StringJoiner;
 
+// TODO: equals method. Requires Clause to have ID else it will be very troublesome.
 public class Clause {
     private List<Literal> literals;
 
@@ -16,13 +17,19 @@ public class Clause {
 
     public Literal getUnitLiteral(Assignments assignments) {
         Literal unitLiteral = null;
+        boolean clauseValue = false;
         for (Literal literal : literals) {
-            if (assignments.hasAssignedVariable(literal.getVariable().getId())) {
+            if (!assignments.hasAssignedVariable(literal.getVariable().getId())) {
                 if (unitLiteral != null) {
                     return null;
                 }
                 unitLiteral = literal;
+            } else {
+                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getAssignmentValue(literal.getVariable().getId()));
             }
+        }
+        if (clauseValue) {
+            return null;
         }
         return unitLiteral;
     }

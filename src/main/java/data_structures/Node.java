@@ -39,4 +39,26 @@ public class Node {
     public void addOutEdge(Edge outEdge) {
         this.outEdges.add(outEdge);
     }
+
+    public void removeOutEdge(Edge outEdge) {
+        outEdges.remove(outEdge);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        if (((Node) obj).getVariable() == this.getVariable()
+                && ((Node) obj).getDecisionLevel() == this.getDecisionLevel()) {
+            return true;
+        }
+        return false;
+    }
 }
