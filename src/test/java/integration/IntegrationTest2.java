@@ -5,9 +5,7 @@ import data_structures.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
-import solvers.CDCLSolver;
 import solvers.CDCLSolver2;
-import solvers.Solver;
 
 import java.util.Set;
 
