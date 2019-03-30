@@ -210,8 +210,4 @@ public class Assignments {
             this.decisionLevelToVariables.remove(decisionLevel);
         }
     }
-
-    public boolean hasAssignedVariable(int id) {
-        return assignments.containsKey(id);
-    }
 }
