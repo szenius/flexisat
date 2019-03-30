@@ -39,18 +39,4 @@ public class Clauses {
         }
         return true;
     }
-
-    /**
-     * Check if the entire formula is VALID given the current assignments.
-     *
-     * @param assignments current assignments
-     * @return false if any UNSAT in assignments. true otherwise.
-     */
-    public boolean checkVALID(Assignments2 assignments) {
-        for (Clause clause : clauses) {
-            boolean valid = clause.checkVALID(assignments);
-            if (!valid) return false;
-        }
-        return true;
-    }
 }

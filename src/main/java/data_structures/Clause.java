@@ -59,19 +59,6 @@ public class Clause {
         return clauseVal;
     }
 
-    public boolean checkVALID(Assignments2 assignments) {
-        boolean clauseVal = false;
-        for (Literal literal : literals) {
-            if (!assignments.hasAssignedVariable(literal)) {
-                // There are still unassigned variables, cannot determine VALID
-                return true;
-            }
-            clauseVal |= literal.getValue(assignments.getVariableAssignment(literal));
-        }
-        System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
-        return clauseVal;
-    }
-
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(" ");

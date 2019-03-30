@@ -101,11 +101,14 @@ public class CDCLSolver2 {
         List<Literal> learntLiterals = new ArrayList<>();
         int assertionLevel = -1;
         for (Edge cutEdge : cutEdges) {
-            learntLiterals.add(new Literal(cutEdge.getFromNode().getVariable(),
-                    !assignments.getVariableAssignment(cutEdge.getFromNode().getVariable())));
-            assertionLevel = Math.max(cutEdge.getToNode().getDecisionLevel(), assertionLevel);
+            Literal learntLiteral = new Literal(cutEdge.getFromNode().getVariable(),
+                    assignments.getVariableAssignment(cutEdge.getFromNode().getVariable()));
+            learntLiterals.add(learntLiteral);
+            assertionLevel = Math.max(cutEdge.getFromNode().getDecisionLevel(), assertionLevel);
         }
-        clauses.addClause(new Clause(learntLiterals));
+        Clause learntClause = new Clause(learntLiterals);
+        clauses.addClause(learntClause);
+        System.out.println("Learnt new clause " + learntClause.toString());
 
         // Remove assignment of conflicting nodes
         assignments.removeAssignment(conflictingNode.getVariable());
@@ -132,7 +135,7 @@ public class CDCLSolver2 {
             performedUnitResolution = false;
 
             for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments); 
+                Literal unitLiteral = clause.getUnitLiteral(assignments);
 
                 if (unitLiteral != null) {
                     // Found unit literal, do unit resolution
@@ -145,6 +148,7 @@ public class CDCLSolver2 {
                     // Check if assignment is conflicting
                     if(isConflict(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
+                        System.out.println("Found conflicting assignment for " + unitLiteralVariable.getId() + " in clause " + clause.toString());
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true);
 
