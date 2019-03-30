@@ -5,7 +5,9 @@ import data_structures.Literal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,7 +18,7 @@ public class ParserTest {
     void validParseTest() {
         String filePath = "input/sat_input1.cnf";
         Parser testParser = new Parser();
-        List<Clause> listOfClause = testParser.parse(filePath).getClauses();
+        List<Clause> listOfClause = new ArrayList<>(testParser.parse(filePath).getClauses());
 
         assertEquals(2, listOfClause.size());
         // Test first clause

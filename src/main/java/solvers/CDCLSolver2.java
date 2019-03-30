@@ -9,10 +9,10 @@ public class CDCLSolver2 {
     Set<Variable> variables;
     Assignments2 assignments;
 
-    public CDCLSolver2(Clauses clauses, Set<Variable> variables, Assignments2 assignments) {
+    public CDCLSolver2(Clauses clauses, Set<Variable> variables) {
         this.clauses = clauses;
         this.variables = variables;
-        this.assignments = assignments;
+        this.assignments = new Assignments2();
     }
 
     /**

@@ -23,7 +23,7 @@ class Main {
 //        boolean isSat = solver.solve(clauses, variables, assignments, 0, perfTester);
 
         // Run solver 2
-        CDCLSolver2 solver = new CDCLSolver2(clauses, variables, new Assignments2());
+        CDCLSolver2 solver = new CDCLSolver2(clauses, variables);
         boolean isValid = solver.solve();
 
         if (isValid) {
