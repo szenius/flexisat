@@ -71,7 +71,7 @@ public class Parser {
             }
             this.clauses = new Clauses(clauses);
             br.close();
-            System.out.println("Done!");
+            System.out.println("Parsed input file.");
             return this.clauses;
         } catch (IOException e) {
             e.printStackTrace();

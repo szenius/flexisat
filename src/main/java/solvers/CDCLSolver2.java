@@ -21,34 +21,45 @@ public class CDCLSolver2 {
      * @return true if the formula is VALID, false otherwise.
      */
     public boolean solve() {
+        System.out.println("Running CDCLSolver2...");
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
+            System.out.println("Found empty formula!");
             return true;
         }
 
         // Check if there is any empty clause
         if (clauses.hasEmptyClause()) {
+            System.out.println("Found empty clause!");
             return false;
         }
 
         // Perform unit resolution
         int decisionLevel = 0;
         if (unitPropagation(decisionLevel).isConflict()) {
+            System.out.println("CONFLICT from Unit Propagation at decision level " + decisionLevel + "!");
             return false;
         }
 
         while (assignments.getNumAssigned() < variables.size()) {
+            // Pick branching variable to assign
             Variable pickedVariable = pickBranchingVariable();
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
             assignments.addAssignment(pickedVariable, newNode, true, true);
+            System.out.println("Assigned variable " + pickedVariable.getId() + " at " + decisionLevel + "!");
+
+            // Run unit propagation
             UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
             if (unitResolutionResult.isConflict()) {
+                System.out.println("CONFLICT from Unit Propagation at decision level " + decisionLevel + "!");
                 int assertionLevel = conflictAnalysis(unitResolutionResult);
+                System.out.println("Asserting at level " + assertionLevel);
                 if (assertionLevel < 0) {
                     return false;
                 } else {
                     backtrack(assertionLevel);
+                    System.out.println("Backtracked to decision level " + assertionLevel);
                     decisionLevel = assertionLevel;
                 }
             }
@@ -176,7 +187,7 @@ public class CDCLSolver2 {
      */
     private Variable pickBranchingVariable() {
         for (Variable variable : variables) {
-            if (assignments.getImplicationGraphNodes().containsKey(variable)) {
+            if (!assignments.getImplicationGraphNodes().containsKey(variable)) {
                 return variable;
             }
         }
