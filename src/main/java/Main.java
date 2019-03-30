@@ -6,12 +6,16 @@ import java.util.Set;
 
 class Main {
     public static void main(String[] args) {
-        String filename = args[0]; // TODO: if this gets complicated, we can define an object class for input args
+        String filename = args[0];
+
+        // Parse input file
         Parser parser = new Parser();
         parser.parse(filename);
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
         Assignments assignments = new Assignments(parser.getVarIds());
+
+        // Run solver
         CDCLSolver solver = new CDCLSolver();
         if (solver.solve(clauses, variables, assignments, 0)) {
             System.out.println("VALID");

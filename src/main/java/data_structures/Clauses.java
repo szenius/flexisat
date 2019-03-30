@@ -1,11 +1,11 @@
 package data_structures;
 
-import java.util.List;
+import java.util.Set;
 
 public class Clauses {
-    private List<Clause> clauses;
+    private Set<Clause> clauses;
 
-    public Clauses(List<Clause> clauses) {
+    public Clauses(Set<Clause> clauses) {
         this.clauses = clauses;
     }
 
@@ -13,7 +13,7 @@ public class Clauses {
         this.clauses.add(clause);
     }
 
-    public List<Clause> getClauses() {
+    public Set<Clause> getClauses() {
         return this.clauses;
     }
 
@@ -30,10 +30,9 @@ public class Clauses {
      * Check if the entire formula is SAT given the current assignments.
      *
      * @param assignments current assignments
-     * @param decisionLevel decision level at which this resolution is being invoked
      * @return false if any UNSAT in assignments. true otherwise.
      */
-    public boolean resolve(Assignments assignments, int decisionLevel) {
+    public boolean resolve(Assignments assignments) {
         for (Clause clause : clauses) {
             boolean sat = clause.checkSAT(assignments);
             if (!sat) return false;

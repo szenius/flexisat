@@ -34,11 +34,9 @@ public class Edge {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        if (((Edge) obj).getFromNode() == this.getFromNode()
-                && ((Edge) obj).getToNode() == this.getToNode()
-                && ((Edge) obj).getDueToClause() == this.getDueToClause()) {
-            return true;
-        }
-        return false;
+        Edge edge = (Edge) obj;
+        return edge.getFromNode() == this.getFromNode()
+                && edge.getToNode() == this.getToNode()
+                && edge.getDueToClause() == this.getDueToClause();
     }
 }

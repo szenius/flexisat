@@ -79,7 +79,7 @@ public class CDCLSolver implements Solver {
             for (Clause clause : clauses.getClauses()) {
                 if (assignments.assignUnitClause(clause, decisionLevel)) {
                     performedUnitResolution = true;
-                    if (!clauses.resolve(assignments, decisionLevel)) {
+                    if (!clauses.resolve(assignments)) {
                         conflictResolution(clauses, assignments, variables);
                         return false;
                     }

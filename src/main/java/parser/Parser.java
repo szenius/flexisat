@@ -59,7 +59,7 @@ public class Parser {
             int numVariables = Integer.parseInt(secondLine[2]);
             int numClauses = Integer.parseInt(secondLine[3]);
 
-            List<Clause> clauses = new ArrayList<Clause>();
+            Set<Clause> clauses = new HashSet<>();
             for (int i = 0 ; i < numClauses; i++ ) {
                 line = br.readLine();
                 try {

@@ -1,9 +1,9 @@
 package data_structures;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-// TODO: equals method. Requires Clause to have ID else it will be very troublesome.
 public class Clause {
     private List<Literal> literals;
 
@@ -56,5 +56,26 @@ public class Clause {
             joiner.add(String.valueOf(id));
         }
         return joiner.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Clause clause = (Clause) obj;
+        List<Literal> literalsCopy = new ArrayList<>(this.getLiterals());
+        for (Literal literal : clause.getLiterals()) {
+            if (!literalsCopy.remove(literal)) {
+                return false;
+            }
+        }
+        return literalsCopy.isEmpty();
     }
 }

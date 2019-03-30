@@ -27,4 +27,19 @@ public class Literal {
     public boolean getValue(boolean assignment) {
         return this.isNegated ^ assignment;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Literal literal = (Literal) obj;
+        return this.variable == literal.getVariable() && this.isNegated == literal.isNegated();
+    }
 }
