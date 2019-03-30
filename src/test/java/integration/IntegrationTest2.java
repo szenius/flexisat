@@ -16,15 +16,14 @@ public class IntegrationTest2 {
 
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
-            "are supposed to return SAT returns SAT.")
+            "are supposed to return VALID returns VALID.")
     void testValidCNF() {
-        String[] satTestInputs = {
-                "input/sat_input1.cnf",
-                "input/sat_input2.cnf",
-                "input/sat_input3.cnf"};
-        for (String testInput : satTestInputs) {
-            boolean valid = runSatSolverTest(testInput);
-            assertTrue(valid);
+        String[] validTestFilenames = {
+                "input/valid_input1.cnf",
+                "input/valid_input2.cnf",
+                "input/valid_input3.cnf"};
+        for (String filename : validTestFilenames) {
+            assertTrue(runSatSolverTest(filename), "Returned UNSAT for VALID test case " + filename);
         }
     }
 
@@ -32,13 +31,12 @@ public class IntegrationTest2 {
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return UNSAT returns UNSAT.")
     void testUnsatCNF() {
-        String[] unsatTestInputs = {
+        String[] unsatTestFilenames = {
                 "input/unsat_input1.cnf",
                 "input/unsat_input2.cnf",
                 "input/unsat_input3.cnf"};
-        for (String testInput : unsatTestInputs) {
-            boolean valid = runSatSolverTest(testInput);
-            assertFalse(valid);
+        for (String filename : unsatTestFilenames) {
+            assertFalse(runSatSolverTest(filename), "Returned VALID for UNSAT test case " + filename);
         }
     }
 
