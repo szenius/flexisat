@@ -32,23 +32,16 @@ public class Clause {
         return clauseVal;
     }
 
-    public void updateTwoClauseStatus(Assignments assignments) {
-        int currentUnassignedVars = 0;
-        List<Integer> unassignedVariablesInClause = new ArrayList<>();
-        for (Literal literal : literals) {
-            if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                unassignedVariablesInClause.add(literal.getVariable().getId());
-                currentUnassignedVars++;
-            }
-        }
-        if (currentUnassignedVars == 2) {
-            this.isTwoClause = true;
-            this.variablesInTwoClause = unassignedVariablesInClause;
-        }
+    public void setIsTwoClause() {
+        this.isTwoClause = true;
     }
 
     public boolean isTwoClause() {
         return this.isTwoClause;
+    }
+
+    public void setVariablesInTwoClause(List<Integer> variablesInTwoClause) {
+        this.variablesInTwoClause = variablesInTwoClause;
     }
 
     public List<Integer> getVariablesInTwoClause() {

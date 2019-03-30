@@ -1,5 +1,8 @@
 package solvers;
 
+import branching_heuristics.PickBranchingVariableHeuristic;
+import branching_heuristics.RandomVariable;
+import branching_heuristics.TwoLiteralClause;
 import data_structures.*;
 import data_structures.Assignments;
 import data_structures.Clause;
@@ -16,11 +19,23 @@ public class CDCLSolver implements Solver {
         TWO_LITERALS_CLAUSE, RANDOM
     }
 
-    private PickBranchingVariableHeuristics pickBranchingVariableHeuristic;
+    private PickBranchingVariableHeuristic variablePicker;
 
     public CDCLSolver(PickBranchingVariableHeuristics heuristic) {
-        this.pickBranchingVariableHeuristic = heuristic;
+        switch (heuristic) {
+            case RANDOM:
+                variablePicker = new RandomVariable();
+                break;
+            case TWO_LITERALS_CLAUSE:
+                variablePicker = new TwoLiteralClause();
+                break;
+            // We'll default to the random heuristic for now.
+            default:
+                variablePicker = new RandomVariable();
+        }
+
     }
+
 
     @Override
     public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
@@ -47,7 +62,7 @@ public class CDCLSolver implements Solver {
         }
 
         // Pick a new variable to assign
-        int varId = pickBranchingVariable(clauses, assignments);
+        int varId = variablePicker.pickBranchingVariable(clauses, assignments);
         System.out.println("Solver: Try assigning " + varId + " to TRUE");
         if(!assignments.addAssignment(new Assignment(varId, true, decisionLevel, null))) {
             return false;
@@ -105,50 +120,6 @@ public class CDCLSolver implements Solver {
         List<Literal> literals = createNewClause(variablesThatCausedUNSAT, assignments, variables);
         clauses.addClause(new Clause(literals));
         assignments.revertAssignments(literals);
-    }
-
-
-    private int pickBranchingVariable(Clauses clauses, Assignments assignments) {
-        switch (this.pickBranchingVariableHeuristic) {
-            case RANDOM:
-                return (int) assignments.getUnassignedVarIds().toArray()[0];
-            case TWO_LITERALS_CLAUSE:
-                int maxOccurredVariable = countMaxVariableInTwoLiteralClauses(clauses, assignments);
-                if (maxOccurredVariable == -1 ) {
-                    return (int) assignments.getUnassignedVarIds().toArray()[0];
-                } else {
-                    return maxOccurredVariable;
-                }
-            // We will default to the random case.
-            default:
-                return (int) assignments.getUnassignedVarIds().toArray()[0];
-        }
-    }
-
-    /**
-     * Finds the variable that occurred the most number of times in two-literal clauses.
-     * @param clauses
-     * @param assignments
-     * @return varId of variable that occurred the most. Else return -1 if there are no two-literal clauses.
-     */
-    private int countMaxVariableInTwoLiteralClauses(Clauses clauses, Assignments assignments) {
-        int maxOccurrence = 0;
-        int mostOccurredVar = -1;
-        Map<Integer, Integer> varIdToNumOccurrence = new HashMap<>();
-        for (Clause clause : clauses.getClauses()) {
-            if (clause.isTwoClause()) {
-                for (int varId : clause.getVariablesInTwoClause()) {
-                    int numOccurrence = varIdToNumOccurrence.getOrDefault(varId, 0);
-                    numOccurrence++;
-                    if (numOccurrence >= maxOccurrence) {
-                        maxOccurrence = numOccurrence;
-                        mostOccurredVar = varId;
-                    }
-                    varIdToNumOccurrence.put(varId, numOccurrence);
-                }
-            }
-        }
-        return mostOccurredVar;
     }
 
 
