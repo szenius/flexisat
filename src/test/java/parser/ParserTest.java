@@ -14,7 +14,7 @@ public class ParserTest {
     @Test
     @DisplayName("Parses a valid cnf.")
     void validParseTest() {
-        String filePath = "input/input1.cnf";
+        String filePath = "input/sat_input1.cnf";
         Parser testParser = new Parser();
         List<Clause> listOfClause = testParser.parse(filePath).getClauses();
 

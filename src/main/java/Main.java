@@ -1,5 +1,6 @@
 import data_structures.*;
 import parser.Parser;
+import performance.PerformanceTester;
 import solvers.CDCLSolver;
 import solvers.CDCLSolver2;
 
@@ -17,24 +18,15 @@ class Main {
         Assignments assignments = new Assignments(parser.getVarIds());
 
         // Run solver v1
+//        PerformanceTester perfTester = new PerformanceTester();
 //        CDCLSolver solver = new CDCLSolver();
-//        if (solver.solve(clauses, variables, assignments, 0)) {
-//            System.out.println("VALID");
-//        } else {
-//            // Print test to make sure that UNSAT assignments get added into our Clauses as part of the CDCL algorithm.
-//            for (Clause clause : clauses.getClauses()) {
-//                for (Literal literal : clause.getLiterals()) {
-//                    System.out.println(literal.getVariable().getId());
-//                    System.out.println(literal.isNegated());
-//                }
-//                System.out.println("~~~~~~~~~~~~~");
-//            }
-//            System.out.println("UNSAT");
-//        }
+//        boolean isSat = solver.solve(clauses, variables, assignments, 0, perfTester);
 
         // Run solver 2
         CDCLSolver2 solver = new CDCLSolver2(clauses, variables, new Assignments2());
-        if (solver.solve()) {
+        boolean isValid = solver.solve();
+
+        if (isValid) {
             System.out.println("VALID");
         } else {
             System.out.println("UNSAT");
