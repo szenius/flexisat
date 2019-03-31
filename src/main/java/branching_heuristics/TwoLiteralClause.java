@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TwoLiteralClause implements PickBranchingVariableHeuristic{
+public class TwoLiteralClause extends PickBranchingVariableHeuristic{
     @Override
     public int pickBranchingVariable(Clauses clauses, Assignments assignments) {
         int maxOccurredVariable = countMaxVariableInTwoLiteralClauses(clauses, assignments);
@@ -21,7 +21,7 @@ public class TwoLiteralClause implements PickBranchingVariableHeuristic{
         }
     }
 
-
+    @Override
     public void updateTwoClauseStatus(Assignments assignments, Clause clause) {
         int currentUnassignedVars = 0;
         List<Integer> unassignedVariablesInClause = new ArrayList<>();
@@ -32,8 +32,11 @@ public class TwoLiteralClause implements PickBranchingVariableHeuristic{
             }
         }
         if (currentUnassignedVars == 2) {
-            clause.setIsTwoClause();
+            clause.setIsTwoClause(true);
             clause.setVariablesInTwoClause(unassignedVariablesInClause);
+        } else {
+            clause.setIsTwoClause(false);
+            clause.setVariablesInTwoClause(new ArrayList<>());
         }
     }
 

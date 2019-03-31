@@ -32,8 +32,8 @@ public class Clause {
         return clauseVal;
     }
 
-    public void setIsTwoClause() {
-        this.isTwoClause = true;
+    public void setIsTwoClause(boolean isTwoClause) {
+        this.isTwoClause = isTwoClause;
     }
 
     public boolean isTwoClause() {

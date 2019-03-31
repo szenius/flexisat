@@ -108,7 +108,7 @@ public class CDCLSolver implements Solver {
                     }
                 }
                 //TODO: Not sure if this is most efficient place to update the two clause status.
-                clause.updateTwoClauseStatus(assignments);
+                variablePicker.updateTwoClauseStatus(assignments, clause);
             }
         }
         return true;
