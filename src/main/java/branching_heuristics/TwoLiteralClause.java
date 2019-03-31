@@ -49,7 +49,7 @@ public class TwoLiteralClause extends PickBranchingVariableHeuristic{
      */
     private int countMaxVariableInTwoLiteralClauses(Clauses clauses, Assignments assignments) {
         int maxOccurrence = 0;
-        int mostOccurredVar = -1;
+        int mostOccurredVarId = -1;
         Map<Integer, Integer> varIdToNumOccurrence = new HashMap<>();
         for (Clause clause : clauses.getClauses()) {
             if (clause.isTwoClause()) {
@@ -58,12 +58,12 @@ public class TwoLiteralClause extends PickBranchingVariableHeuristic{
                     numOccurrence++;
                     if (numOccurrence >= maxOccurrence) {
                         maxOccurrence = numOccurrence;
-                        mostOccurredVar = varId;
+                        mostOccurredVarId = varId;
                     }
                     varIdToNumOccurrence.put(varId, numOccurrence);
                 }
             }
         }
-        return mostOccurredVar;
+        return mostOccurredVarId;
     }
 }
