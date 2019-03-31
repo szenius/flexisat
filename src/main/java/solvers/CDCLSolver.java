@@ -7,6 +7,7 @@ import data_structures.*;
 import data_structures.Assignments;
 import data_structures.Clause;
 import data_structures.Clauses;
+import performance.PerformanceTester;
 
 import java.util.*;
 
@@ -38,7 +39,8 @@ public class CDCLSolver implements Solver {
 
 
     @Override
-    public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
+    public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
+                         PerformanceTester perfTester) {
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
             return true;
@@ -67,7 +69,7 @@ public class CDCLSolver implements Solver {
         if(!assignments.addAssignment(new Assignment(varId, true, decisionLevel, null))) {
             return false;
         }
-        if (solve(clauses, variables, assignments, decisionLevel + 1)) {
+        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
             return true;
         }
         // Decision level might have changed to a lower level
@@ -78,10 +80,23 @@ public class CDCLSolver implements Solver {
         if(!assignments.changeAssignment(varId, decisionLevel)) {
             return false;
         }
-        if (solve(clauses, variables, assignments, decisionLevel + 1)) {
+        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean solveWithTimer(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
+                         PerformanceTester perfTester) {
+
+        perfTester.startTimer();
+        boolean isSat = this.solve(clauses, variables, assignments, 0, perfTester);
+        perfTester.stopTimer();
+
+        perfTester.printExecutionTime();
+        perfTester.printNumPickBranchingVariablesCalled();
+        return isSat;
     }
 
     /**
@@ -121,7 +136,6 @@ public class CDCLSolver implements Solver {
         clauses.addClause(new Clause(literals));
         assignments.revertAssignments(literals);
     }
-
 
     /**
      * Get the variable assignments that caused the UNSAT conflict.
