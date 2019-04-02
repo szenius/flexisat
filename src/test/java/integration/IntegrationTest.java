@@ -33,13 +33,6 @@ public class IntegrationTest {
         }
     }
 
-    /*                "input/valid_input1.cnf",
-,
-                "input/valid_input3.cnf"
-
-     */
-
-
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return UNSAT returns UNSAT.")

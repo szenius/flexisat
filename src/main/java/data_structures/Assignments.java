@@ -30,6 +30,7 @@ public class Assignments {
         // Variable has already been assigned. We have to check if it is a conflicting assignment.
         if (assignments.containsKey(assignment.getVarId())) {
             System.out.println("This variable has already been assigned! Id =  " + assignment.getVarId());
+            System.exit(1);
             return assignments.get(assignment.getVarId()).getAssignmentValue() ==
                     assignment.getAssignmentValue();
         }
@@ -100,44 +101,53 @@ public class Assignments {
         // Find unit literal, if any
         Literal unitLiteral = null;
         List<Integer> impliedByGraphRoots = new ArrayList<>();
+        Assignment assignment;
 
-        // Check if this is a unit clause
-        for (Literal literal : clause.getLiterals()) {
-            if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                if (unitLiteral == null) {
-                    unitLiteral = literal;
+        // Clause size 1. As good as a root node.
+        if (clause.getLiterals().size() == 1) {
+            unitLiteral = clause.getLiterals().get(0);
+            if (!getUnassignedVarIds().contains(unitLiteral.getVariable().getId())) {
+                return false;
+            }
+            impliedByGraphRoots.add(unitLiteral.getVariable().getId());
+            assignment = new Assignment(unitLiteral.getVariable().getId(),
+                    !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
+        } else {
+            // Check if this is a unit clause
+            for (Literal literal : clause.getLiterals()) {
+                if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
+                    if (unitLiteral == null) {
+                        unitLiteral = literal;
+                    } else {
+                        // This is not a unit clause
+                        return false;
+                    }
                 } else {
-                    // This is not a unit clause
-                    return false;
-                }
-            } else {
-                // Variable has already been assigned. We will have to get all the variables that implied
-                // its assignment so that if this clause is a unit clause, we can have a list of all the variables that
-                // implied the literal's (the only non-assigned variable in the clause) assignment.
-                Assignment unit = assignments.get(literal.getVariable().getId());
-                // Once a literal has been assigned a value of true, we cannot do unit resolution.
-                if (literal.getValue(unit.getAssignmentValue())) {
-                    return false;
-                }
-                // The variable is a root variable itself. Add its own variable Id into the list.
-                if (unit.getImplicationGraphRoots() == null) {
-                    impliedByGraphRoots.add(literal.getVariable().getId());
-                } else {
-                    // Retrieve the entire list of root variables that implied this variable's assignment.
-                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImplicationGraphRoots();
-                    impliedByGraphRoots.addAll(rootNodes);
+                    // Variable has already been assigned. We will have to get all the variables that implied
+                    // its assignment so that if this clause is a unit clause, we can have a list of all the variables that
+                    // implied the literal's (the only non-assigned variable in the clause) assignment.
+                    Assignment unit = assignments.get(literal.getVariable().getId());
+                    // Once a literal has been assigned a value of true, we cannot do unit resolution.
+                    if (literal.getValue(unit.getAssignmentValue())) {
+                        return false;
+                    }
+                    // The variable is a root variable itself. Add its own variable Id into the list.
+                    if (unit.getImplicationGraphRoots() == null) {
+                        impliedByGraphRoots.add(literal.getVariable().getId());
+                    } else {
+                        // Retrieve the entire list of root variables that implied this variable's assignment.
+                        List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImplicationGraphRoots();
+                        impliedByGraphRoots.addAll(rootNodes);
+                    }
                 }
             }
+            if (unitLiteral == null) {
+                // Did not find any unassigned variable
+                return false;
+            }
+            assignment = new Assignment(unitLiteral.getVariable().getId(),
+                    !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
         }
-
-        if (unitLiteral == null) {
-            // Did not find any unassigned variable
-            return false;
-        }
-
-        // Update the variables that implied the assignment of this variable
-        Assignment assignment = new Assignment(unitLiteral.getVariable().getId(),
-                                            !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
 
         // Assign the literal so its value is true
         System.out.println("UNIT RESOLUTION IMPLIED assignment varid: " + unitLiteral.getVariable().getId() + " decision level = " + decisionLevel);
