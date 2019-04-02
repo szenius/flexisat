@@ -100,6 +100,8 @@ public class Assignments {
         // Find unit literal, if any
         Literal unitLiteral = null;
         List<Integer> impliedByGraphRoots = new ArrayList<>();
+
+        // Check if this is a unit clause
         for (Literal literal : clause.getLiterals()) {
             if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
                 if (unitLiteral == null) {
@@ -113,6 +115,10 @@ public class Assignments {
                 // its assignment so that if this clause is a unit clause, we can have a list of all the variables that
                 // implied the literal's (the only non-assigned variable in the clause) assignment.
                 Assignment unit = assignments.get(literal.getVariable().getId());
+                // Once a literal has been assigned a value of true, we cannot do unit resolution.
+                if (literal.getValue(unit.getAssignmentValue())) {
+                    return false;
+                }
                 // The variable is a root variable itself. Add its own variable Id into the list.
                 if (unit.getImplicationGraphRoots() == null) {
                     impliedByGraphRoots.add(literal.getVariable().getId());
@@ -135,6 +141,7 @@ public class Assignments {
 
         // Assign the literal so its value is true
         System.out.println("UNIT RESOLUTION IMPLIED assignment varid: " + unitLiteral.getVariable().getId() + " decision level = " + decisionLevel);
+        System.out.println("FROM CLAUSE = " + clause.toString());
         return addAssignment(assignment);
     }
 
@@ -225,7 +232,7 @@ public class Assignments {
         this.decisionLevelToVariables.remove(decisionLevel);
         addVarIdToDecisionLevelMap(varIdsAtDecisionLevel.get(0), decisionLevel);
 */
-        for (int i = decisionLevel + 1; i <= maxDecisionLevel; i++ ){
+        for (int i = decisionLevel ; i <= maxDecisionLevel; i++ ){
             System.out.println("Decision level = " + i);
             List<Integer> varIds = this.decisionLevelToVariables.get(i);
             for (int varId : varIds) {

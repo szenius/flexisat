@@ -28,9 +28,17 @@ public class IntegrationTest {
         for (String testInput : satTestInputs) {
             boolean sat = runSatSolverTest(testInput);
             assertTrue(sat);
+            System.out.println();
+            System.out.println();
         }
     }
-    
+
+    /*                "input/valid_input1.cnf",
+,
+                "input/valid_input3.cnf"
+
+     */
+
 
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +

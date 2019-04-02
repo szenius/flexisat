@@ -64,6 +64,7 @@ public class CDCLSolver implements Solver {
             while (!success) {
                 // Run unit propagation
                 success = performUnitResolution(clauses, variables, assignments, decisionLevel);
+
                 // Conflict analysis already ran. Now need to get the new decision level.
                 if (!success) {
                     decisionLevel = assignments.getHighestDecisionLevel();
@@ -77,11 +78,19 @@ public class CDCLSolver implements Solver {
                     // DEBUGGING
                 }
             }
+            /*
+            if (assignments.getHighestDecisionLevel() == 0 && assignments.getVariablesInDecisionLevel(0) == null) {
+                return false;
+            }*/
             // DEBUGGING
             printStateCheck();
             // DEBUGGING
 
-            decisionLevel++;
+            if (decisionLevel == 0 && assignments.getVariablesInDecisionLevel(decisionLevel) == null ) {
+                decisionLevel = 0;
+            } else {
+                decisionLevel++;
+            }
 
             if (decisionLevel > variables.size()) {
                 // DEBUGGING
@@ -92,7 +101,12 @@ public class CDCLSolver implements Solver {
                 // DEBUGGING
             }
         }
-        return true;
+        // FINAL CHECK
+        if (clauses.checkVALID(assignments)) {
+            return true;
+        } else {
+            return false;
+        }
     };
 
 
@@ -118,7 +132,7 @@ public class CDCLSolver implements Solver {
             List<Integer> varsInDecisionLevel = assignments.getVariablesInDecisionLevel(i);
             if (varsInDecisionLevel == null){
                 System.out.println("NULL WEIRD.");
-                System.exit(1);
+                //System.exit(1);
             } else {
                 for (Integer var : varsInDecisionLevel) {
                     System.out.print(var + " ");
