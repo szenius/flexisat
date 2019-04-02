@@ -7,6 +7,7 @@ import data_structures.Clauses;
 import performance.PerformanceTester;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -52,21 +53,43 @@ public class CDCLSolver implements Solver {
             // Pick branching variable to assign
             int pickedVariableId = pickBranchingVariable(assignments, perfTester);
             Assignment newNode = new Assignment(pickedVariableId, true, decisionLevel, null);
-            decisionLevel++;
+
             if (!assignments.addAssignment(newNode)) {
                 System.out.println("NOT POSSIBLE.");
                 return false;
             }
-            System.out.println("Assigned variable " + pickedVariableId + " at " + decisionLevel + "!");
+            System.out.println("PICK VARIABLE: Assigned variable " + pickedVariableId + " at " + newNode.getDecisionLevel() + "!");
 
-            // Run unit propagation
-            boolean success = performUnitResolution(clauses, variables, assignments, decisionLevel);
-            // Conflict analysis already ran. Now need to get the new decision level.
-            if (!success) {
-                decisionLevel = assignments.getHighestDecisionLevel();
-                if (decisionLevel < 0 ) {
-                    return false;
+            boolean success = false;
+            while (!success) {
+                // Run unit propagation
+                success = performUnitResolution(clauses, variables, assignments, decisionLevel);
+                // Conflict analysis already ran. Now need to get the new decision level.
+                if (!success) {
+                    decisionLevel = assignments.getHighestDecisionLevel();
+                    //TODO: definitely wrong here.
+                    if (decisionLevel < 0 ) {
+                        return false;
+                    }
+
+                    // DEBUGGING
+                    printStateCheck();
+                    // DEBUGGING
                 }
+            }
+            // DEBUGGING
+            printStateCheck();
+            // DEBUGGING
+
+            decisionLevel++;
+
+            if (decisionLevel > variables.size()) {
+                // DEBUGGING
+                System.out.println("************Error in implementation.*********** It is not possible for the decision level to be higher " +
+                        "than the number of variables.");
+                printStateCheck();
+                System.exit(1);
+                // DEBUGGING
             }
         }
         return true;
@@ -83,6 +106,31 @@ public class CDCLSolver implements Solver {
         perfTester.printExecutionTime();
         perfTester.printNumPickBranchingVariablesCalled();
         return isSat;
+    }
+
+    /*
+     * DEBUG. PRINTS ENTIRE STATE.
+     */
+    private void printStateCheck() {
+        System.out.println("====== STATE CHECK=====");
+        for (int i = 0 ; i <= assignments.getHighestDecisionLevel(); i++) {
+            System.out.println("Decision Level = " + i);
+            List<Integer> varsInDecisionLevel = assignments.getVariablesInDecisionLevel(i);
+            if (varsInDecisionLevel == null){
+                System.out.println("NULL WEIRD.");
+                System.exit(1);
+            } else {
+                for (Integer var : varsInDecisionLevel) {
+                    System.out.print(var + " ");
+                    if (assignments.getAssignment(var) == null) {
+                        System.out.println("ERROR. " + var + "'s assignment does not exist.");
+                        System.exit(1);
+                    }
+                }
+                System.out.println();
+            }
+        }
+        System.out.println("~~~~~~~ STATE CHECK END ~~~~~~~~");
     }
 
     /**
@@ -129,10 +177,21 @@ public class CDCLSolver implements Solver {
 
         int lastAssignedId = assignments.getLastAssignment();
 
-        List<Integer> variablesThatCausedUNSAT = getVariablesThatImpliedUNSATAssignment(clauses, assignments, lastAssignedId);
+        System.out.println("Before revert: Highest decision level = " + assignments.getHighestDecisionLevel());
+        Set<Integer> variablesThatCausedUNSAT = getVariablesThatImpliedUNSATAssignment(clauses, assignments, lastAssignedId);
         List<Literal> literals = createNewClause(variablesThatCausedUNSAT, assignments, variables);
+
+        // DEBUG
+        System.out.println("::::::CONFLICT ANALYSIS new clause added");
+        for (Literal literal: literals) {
+            System.out.print(literal.toString());
+        }
+        System.out.println();
+        // DEBUG
+
         clauses.addClause(new Clause(literals));
         assignments.revertAssignments(literals);
+        System.out.println("After revert: Highest decision level = " + assignments.getHighestDecisionLevel());
         return assignments.getHighestDecisionLevel();
     }
 
@@ -152,25 +211,46 @@ public class CDCLSolver implements Solver {
      * @param unSatVarId
      * @return
      */
-    private List<Integer> getVariablesThatImpliedUNSATAssignment(Clauses clauses, Assignments assignments, Integer unSatVarId) {
+    private Set<Integer> getVariablesThatImpliedUNSATAssignment(Clauses clauses, Assignments assignments, Integer unSatVarId) {
         Assignment conflictVariableUnit = assignments.getAssignment(unSatVarId);
         if (conflictVariableUnit == null ){
             System.out.println("NULL conflict variable unit = " + unSatVarId);
         }
         List<Integer> affectedVariables = conflictVariableUnit.getImplicationGraphRoots();
-        return affectedVariables;
+
+        // DEBUG::::
+        System.out.println("::::::CONFLICT ANALYSIS:::::: root variables that implied UNSAT");
+        for (int varId: affectedVariables) {
+            System.out.print(varId + " ");
+        }
+        System.out.println();
+        // DEBUG::::
+
+        Set<Integer> affectedVariablesDedupped = new HashSet<>();
+        for (Integer varIds : affectedVariables) {
+            affectedVariablesDedupped.add(varIds);
+        }
+
+        return affectedVariablesDedupped;
     }
 
 
-    private List<Literal> createNewClause(List<Integer> affectedVariables,
+    private List<Literal> createNewClause(Set<Integer> affectedVariables,
                                           Assignments assignments, Set<Variable> variables) {
         List<Literal> clause = new ArrayList<>();
+
+        System.out.println(":::::::CONFLICT ANALYSIS CREATE NEW CLAUSE:::::::");
+
         for (Integer affectedVarId : affectedVariables) {
             Assignment currentAssignment = assignments.getAssignment(affectedVarId);
             if (variables.contains(new Variable(affectedVarId))){
-                clause.add(new Literal(new Variable(affectedVarId), !currentAssignment.getAssignmentValue()));
+                Literal literalToAdd = new Literal(new Variable(affectedVarId), currentAssignment.getAssignmentValue());
+                System.out.println("Adding literal = " + literalToAdd);
+                clause.add(literalToAdd);
             }
         }
+        System.out.println(":::::::CONFLICT ANALYSIS CREATE NEW CLAUSE:::::::");
+
         return clause;
     }
 }

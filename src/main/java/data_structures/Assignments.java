@@ -134,6 +134,7 @@ public class Assignments {
                                             !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
 
         // Assign the literal so its value is true
+        System.out.println("UNIT RESOLUTION IMPLIED assignment varid: " + unitLiteral.getVariable().getId() + " decision level = " + decisionLevel);
         return addAssignment(assignment);
     }
 
@@ -143,7 +144,7 @@ public class Assignments {
     public Set<Integer> getUnassignedVarIds() {
         Set<Integer> result = new HashSet<>();
         for (Variable variable : variables) {
-            if (!assignments.containsKey(variable.getId())) {
+            if (!this.assignments.containsKey(variable.getId())) {
                 result.add(variable.getId());
             }
         }
@@ -207,19 +208,30 @@ public class Assignments {
     }
 
     /**
-     * Removes all assignments above a particular decision level.
+     * Removes all assignments >= particular decision level.
+     * NOTE: !!!Excluding the root!!! => We will leave the root there.
      * @param decisionLevel
      */
     public void removeAssignmentsAboveDecisionLevel(int decisionLevel) {
         int maxDecisionLevel = getHighestDecisionLevel();
         System.out.println("Max decision level = " + maxDecisionLevel);
-        for (int i = decisionLevel; i <= maxDecisionLevel; i++ ){
+
+        // At decision level, we will remove every assignment other than the first one. IE: the picked variable
+        /*
+        List<Integer> varIdsAtDecisionLevel = this.decisionLevelToVariables.get(decisionLevel);
+        for (int i = 1 ; i < varIdsAtDecisionLevel.size(); i++) {
+            this.assignments.remove(i);
+        }
+        this.decisionLevelToVariables.remove(decisionLevel);
+        addVarIdToDecisionLevelMap(varIdsAtDecisionLevel.get(0), decisionLevel);
+*/
+        for (int i = decisionLevel + 1; i <= maxDecisionLevel; i++ ){
             System.out.println("Decision level = " + i);
             List<Integer> varIds = this.decisionLevelToVariables.get(i);
             for (int varId : varIds) {
                 this.assignments.remove(varId);
             }
-            this.decisionLevelToVariables.remove(decisionLevel);
+            this.decisionLevelToVariables.remove(i);
         }
     }
 }
