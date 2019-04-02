@@ -6,16 +6,17 @@ import java.util.*;
  * TODO: make assignment and decision level the same variable so we don't have to maintain two equivalent maps
  */
 public class Assignments {
-    private Set<Integer> varIds;
+    private Set<Variable> variables;
     private Map<Integer, Assignment> assignments;
     // This map is for quick access to each variable's decision level
     private Map<Integer, List<Integer>> decisionLevelToVariables;
 
-    public Assignments(Set<Integer> varIds) {
-        this.varIds = varIds;
+    public Assignments(Set<Variable> variables) {
+        this.variables = variables;
         this.assignments = new HashMap<>();
         this.decisionLevelToVariables = new HashMap<>();
     }
+
 
     /**
      * Tries to add an assignment to a variable by its variable ID.
@@ -28,14 +29,16 @@ public class Assignments {
                 assignment.getDecisionLevel() + "=" + String.valueOf(assignment.getAssignmentValue()));
         // Variable has already been assigned. We have to check if it is a conflicting assignment.
         if (assignments.containsKey(assignment.getVarId())) {
+            System.out.println("This variable has already been assigned! Id =  " + assignment.getVarId());
             return assignments.get(assignment.getVarId()).getAssignmentValue() ==
                     assignment.getAssignmentValue();
         }
 
-        assignments.put(assignment.getVarId(), assignment);
+        this.assignments.put(assignment.getVarId(), assignment);
         // We will add the variable to decisionLevelToVariable to 'cache' it at the particular decision level key.
         addVarIdToDecisionLevelMap(assignment.getVarId(), assignment.getDecisionLevel());
-
+        System.out.println("Assignment: Added assignment of " + assignment.getVarId() + "@" +
+                assignment.getDecisionLevel() + "=" + String.valueOf(assignment.getAssignmentValue()));
         return true;
     }
 
@@ -139,9 +142,9 @@ public class Assignments {
      */
     public Set<Integer> getUnassignedVarIds() {
         Set<Integer> result = new HashSet<>();
-        for (Integer id : varIds) {
-            if (!assignments.containsKey(id)) {
-                result.add(id);
+        for (Variable variable : variables) {
+            if (!assignments.containsKey(variable.getId())) {
+                result.add(variable.getId());
             }
         }
         return result;
@@ -159,7 +162,7 @@ public class Assignments {
     }
 
     public Assignment getAssignment(int id) {
-        return assignments.get(id);
+        return this.assignments.get(id);
     }
 
     public int getLastAssignment() {
@@ -167,6 +170,15 @@ public class Assignments {
         // the list in each decisionLevelToVariable map's decision level is updated sequentially.
         int highestDecisionLevel = getHighestDecisionLevel();
         List<Integer> variablesInHighestDecisionLevel = decisionLevelToVariables.get(highestDecisionLevel);
+
+        //DEBUG :::::
+        System.out.print("Variables in highest decision level " + highestDecisionLevel + " = " );
+        for (int varID : variablesInHighestDecisionLevel) {
+            System.out.print(varID + " ");
+        }
+        System.out.println();
+        System.out.println("==================================");
+
         // Getting the last element in the list
         return variablesInHighestDecisionLevel.get(variablesInHighestDecisionLevel.size() - 1);
     }

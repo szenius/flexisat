@@ -14,61 +14,70 @@ import java.util.Set;
  * TODO: add conflict analysis
  */
 public class CDCLSolver implements Solver {
+    Clauses clauses;
+    Set<Variable> variables;
+    Assignments assignments;
+
+
+    public CDCLSolver(Clauses clauses, Set<Variable> variables) {
+        this.clauses = clauses;
+        this.variables = variables;
+        this.assignments = new Assignments(variables);
+    }
 
     @Override
-    public boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
-                         PerformanceTester perfTester) {
+    public boolean solve(PerformanceTester perfTester) {
+        System.out.println("Running CDCLSolver...");
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
+            System.out.println("Found empty formula!");
             return true;
         }
 
         // Check if there is any empty clause
         if (clauses.hasEmptyClause()) {
+            System.out.println("Found empty clause!");
             return false;
         }
 
         // Perform unit resolution
-        int unitResolutionDecisionLevel = decisionLevel == 0 ? decisionLevel : decisionLevel - 1;
-        if (!performUnitResolution(clauses, variables, assignments, unitResolutionDecisionLevel)) {
-            // Conflict resolution should have happened
+        int decisionLevel = 0;
+
+        if (!performUnitResolution(clauses, variables, assignments, decisionLevel)) {
+            System.out.println("Conflict from Unit Propagation at decision level " + decisionLevel + "!");
             return false;
         }
 
-        // Check if any more variables to assign
-        if (assignments.getUnassignedVarIds().isEmpty()) {
-            return true;
-        }
+        while (!isAllVariablesAssigned(assignments)) {
+            // Pick branching variable to assign
+            int pickedVariableId = pickBranchingVariable(assignments, perfTester);
+            Assignment newNode = new Assignment(pickedVariableId, true, decisionLevel, null);
+            decisionLevel++;
+            if (!assignments.addAssignment(newNode)) {
+                System.out.println("NOT POSSIBLE.");
+                return false;
+            }
+            System.out.println("Assigned variable " + pickedVariableId + " at " + decisionLevel + "!");
 
-        // Pick a new variable to assign
-        int varId = pickBranchingVariable(assignments, perfTester);
-        System.out.println("Solver: Try assigning " + varId + " to TRUE");
-        if(!assignments.addAssignment(new Assignment(varId, true, decisionLevel, null))) {
-            return false;
+            // Run unit propagation
+            boolean success = performUnitResolution(clauses, variables, assignments, decisionLevel);
+            // Conflict analysis already ran. Now need to get the new decision level.
+            if (!success) {
+                decisionLevel = assignments.getHighestDecisionLevel();
+                if (decisionLevel < 0 ) {
+                    return false;
+                }
+            }
         }
-        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
-            return true;
-        }
-        // Decision level might have changed to a lower level
-        decisionLevel = assignments.getHighestDecisionLevel();
+        return true;
+    };
 
-        // Change assignment of picked variable
-        System.out.println("Solver: Try assigning " + varId + " to FALSE");
-        if(!assignments.changeAssignment(varId, decisionLevel)) {
-            return false;
-        }
-        if (solve(clauses, variables, assignments, decisionLevel + 1, perfTester)) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
-    public boolean solveWithTimer(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
-                         PerformanceTester perfTester) {
+    public boolean solveWithTimer(PerformanceTester perfTester) {
 
         perfTester.startTimer();
-        boolean isSat = this.solve(clauses, variables, assignments, 0, perfTester);
+        boolean isSat = this.solve(perfTester);
         perfTester.stopTimer();
 
         perfTester.printExecutionTime();
@@ -95,7 +104,8 @@ public class CDCLSolver implements Solver {
                 if (assignments.assignUnitClause(clause, decisionLevel)) {
                     performedUnitResolution = true;
                     if (!clauses.checkVALID(assignments)) {
-                        conflictResolution(clauses, assignments, variables);
+                        System.out.println("==== Running conflict analysis at decision level = " + decisionLevel + "====");
+                        conflictAnalysis(clauses, assignments, variables);
                         return false;
                     }
                 }
@@ -104,12 +114,26 @@ public class CDCLSolver implements Solver {
         return true;
     }
 
-    private void conflictResolution(Clauses clauses, Assignments assignments, Set<Variable> variables) {
+    private boolean isAllVariablesAssigned(Assignments assignments) {
+        return (assignments.getUnassignedVarIds().size() == 0);
+    }
+
+    /**
+     * Conflict Analysis will use the root heuristics to get the root variables.
+     * It will add the root variables clause that implied the assignments that led to the UNSAT assignment.
+     * @param clauses
+     * @param assignments
+     * @param variables
+     */
+    private int conflictAnalysis(Clauses clauses, Assignments assignments, Set<Variable> variables) {
+
         int lastAssignedId = assignments.getLastAssignment();
+
         List<Integer> variablesThatCausedUNSAT = getVariablesThatImpliedUNSATAssignment(clauses, assignments, lastAssignedId);
         List<Literal> literals = createNewClause(variablesThatCausedUNSAT, assignments, variables);
         clauses.addClause(new Clause(literals));
         assignments.revertAssignments(literals);
+        return assignments.getHighestDecisionLevel();
     }
 
 
@@ -130,6 +154,9 @@ public class CDCLSolver implements Solver {
      */
     private List<Integer> getVariablesThatImpliedUNSATAssignment(Clauses clauses, Assignments assignments, Integer unSatVarId) {
         Assignment conflictVariableUnit = assignments.getAssignment(unSatVarId);
+        if (conflictVariableUnit == null ){
+            System.out.println("NULL conflict variable unit = " + unSatVarId);
+        }
         List<Integer> affectedVariables = conflictVariableUnit.getImplicationGraphRoots();
         return affectedVariables;
     }

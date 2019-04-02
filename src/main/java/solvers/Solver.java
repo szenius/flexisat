@@ -8,10 +8,8 @@ import performance.PerformanceTester;
 import java.util.Set;
 
 public interface Solver {
-    boolean solveWithTimer(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
-                           PerformanceTester perfTester);
+    boolean solveWithTimer(PerformanceTester perfTester);
 
-    boolean solve(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel,
-                  PerformanceTester perfTester);
+    boolean solve(PerformanceTester perfTester);
 
 }

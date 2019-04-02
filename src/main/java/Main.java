@@ -15,7 +15,6 @@ class Main {
         parser.parse(filename);
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
-        Assignments assignments = new Assignments(parser.getVarIds());
 
         // Run solver v1
 //        PerformanceTester perfTester = new PerformanceTester();
