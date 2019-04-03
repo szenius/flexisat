@@ -38,7 +38,9 @@ public class IntegrationTest {
             "are supposed to return UNSAT returns UNSAT.")
     void unsatCDCLSolverTest() {
         String[] unsatTestInputs = {
-                "input/unsat_input1.cnf"};
+                "input/unsat_input1.cnf",
+                "input/unsat_input2.cnf",
+                "input/unsat_input3.cnf"};
         for (String testInput : unsatTestInputs) {
             boolean sat = runSatSolverTest(testInput);
             assertFalse(sat);

@@ -44,7 +44,7 @@ public class CDCLSolver implements Solver {
         // Perform unit resolution
         int decisionLevel = 0;
 
-        if (!performUnitResolution(clauses, variables, assignments, decisionLevel)) {
+        if (performUnitResolution(clauses, variables, assignments, decisionLevel) == unitResolutionResults.FALSE) {
             System.out.println("Conflict from Unit Propagation at decision level " + decisionLevel + "!");
             return false;
         }
@@ -55,7 +55,7 @@ public class CDCLSolver implements Solver {
             Assignment newNode = new Assignment(pickedVariableId, true, decisionLevel, null);
 
             if (!assignments.addAssignment(newNode)) {
-                System.out.println("NOT POSSIBLE.");
+                System.out.println("UNSAT!!! NOT POSSIBLE.");
                 return false;
             }
             System.out.println("PICK VARIABLE: Assigned variable " + pickedVariableId + " at " + newNode.getDecisionLevel() + "!");
@@ -63,7 +63,22 @@ public class CDCLSolver implements Solver {
             boolean success = false;
             while (!success) {
                 // Run unit propagation
-                success = performUnitResolution(clauses, variables, assignments, decisionLevel);
+                unitResolutionResults results = performUnitResolution(clauses, variables, assignments, decisionLevel);
+                switch (results) {
+                    case UNSAT:
+                        return false;
+                    case TRUE:
+                        success = true;
+                        break;
+                    case FALSE:
+                        success = false;
+                        break;
+                    default:
+                        System.out.println("Not possible.");
+                        System.exit(1);
+                }
+
+                // success = performUnitResolution(clauses, variables, assignments, decisionLevel);
 
                 // Conflict analysis already ran. Now need to get the new decision level.
                 if (!success) {
@@ -147,6 +162,10 @@ public class CDCLSolver implements Solver {
         System.out.println("~~~~~~~ STATE CHECK END ~~~~~~~~");
     }
 
+    enum unitResolutionResults {
+        UNSAT, TRUE, FALSE
+    }
+
     /**
      * Tries to perform unit resolution for whichever unit clause found.
      * After performing unit resolution, check if the assignment is satisfiable. If not, revert the assignment.
@@ -157,7 +176,7 @@ public class CDCLSolver implements Solver {
      * @return True if unit resolution was done and the resulting assignment is satisfiable,
      *          OR if unit resolution was not done at all. Otherwise return False.
      */
-    private boolean performUnitResolution(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
+    private unitResolutionResults performUnitResolution(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
         boolean performedUnitResolution = true;
         while (performedUnitResolution) {
             performedUnitResolution = false;
@@ -167,13 +186,19 @@ public class CDCLSolver implements Solver {
                     performedUnitResolution = true;
                     if (!clauses.checkVALID(assignments)) {
                         System.out.println("==== Running conflict analysis at decision level = " + decisionLevel + "====");
+                        // Case of UNSAT.
+                        // If clause only consists of 1 literal and still invalid. Then UNSAT.
+                        if (clause.getLiterals().size() == 1) {
+                            return unitResolutionResults.UNSAT;
+                        }
+
                         conflictAnalysis(clauses, assignments, variables);
-                        return false;
+                        return unitResolutionResults.FALSE;
                     }
                 }
             }
         }
-        return true;
+        return unitResolutionResults.TRUE;
     }
 
     private boolean isAllVariablesAssigned(Assignments assignments) {
