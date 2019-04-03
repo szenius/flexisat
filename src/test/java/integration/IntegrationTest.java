@@ -46,13 +46,7 @@ public class IntegrationTest {
             assertFalse(sat);
         }
     }
-
-    /*
-                    "input/unsat_input2.cnf",
-                "input/unsat_input3.cnf"
-     */
-
-
+    
     boolean runSatSolverTest(String testInput) {
         Parser parser = new Parser();
         parser.parse(testInput);
