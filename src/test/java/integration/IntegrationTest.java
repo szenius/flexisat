@@ -46,7 +46,7 @@ public class IntegrationTest {
             assertFalse(sat);
         }
     }
-    
+
     boolean runSatSolverTest(String testInput) {
         Parser parser = new Parser();
         parser.parse(testInput);

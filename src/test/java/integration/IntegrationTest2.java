@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegrationTest2 {
 
+    /*
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return VALID returns VALID.")
@@ -48,4 +49,5 @@ public class IntegrationTest2 {
         CDCLSolver2 solver = new CDCLSolver2(clauses, variables);
         return solver.solve();
     }
+    */
 }
