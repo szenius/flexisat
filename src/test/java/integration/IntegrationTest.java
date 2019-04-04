@@ -22,9 +22,7 @@ public class IntegrationTest {
             "are supposed to return SAT returns SAT.")
     void satCDCLSolverTest() {
         String[] satTestInputs = {
-                "input/valid_input1.cnf",
-                "input/valid_input2.cnf",
-                "input/valid_input3.cnf"};
+                "input/150var-200.cnf"};
         for (String testInput : satTestInputs) {
             boolean sat = runSatSolverTest(testInput);
             assertTrue(sat);
@@ -32,6 +30,12 @@ public class IntegrationTest {
             System.out.println();
         }
     }
+
+    /*
+    ,
+                "input/valid_input2.cnf",
+                "input/valid_input3.cnf"
+     */
 
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
