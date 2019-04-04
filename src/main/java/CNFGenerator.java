@@ -27,7 +27,7 @@ public class CNFGenerator {
                 writer.write(firstLine);
                 writer.write(secondLine);
                 for (int i = 0; i < Integer.parseInt(numClauses); i++) {
-                    String line = generateClause(Integer.parseInt(numVariables));
+                    String line = generate3CNFClause(Integer.parseInt(numVariables));
                     writer.write(line);
                 }
                 writer.close();
@@ -40,7 +40,13 @@ public class CNFGenerator {
         }
     }
 
-    private static String generateClause(int numVariables) {
+    /**
+     * This function generates a string line of clause randomly with equal probabilities across the
+     * total number of variables and a 0.5% chance that the literal will be negated.
+     * @param numVariables
+     * @return
+     */
+    private static String generate3CNFClause(int numVariables) {
         StringBuilder clause = new StringBuilder();
         for (int i = 0 ; i < 3 ; i++) {
             int variableToChoose = (int) (Math.random() * numVariables + 1);
