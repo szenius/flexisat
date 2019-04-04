@@ -58,7 +58,7 @@ public class CNFGenerator {
                 clause.append(Integer.toString(variableToChoose));
             }
             if (i == 2) {
-                clause.append("\n");
+                clause.append(" 0\n");
             } else {
                 clause.append(" ");
             }
