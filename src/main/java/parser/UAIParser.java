@@ -3,14 +3,12 @@ package parser;
 import data_structures.BayesianClique;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class UAIParser {
 
     List<BayesianClique> cliques;
+    Map<Integer, Integer> queryValues;
 
     public void parse(String filePath) {
         File file = new File(filePath);
@@ -106,4 +104,46 @@ public class UAIParser {
             System.exit(1);
         }
     }
+
+    /**
+     * Parses the evidence (query) file.
+     * @param filePath
+     */
+    public void parseEvidence(String filePath) {
+        File file = new File(filePath);
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        InputStreamReader isr = new InputStreamReader(fis);
+        BufferedReader br = new BufferedReader(isr);
+
+        this.queryValues = new HashMap<>();
+        String line;
+        try {
+            line = br.readLine();
+            String [] values = line.split(" ");
+            int numObservedVariables = Integer.parseInt(values[0]);
+            if (values.length != 2 * numObservedVariables + 1) {
+                System.out.println("Evidence file has wrong format. Number of variable entries in the file is = " + values.length);
+                System.exit(1);
+            }
+            for (int i = 0 ; i < numObservedVariables ; i++) {
+                this.queryValues.put(Integer.parseInt(values[i * 2 + 1]), Integer.parseInt(values[i * 2 + 2]));
+            }
+            br.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    public List<BayesianClique> getCliques() {
+        return this.cliques;
+    }
+
 }
