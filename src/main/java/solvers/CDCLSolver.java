@@ -3,6 +3,7 @@ package solvers;
 import branching_heuristics.PickBranchingVariableHeuristic;
 import branching_heuristics.RandomVariable;
 import branching_heuristics.TwoLiteralClause;
+import branching_heuristics.VSIDS;
 import data_structures.*;
 import data_structures.Assignments;
 import data_structures.Clause;
@@ -17,7 +18,7 @@ import java.util.*;
 public class CDCLSolver implements Solver {
 
     public enum PickBranchingVariableHeuristics{
-        TWO_LITERALS_CLAUSE, RANDOM
+        TWO_LITERALS_CLAUSE, VSIDS, RANDOM
     }
 
     private PickBranchingVariableHeuristic variablePicker;
@@ -29,6 +30,9 @@ public class CDCLSolver implements Solver {
                 break;
             case TWO_LITERALS_CLAUSE:
                 variablePicker = new TwoLiteralClause();
+                break;
+            case VSIDS:
+                variablePicker = new VSIDS();
                 break;
             // We'll default to the random heuristic for now.
             default:
