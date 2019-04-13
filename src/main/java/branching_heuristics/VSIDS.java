@@ -9,6 +9,8 @@ import java.util.Set;
 
 /**
  * This is an implementation of Chaff's VSIDS algorithm.
+ * Activities are bumped for all variables in a newly learnt clause.
+ * Decay occurs after every conflicts.
  */
 public class VSIDS extends PickBranchingVariableHeuristic {
 
