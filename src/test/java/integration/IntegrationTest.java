@@ -21,40 +21,41 @@ public class IntegrationTest {
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return SAT returns SAT.")
     void satCDCLSolverTest() {
-        Solver solver = new CDCLSolver();
         String[] satTestInputs = {
-                "input/sat_input1.cnf",
-                "input/sat_input2.cnf",
-                "input/sat_input3.cnf"};
+                "input/valid_input1.cnf",
+                "input/valid_input2.cnf",
+                "input/valid_input3.cnf"};
         for (String testInput : satTestInputs) {
-            boolean sat = runSatSolverTest(testInput, solver);
+            boolean sat = runSatSolverTest(testInput);
             assertTrue(sat);
+            System.out.println();
+            System.out.println();
         }
     }
 
+    
     @Test
     @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
             "are supposed to return UNSAT returns UNSAT.")
     void unsatCDCLSolverTest() {
-        Solver solver = new CDCLSolver();
         String[] unsatTestInputs = {
                 "input/unsat_input1.cnf",
                 "input/unsat_input2.cnf",
                 "input/unsat_input3.cnf"};
         for (String testInput : unsatTestInputs) {
-            boolean sat = runSatSolverTest(testInput, solver);
+            boolean sat = runSatSolverTest(testInput);
             assertFalse(sat);
         }
     }
 
-    boolean runSatSolverTest(String testInput, Solver solver) {
+    boolean runSatSolverTest(String testInput) {
         Parser parser = new Parser();
         parser.parse(testInput);
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
-        Assignments assignments = new Assignments(parser.getVarIds());
+        Solver solver = new CDCLSolver(clauses, variables);
         PerformanceTester perfTester = new PerformanceTester();
 
-        return solver.solveWithTimer(clauses, variables, assignments, 0, perfTester);
+        return solver.solveWithTimer(perfTester);
     }
 }

@@ -6,16 +6,17 @@ import java.util.*;
  * TODO: make assignment and decision level the same variable so we don't have to maintain two equivalent maps
  */
 public class Assignments {
-    private Set<Integer> varIds;
+    private Set<Variable> variables;
     private Map<Integer, Assignment> assignments;
     // This map is for quick access to each variable's decision level
     private Map<Integer, List<Integer>> decisionLevelToVariables;
 
-    public Assignments(Set<Integer> varIds) {
-        this.varIds = varIds;
+    public Assignments(Set<Variable> variables) {
+        this.variables = variables;
         this.assignments = new HashMap<>();
         this.decisionLevelToVariables = new HashMap<>();
     }
+
 
     /**
      * Tries to add an assignment to a variable by its variable ID.
@@ -28,14 +29,17 @@ public class Assignments {
                 assignment.getDecisionLevel() + "=" + String.valueOf(assignment.getAssignmentValue()));
         // Variable has already been assigned. We have to check if it is a conflicting assignment.
         if (assignments.containsKey(assignment.getVarId())) {
+            System.out.println("This variable has already been assigned! Id =  " + assignment.getVarId());
+            System.exit(1);
             return assignments.get(assignment.getVarId()).getAssignmentValue() ==
                     assignment.getAssignmentValue();
         }
 
-        assignments.put(assignment.getVarId(), assignment);
+        this.assignments.put(assignment.getVarId(), assignment);
         // We will add the variable to decisionLevelToVariable to 'cache' it at the particular decision level key.
         addVarIdToDecisionLevelMap(assignment.getVarId(), assignment.getDecisionLevel());
-
+        System.out.println("Assignment: Added assignment of " + assignment.getVarId() + "@" +
+                assignment.getDecisionLevel() + "=" + String.valueOf(assignment.getAssignmentValue()));
         return true;
     }
 
@@ -97,40 +101,57 @@ public class Assignments {
         // Find unit literal, if any
         Literal unitLiteral = null;
         List<Integer> impliedByGraphRoots = new ArrayList<>();
-        for (Literal literal : clause.getLiterals()) {
-            if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                if (unitLiteral == null) {
-                    unitLiteral = literal;
+        Assignment assignment;
+
+        // Clause size 1. As good as a root node.
+        if (clause.getLiterals().size() == 1) {
+            unitLiteral = clause.getLiterals().get(0);
+            if (!getUnassignedVarIds().contains(unitLiteral.getVariable().getId())) {
+                return false;
+            }
+            impliedByGraphRoots.add(unitLiteral.getVariable().getId());
+            assignment = new Assignment(unitLiteral.getVariable().getId(),
+                    !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
+        } else {
+            // Check if this is a unit clause
+            for (Literal literal : clause.getLiterals()) {
+                if (getUnassignedVarIds().contains(literal.getVariable().getId())) {
+                    if (unitLiteral == null) {
+                        unitLiteral = literal;
+                    } else {
+                        // This is not a unit clause
+                        return false;
+                    }
                 } else {
-                    // This is not a unit clause
-                    return false;
-                }
-            } else {
-                // Variable has already been assigned. We will have to get all the variables that implied
-                // its assignment so that if this clause is a unit clause, we can have a list of all the variables that
-                // implied the literal's (the only non-assigned variable in the clause) assignment.
-                Assignment unit = assignments.get(literal.getVariable().getId());
-                // The variable is a root variable itself. Add its own variable Id into the list.
-                if (unit.getImplicationGraphRoots() == null) {
-                    impliedByGraphRoots.add(literal.getVariable().getId());
-                } else {
-                    // Retrieve the entire list of root variables that implied this variable's assignment.
-                    List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImplicationGraphRoots();
-                    impliedByGraphRoots.addAll(rootNodes);
+                    // Variable has already been assigned. We will have to get all the variables that implied
+                    // its assignment so that if this clause is a unit clause, we can have a list of all the variables that
+                    // implied the literal's (the only non-assigned variable in the clause) assignment.
+                    Assignment unit = assignments.get(literal.getVariable().getId());
+                    // Once a literal has been assigned a value of true, we cannot do unit resolution.
+                    if (literal.getValue(unit.getAssignmentValue())) {
+                        return false;
+                    }
+                    // The variable is a root variable itself. Add its own variable Id into the list.
+                    if (unit.getImplicationGraphRoots() == null) {
+                        impliedByGraphRoots.add(literal.getVariable().getId());
+                    } else {
+                        // Retrieve the entire list of root variables that implied this variable's assignment.
+                        List<Integer> rootNodes = assignments.get(literal.getVariable().getId()).getImplicationGraphRoots();
+                        impliedByGraphRoots.addAll(rootNodes);
+                    }
                 }
             }
+            if (unitLiteral == null) {
+                // Did not find any unassigned variable
+                return false;
+            }
+            assignment = new Assignment(unitLiteral.getVariable().getId(),
+                    !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
         }
-
-        if (unitLiteral == null) {
-            // Did not find any unassigned variable
-            return false;
-        }
-
-        // Update the variables that implied the assignment of this variable
-        Assignment assignment = new Assignment(unitLiteral.getVariable().getId(),
-                                            !unitLiteral.isNegated(), decisionLevel, impliedByGraphRoots);
 
         // Assign the literal so its value is true
+        System.out.println("UNIT RESOLUTION IMPLIED assignment varid: " + unitLiteral.getVariable().getId() + " decision level = " + decisionLevel);
+        System.out.println("FROM CLAUSE = " + clause.toString());
         return addAssignment(assignment);
     }
 
@@ -139,9 +160,9 @@ public class Assignments {
      */
     public Set<Integer> getUnassignedVarIds() {
         Set<Integer> result = new HashSet<>();
-        for (Integer id : varIds) {
-            if (!assignments.containsKey(id)) {
-                result.add(id);
+        for (Variable variable : variables) {
+            if (!this.assignments.containsKey(variable.getId())) {
+                result.add(variable.getId());
             }
         }
         return result;
@@ -159,7 +180,7 @@ public class Assignments {
     }
 
     public Assignment getAssignment(int id) {
-        return assignments.get(id);
+        return this.assignments.get(id);
     }
 
     public int getLastAssignment() {
@@ -167,6 +188,15 @@ public class Assignments {
         // the list in each decisionLevelToVariable map's decision level is updated sequentially.
         int highestDecisionLevel = getHighestDecisionLevel();
         List<Integer> variablesInHighestDecisionLevel = decisionLevelToVariables.get(highestDecisionLevel);
+
+        //DEBUG :::::
+        System.out.print("Variables in highest decision level " + highestDecisionLevel + " = " );
+        for (int varID : variablesInHighestDecisionLevel) {
+            System.out.print(varID + " ");
+        }
+        System.out.println();
+        System.out.println("==================================");
+
         // Getting the last element in the list
         return variablesInHighestDecisionLevel.get(variablesInHighestDecisionLevel.size() - 1);
     }
@@ -195,19 +225,30 @@ public class Assignments {
     }
 
     /**
-     * Removes all assignments above a particular decision level.
+     * Removes all assignments >= particular decision level.
+     * NOTE: !!!Excluding the root!!! => We will leave the root there.
      * @param decisionLevel
      */
     public void removeAssignmentsAboveDecisionLevel(int decisionLevel) {
         int maxDecisionLevel = getHighestDecisionLevel();
         System.out.println("Max decision level = " + maxDecisionLevel);
-        for (int i = decisionLevel; i <= maxDecisionLevel; i++ ){
+
+        // At decision level, we will remove every assignment other than the first one. IE: the picked variable
+        /*
+        List<Integer> varIdsAtDecisionLevel = this.decisionLevelToVariables.get(decisionLevel);
+        for (int i = 1 ; i < varIdsAtDecisionLevel.size(); i++) {
+            this.assignments.remove(i);
+        }
+        this.decisionLevelToVariables.remove(decisionLevel);
+        addVarIdToDecisionLevelMap(varIdsAtDecisionLevel.get(0), decisionLevel);
+*/
+        for (int i = decisionLevel ; i <= maxDecisionLevel; i++ ){
             System.out.println("Decision level = " + i);
             List<Integer> varIds = this.decisionLevelToVariables.get(i);
             for (int varId : varIds) {
                 this.assignments.remove(varId);
             }
-            this.decisionLevelToVariables.remove(decisionLevel);
+            this.decisionLevelToVariables.remove(i);
         }
     }
 }

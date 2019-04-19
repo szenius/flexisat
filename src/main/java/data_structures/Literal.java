@@ -29,6 +29,16 @@ public class Literal {
     }
 
     @Override
+    public String toString(){
+        if (this.isNegated()) {
+            return "-" + Integer.toString(this.getVariable().getId());
+        } else {
+            return Integer.toString(this.getVariable().getId());
+        }
+    }
+
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

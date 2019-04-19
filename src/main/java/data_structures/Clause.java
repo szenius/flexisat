@@ -54,7 +54,7 @@ public class Clause {
             }
             clauseVal |= literal.getValue(assignments.getAssignmentValue(literal.getVariable().getId()));
         }
-        System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
+        //System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
         return clauseVal;
     }
 
