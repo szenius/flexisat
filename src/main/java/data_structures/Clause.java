@@ -15,27 +15,48 @@ public class Clause {
         return this.literals;
     }
 
+    public boolean evaluatesToFalse(Assignments2 assignments, Variable newlyAssignedVariable, boolean newlyAssignedValue) {
+        for (Literal literal : literals) {
+            if (literal.getVariable().equals(newlyAssignedVariable)) {
+                if (literal.isNegated() ^ newlyAssignedValue) {
+                    return false;
+                }
+                continue;
+            }
+            if (!assignments.hasAssignedVariable(literal)) {
+                return false;
+            }
+            if ((literal.isNegated() ^ assignments.getVariableAssignment(literal))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public Literal getUnitLiteral(Assignments2 assignments) {
         Literal unitLiteral = null;
         boolean clauseValue = false;
         for (Literal literal : literals) {
             if (!assignments.hasAssignedVariable(literal)) {
+                // Found unassigned literal
                 if (unitLiteral != null) {
+                    // Found more than one unassigned literal, so there is no unit literal
                     return null;
                 }
                 unitLiteral = literal;
             } else {
-                List<Edge> edges = assignments.getNode(literal.getVariable()).getInEdges();
-                boolean foundEdgeDueToThisClause = false;
-                for (Edge edge : edges) {
-                    if (!edge.getDueToClause().equals(this)) {
-                        foundEdgeDueToThisClause = true;
-                        break;
-                    }
-                }
-                if (!foundEdgeDueToThisClause) {
-                    unitLiteral = literal;
-                }
+                // Found assigned literal
+//                List<Edge> edges = assignments.getNode(literal.getVariable()).getInEdges();
+//                boolean foundEdgeDueToThisClause = false;
+//                for (Edge edge : edges) {
+//                    if (!edge.getDueToClause().equals(this)) {
+//                        foundEdgeDueToThisClause = true;
+//                        break;
+//                    }
+//                }
+//                if (!foundEdgeDueToThisClause) {
+//                    unitLiteral = literal;
+//                }
                 clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
             }
         }

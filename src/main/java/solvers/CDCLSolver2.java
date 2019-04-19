@@ -73,12 +73,14 @@ public class CDCLSolver2 {
      * @param assertionLevel
      */
     private void backtrack(int assertionLevel) {
+        System.out.println("Backtracking...");
         for (Node node : assignments.getImplicationGraphNodes().values()) {
             if (node.getDecisionLevel() > assertionLevel) {
+                System.out.println("Removing all nodes that led to node " + node.getVariable().getId());
                 for (Edge inEdge : node.getInEdges()) {
                     inEdge.getFromNode().removeOutEdge(inEdge);
-                    assignments.removeAssignment(node.getVariable());
                 }
+                assignments.removeAssignment(node.getVariable());
             }
         }
     }
@@ -113,7 +115,7 @@ public class CDCLSolver2 {
         // Remove assignment of conflicting nodes
         assignments.removeAssignment(conflictingNode.getVariable());
 
-        return assertionLevel;
+        return assertionLevel - 1;
     }
 
     /**
@@ -145,6 +147,10 @@ public class CDCLSolver2 {
                     // Add to implication graph
                     lastInferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
 
+                    // Add assignment of unit literal
+                    System.out.println("Inferred " + unitLiteralVariable.getId() + " in clause " + clause.toString());
+                    assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
+
                     // Check if assignment is conflicting
                     if(isConflict(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
@@ -152,9 +158,6 @@ public class CDCLSolver2 {
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true);
 
-                    } else {
-                        // Not conflicting, add assignment
-                        assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
                     }
 
                     performedUnitResolution = true;
@@ -166,7 +169,15 @@ public class CDCLSolver2 {
     }
 
     private boolean isConflict(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
-        return assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment);
+        if(assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
+            return true;
+        }
+        for (Clause clause : clauses.getClauses()) {
+            if (clause.evaluatesToFalse(assignments, unitLiteralVariable, inferredNodeAssignment)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -183,6 +194,7 @@ public class CDCLSolver2 {
             if (literal.getVariable() != unitLiteralVariable) {
                 Node fromNode = assignments.getNode(literal.getVariable());
                 Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
+                System.out.println("Added edge from " + fromNode.getVariable().getId() + " to " + lastInferredNode.getVariable().getId() + " using clause " + dueToClause.toString());
                 fromNode.addOutEdge(newEdge);
                 lastInferredNode.addInEdge(newEdge);
             }
@@ -196,6 +208,17 @@ public class CDCLSolver2 {
      * @return Variable that has not been assigned
      */
     private Variable pickBranchingVariable() {
+        Clause lastAddedClause = clauses.getLastAddedClause();
+        if (lastAddedClause != null) {
+            System.out.println("Picking branching variable from clause " + lastAddedClause.toString());
+            assignments.printVariableAssignments();
+            for (Literal literal : lastAddedClause.getLiterals()) {
+                if (!assignments.hasAssignedVariable(literal)) {
+                    return literal.getVariable();
+                }
+            }
+        }
+        System.out.println("Did not find branching variable from clause, picking next variable...");
         for (Variable variable : variables) {
             if (!assignments.getImplicationGraphNodes().containsKey(variable)) {
                 return variable;

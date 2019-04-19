@@ -14,6 +14,17 @@ public class Assignments2 {
         this.variableAssignments = new HashMap<>();
     }
 
+    public void printVariableAssignments() {
+        StringBuilder sb = new StringBuilder();
+        for (Variable assignedVars : variableAssignments.keySet()) {
+            sb.append(assignedVars.getId())
+                    .append('=')
+                    .append(variableAssignments.get(assignedVars))
+                    .append(',');
+        }
+        System.out.println(sb.toString());
+    }
+
     public int getNumAssigned() {
         return variableAssignments.size();
     }
@@ -47,6 +58,7 @@ public class Assignments2 {
     }
 
     private void removeVariableAssignment(Variable variable) {
+        System.out.println("Removing assignment from variable " + variable.getId());
         variableAssignments.remove(variable);
     }
 
