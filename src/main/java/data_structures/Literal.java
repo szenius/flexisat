@@ -37,6 +37,10 @@ public class Literal {
         }
     }
 
+    @Override
+    public int hashCode() {
+        return (String.valueOf(this.variable.getId()) + this.isNegated()).hashCode();
+    }
 
     @Override
     public boolean equals(Object obj) {

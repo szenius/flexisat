@@ -13,8 +13,7 @@ public class Variable {
 
     @Override
     public int hashCode(){
-        // note: Not sure if this will cause any errors in the future.
-        return getId();
+        return String.valueOf(getId()).hashCode();
     }
 
     @Override
@@ -29,9 +28,6 @@ public class Variable {
             return false;
         }
         Variable other = (Variable) obj;
-        if (other.getId() == this.getId()) {
-            return true;
-        }
-        return false;
+        return this.getId() == other.getId();
     }
 }

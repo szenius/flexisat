@@ -46,8 +46,8 @@ public class CDCLSolver2 {
             Variable pickedVariable = pickBranchingVariable();
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
-            assignments.addAssignment(pickedVariable, newNode, true, true);
-            System.out.println("Assigned variable " + pickedVariable.getId() + " at " + decisionLevel + "!");
+            assignments.addAssignment(pickedVariable, newNode, false, true);
+            System.out.println("Assigned " + pickedVariable.getId() + "=" + assignments.getVariableAssignment(pickedVariable) + "@" + decisionLevel);
 
             // Run unit propagation
             UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
@@ -100,22 +100,30 @@ public class CDCLSolver2 {
         cutEdges.addAll(inferredNode.getInEdges());
 
         // Learn new clause from our cut
-        List<Literal> learntLiterals = new ArrayList<>();
+        Set<Literal> learntLiterals = new HashSet<>();
+        int maxLevel = -1;
         int assertionLevel = -1;
         for (Edge cutEdge : cutEdges) {
             Literal learntLiteral = new Literal(cutEdge.getFromNode().getVariable(),
                     assignments.getVariableAssignment(cutEdge.getFromNode().getVariable()));
             learntLiterals.add(learntLiteral);
-            assertionLevel = Math.max(cutEdge.getFromNode().getDecisionLevel(), assertionLevel);
+            int decisionLevel = cutEdge.getFromNode().getDecisionLevel();
+            if (decisionLevel > maxLevel) {
+                assertionLevel = maxLevel;
+                maxLevel = decisionLevel;
+            } else if (decisionLevel < maxLevel && decisionLevel > assertionLevel) {
+                assertionLevel = decisionLevel;
+            }
+            System.out.println("Checked decision level " + decisionLevel + " || assertion@" + assertionLevel + ", max@" + maxLevel);
         }
-        Clause learntClause = new Clause(learntLiterals);
+        Clause learntClause = new Clause(new ArrayList<>(learntLiterals));
         clauses.addClause(learntClause);
         System.out.println("Learnt new clause " + learntClause.toString());
 
         // Remove assignment of conflicting nodes
         assignments.removeAssignment(conflictingNode.getVariable());
 
-        return assertionLevel - 1;
+        return assertionLevel;
     }
 
     /**
@@ -135,30 +143,32 @@ public class CDCLSolver2 {
         // for possibility for unit resolution again.
         while (performedUnitResolution) {
             performedUnitResolution = false;
+            Variable lastAssignedVar = null;
 
             for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments);
+                Literal unitLiteral = clause.getUnitLiteral(assignments, lastAssignedVar);
 
                 if (unitLiteral != null) {
                     // Found unit literal, do unit resolution
                     Variable unitLiteralVariable = unitLiteral.getVariable();
+                    lastAssignedVar = unitLiteralVariable;
                     boolean inferredNodeAssignment = !unitLiteral.isNegated();
 
                     // Add to implication graph
                     lastInferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
 
                     // Add assignment of unit literal
-                    System.out.println("Inferred " + unitLiteralVariable.getId() + " in clause " + clause.toString());
-                    assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
+                    System.out.println("Inferred " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
 
                     // Check if assignment is conflicting
-                    if(isConflict(unitLiteralVariable, inferredNodeAssignment)) {
+                    if(conflictsWithExistingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
                         System.out.println("Found conflicting assignment for " + unitLiteralVariable.getId() + " in clause " + clause.toString());
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true);
-
                     }
+
+                    assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
 
                     performedUnitResolution = true;
                 }
@@ -168,14 +178,11 @@ public class CDCLSolver2 {
         return new UnitResolutionResult(lastInferredNode, false);
     }
 
-    private boolean isConflict(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
+    private boolean conflictsWithExistingAssignment(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
+        System.out.println("Checking if assignment of " + inferredNodeAssignment + " to " + unitLiteralVariable.getId() + " is conflicting...");
+        assignments.printVariableAssignments();
         if(assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
             return true;
-        }
-        for (Clause clause : clauses.getClauses()) {
-            if (clause.evaluatesToFalse(assignments, unitLiteralVariable, inferredNodeAssignment)) {
-                return true;
-            }
         }
         return false;
     }
@@ -208,17 +215,17 @@ public class CDCLSolver2 {
      * @return Variable that has not been assigned
      */
     private Variable pickBranchingVariable() {
-        Clause lastAddedClause = clauses.getLastAddedClause();
-        if (lastAddedClause != null) {
-            System.out.println("Picking branching variable from clause " + lastAddedClause.toString());
-            assignments.printVariableAssignments();
-            for (Literal literal : lastAddedClause.getLiterals()) {
-                if (!assignments.hasAssignedVariable(literal)) {
-                    return literal.getVariable();
-                }
-            }
-        }
-        System.out.println("Did not find branching variable from clause, picking next variable...");
+//        Clause lastAddedClause = clauses.getLastAddedClause();
+//        if (lastAddedClause != null) {
+//            System.out.println("Picking branching variable from clause " + lastAddedClause.toString());
+//            assignments.printVariableAssignments();
+//            for (Literal literal : lastAddedClause.getLiterals()) {
+//                if (!assignments.hasAssignedVariable(literal)) {
+//                    return literal.getVariable();
+//                }
+//            }
+//        }
+//        System.out.println("Did not find branching variable from clause, picking next variable...");
         for (Variable variable : variables) {
             if (!assignments.getImplicationGraphNodes().containsKey(variable)) {
                 return variable;
