@@ -51,7 +51,7 @@ public class CDCLSolver2 {
 
             // Run unit propagation
             UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
-            if (unitResolutionResult.isConflict()) {
+            while (unitResolutionResult.isConflict()) {
                 System.out.println("CONFLICT from Unit Propagation at decision level " + decisionLevel + "!");
                 int assertionLevel = conflictAnalysis(unitResolutionResult);
                 System.out.println("Asserting at level " + assertionLevel);
@@ -62,6 +62,7 @@ public class CDCLSolver2 {
                     System.out.println("Backtracked to decision level " + assertionLevel);
                     decisionLevel = assertionLevel;
                 }
+                unitResolutionResult = unitPropagation(decisionLevel);
             }
         }
         return true;
