@@ -134,29 +134,17 @@ public class Assignments2 {
 
     public void removeAssignmentsBeyondLevel(int assertionLevel) {
         List<Variable> variables = new ArrayList<>(implicationGraphNodes.keySet());
-        for (Variable var : variables) {
-            if (!implicationGraphNodes.containsKey(var)) {
-                continue;
+        for (Variable variable : variables) {
+            Node node = implicationGraphNodes.get(variable);
+            if (node.getDecisionLevel() > assertionLevel) {
+                System.out.println("Removing node " + node.toString());
+                for (Edge inEdge : node.getInEdges()) {
+                    System.out.println("Removing edge " + inEdge.toString());
+                    inEdge.getFromNode().removeOutEdge(inEdge);
+                }
+                node.getInEdges().clear();
+                removeAssignment(variable);
             }
-            if (implicationGraphNodes.get(var).getDecisionLevel() > assertionLevel) {
-                removeTree(implicationGraphNodes.get(var));
-            }
         }
-    }
-
-    private void removeTree(Node root) {
-        List<Edge> outEdges = root.getOutEdges();
-        int i = 0;
-        while (i < outEdges.size()) {
-            Edge outEdge = outEdges.get(i);
-            removeTree(outEdge.getToNode());
-            i++;
-        }
-        List<Edge> inEdges = root.getInEdges();
-        while (!inEdges.isEmpty()) {
-            Edge inEdge = inEdges.remove(0);
-            inEdge.getFromNode().removeOutEdge(inEdge);
-        }
-        removeAssignment(root.getVariable());
     }
 }

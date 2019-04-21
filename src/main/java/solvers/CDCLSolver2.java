@@ -73,7 +73,6 @@ public class CDCLSolver2 {
      */
     private void backtrack(int assertionLevel) {
         System.out.println("Backtracking...");
-        assignments.printVariableAssignments();
         if (assertionLevel == 0) {
             // Remove all assignments
             assignments.clear();
@@ -111,12 +110,12 @@ public class CDCLSolver2 {
 
         // Do resolution to find learnt clause
         int numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
-        System.out.print("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel + ": ");
-        printNodeSet(candidates);
+//        System.out.print("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel + ": ");
+//        printNodeSet(candidates);
         for (Node candidate : candidates) {
             cutEdges.addAll(candidate.getInEdges());
         }
-        while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty()) {
+        while (numLiteralsAtDecisionLevel != 1 && !cutEdges.isEmpty()) {
             Edge cutEdge = cutEdges.poll();
             if (cutEdge.getToNode().equals(conflictingNode) || cutEdge.getToNode().equals(inferredNode)) {
                 // Cannot do resolution with conflicting nodes
@@ -130,9 +129,9 @@ public class CDCLSolver2 {
             numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
 
-            System.out.print("RESOLVED with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString() + " ===> ");
-            System.out.print("New learnt clause: ");
-            printNodeSet(candidates);
+//            System.out.print("RESOLVED with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString() + " ===> ");
+//            System.out.print("New learnt clause: ");
+//            printNodeSet(candidates);
         }
 
         // Generate new learnt clause

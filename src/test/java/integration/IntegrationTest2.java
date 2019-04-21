@@ -43,7 +43,8 @@ public class IntegrationTest2 {
     @Test
     @DisplayName("Single example test")
     void testSingleExample() {
-        assertTrue(runSatSolverTest("input/sat/uf20-0201.cnf"), "Returned UNSAT for SAT test case " + "uf20-0201.cnf");
+        String filename = "input/sat/uf20-0103.cnf";
+        assertTrue(runSatSolverTest(filename), "Returned UNSAT for SAT test case " + filename);
     }
 
     boolean runSatSolverTest(String testInput) {

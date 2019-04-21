@@ -80,7 +80,9 @@ public class Node {
     private void removeInEdge(Clause dueToClause) {
         for (int i = 0; i < inEdges.size(); i++) {
             if (inEdges.get(i).getDueToClause().equals(dueToClause)) {
-                inEdges.remove(i);
+                System.out.println("Removing children of conflicting node: " + inEdges.get(i).toString());
+                Edge inEdge = inEdges.remove(i);
+                inEdge.getFromNode().removeOutEdge(inEdge);
                 i--;
             }
         }
