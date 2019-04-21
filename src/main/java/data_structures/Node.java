@@ -45,6 +45,11 @@ public class Node {
     }
 
     @Override
+    public int hashCode() {
+        return (String.valueOf(getVariable().hashCode()) + "+" + String.valueOf(getDecisionLevel())).hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

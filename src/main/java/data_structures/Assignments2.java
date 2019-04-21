@@ -1,7 +1,6 @@
 package data_structures;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Assignments2 {
     private Map<Variable, Node> implicationGraphRoots;
@@ -96,5 +95,13 @@ public class Assignments2 {
         } else {
             variableAssignments.putIfAbsent(variable, assignment);
         }
+    }
+
+    public Set<Node> getNodes(Clause dueToClause) {
+        Set<Node> nodes = new HashSet<>();
+        for (Literal literal : dueToClause.getLiterals()) {
+            nodes.add(getNode(literal.getVariable()));
+        }
+        return nodes;
     }
 }

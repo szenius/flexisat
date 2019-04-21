@@ -1,16 +1,11 @@
 package integration;
 
-import data_structures.Clause;
 import data_structures.Clauses;
-import data_structures.Literal;
 import data_structures.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
 import solvers.CDCLSolver2;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
