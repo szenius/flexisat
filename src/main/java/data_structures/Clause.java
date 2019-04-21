@@ -63,6 +63,7 @@ public class Clause {
                     return findLiteralByNode(candidate);
                 }
             }
+            // Find the literal that was last assigned in the implication graph
             return findLiteralByNode(findDeepestNode(candidates.get(0), candidates.get(0), candidates));
         }
         return unitLiteral;

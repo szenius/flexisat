@@ -75,14 +75,18 @@ public class CDCLSolver2 {
      */
     private void backtrack(int assertionLevel) {
         System.out.println("Backtracking...");
+        List<Variable> variablesToRemove = new ArrayList<>();
         for (Node node : assignments.getImplicationGraphNodes().values()) {
             if (node.getDecisionLevel() > assertionLevel) {
                 System.out.println("Removing all nodes that led to node " + node.getVariable().getId());
                 for (Edge inEdge : node.getInEdges()) {
                     inEdge.getFromNode().removeOutEdge(inEdge);
                 }
-                assignments.removeAssignment(node.getVariable());
+                variablesToRemove.add(node.getVariable());
             }
+        }
+        for (Variable variable : variablesToRemove) {
+            assignments.removeAssignment(variable);
         }
     }
 
