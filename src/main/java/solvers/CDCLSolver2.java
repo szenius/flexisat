@@ -79,18 +79,19 @@ public class CDCLSolver2 {
             assignments.clear();
         } else {
             // Remove all assignments made beyond assertion level
-            List<Variable> variablesToRemove = new ArrayList<>();
-            for (Node node : assignments.getImplicationGraphNodes().values()) {
-                if (node.getDecisionLevel() > assertionLevel) {
-                    for (Edge inEdge : node.getInEdges()) {
-                        inEdge.getFromNode().removeOutEdge(inEdge);
-                    }
-                    variablesToRemove.add(node.getVariable());
-                }
-            }
-            for (Variable variable : variablesToRemove) {
-                assignments.removeAssignment(variable);
-            }
+            assignments.removeAssignmentsBeyondLevel(assertionLevel);
+//            List<Variable> variablesToRemove = new ArrayList<>();
+//            for (Node node : assignments.getImplicationGraphNodes().values()) {
+//                if (node.getDecisionLevel() > assertionLevel) {
+//                    for (Edge inEdge : node.getInEdges()) {
+//                        inEdge.getFromNode().removeOutEdge(inEdge);
+//                    }
+//                    variablesToRemove.add(node.getVariable());
+//                }
+//            }
+//            for (Variable variable : variablesToRemove) {
+//                assignments.removeAssignment(variable);
+//            }
         }
         assignments.printImplicationGraph();
     }

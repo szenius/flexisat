@@ -131,4 +131,30 @@ public class Assignments2 {
     public boolean hasRoot(Node candidate) {
         return implicationGraphRoots.containsKey(candidate.getVariable());
     }
+
+    public void removeAssignmentsBeyondLevel(int assertionLevel) {
+        List<Variable> variables = new ArrayList<>(implicationGraphNodes.keySet());
+        for (Variable var : variables) {
+            if (!implicationGraphNodes.containsKey(var)) {
+                continue;
+            }
+            if (implicationGraphNodes.get(var).getDecisionLevel() > assertionLevel) {
+                removeTree(implicationGraphNodes.get(var));
+            }
+        }
+    }
+
+    private void removeTree(Node root) {
+        List<Edge> outEdges = root.getOutEdges();
+        while (!outEdges.isEmpty()) {
+            Edge outEdge = outEdges.remove(0);
+            removeTree(outEdge.getToNode());
+        }
+        List<Edge> inEdges = root.getInEdges();
+        while (!inEdges.isEmpty()) {
+            Edge inEdge = inEdges.remove(0);
+            inEdge.getFromNode().removeOutEdge(inEdge);
+        }
+        removeAssignment(root.getVariable());
+    }
 }
