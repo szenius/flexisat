@@ -73,11 +73,12 @@ public class CDCLSolver2 {
      */
     private void backtrack(int assertionLevel) {
         System.out.println("Backtracking...");
+        assignments.printVariableAssignments();
         if (assertionLevel == 0) {
             // Remove all assignments
             assignments.clear();
-
         } else {
+            // Remove all assignments made beyond assertion level
             List<Variable> variablesToRemove = new ArrayList<>();
             for (Node node : assignments.getImplicationGraphNodes().values()) {
                 if (node.getDecisionLevel() > assertionLevel) {
@@ -125,9 +126,8 @@ public class CDCLSolver2 {
         for (Node candidate : candidates) {
             cutEdges.addAll(candidate.getInEdges());
         }
-        Set<Node> visited = new HashSet<>();
         while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty()) {
-                Edge cutEdge = cutEdges.poll();
+            Edge cutEdge = cutEdges.poll();
             if (cutEdge.getToNode().equals(conflictingNode) || cutEdge.getToNode().equals(inferredNode)) {
                 // Cannot do resolution with conflicting nodes
                 continue;
@@ -136,10 +136,6 @@ public class CDCLSolver2 {
                 // Don't consider learning literals assigned at decision level higher than conflict level
                 continue;
             }
-//            if (!visited.add(cutEdge.getToNode())) {
-//                // Already visited this node
-//                continue;
-//            }
             candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
             numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
@@ -166,10 +162,14 @@ public class CDCLSolver2 {
         clauses.addClause(learntClause);
         System.out.println("LEARNT new clause " + learntClause.toString());
 
-        // Remove assignment of conflicting nodes
-        assignments.removeAssignment(conflictingNode.getVariable());
+        // Remove assignment of the conflicting node which came second
+        List<Edge> inEdges = inferredNode.getInEdges();
+        for (Edge inEdge : inEdges) {
+            inEdge.getFromNode().removeOutEdge(inEdge);
+        }
 
-        if (learntClause.size() == 1) {
+        // Default assertion level when only one literal in learnt clause or all literals have same decision level
+        if (learntClause.size() == 1 || maxLevel != -1) {
             return 0;
         }
 

@@ -42,6 +42,7 @@ public class Clause {
         }
         if (unitLiteral == null && lastAssignedVariable != null) {
             // All variables have been assigned but this clause evaluates to false
+            // We find the last assigned literal to return
             Set<Node> nodes = assignments.getNodes(this);
             Map<Integer, List<Node>> nodesByDecisionLevel = new HashMap<>();
             int maxDecisionLevel = Integer.MIN_VALUE;
@@ -57,11 +58,23 @@ public class Clause {
                 return findLiteralByNode(nodesByDecisionLevel.get(maxDecisionLevel).get(0));
             }
             List<Node> candidates = nodesByDecisionLevel.get(maxDecisionLevel);
-            for (Node candidate : candidates) {
+            Node reserveCand = candidates.get(0);
+            int i = 0;
+            while (i < candidates.size()) {
+                Node candidate = candidates.get(i);
                 if (candidate.getOutEdges().isEmpty()) {
                     // Found a leaf in the implication graph
                     return findLiteralByNode(candidate);
                 }
+                if (assignments.hasRoot(candidate)) {
+                    // Remove roots from candidates
+                    candidates.remove(i);
+                }
+                i++;
+            }
+            if (candidates.isEmpty()) {
+                // All candidates were roots
+                return findLiteralByNode(reserveCand);
             }
             // Find the literal that was last assigned in the implication graph
             return findLiteralByNode(findDeepestNode(candidates.get(0), candidates.get(0), candidates));
@@ -83,7 +96,7 @@ public class Clause {
         return lastFoundNode;
     }
 
-    public boolean checkVALID(Assignments assignments) {
+    public boolean checkSAT(Assignments assignments) {
         boolean clauseVal = false;
         for (Literal literal : literals) {
             if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {

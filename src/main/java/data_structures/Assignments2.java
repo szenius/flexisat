@@ -51,6 +51,7 @@ public class Assignments2 {
     }
 
     public void removeAssignment(Variable variable) {
+        System.out.println("Removing assignment for " + variable.getId());
         removeNode(variable);
         removeRoot(variable);
         removeVariableAssignment(variable);
@@ -125,5 +126,9 @@ public class Assignments2 {
             System.out.println(edge.toString());
             traverse(edge.getToNode());
         }
+    }
+
+    public boolean hasRoot(Node candidate) {
+        return implicationGraphRoots.containsKey(candidate.getVariable());
     }
 }

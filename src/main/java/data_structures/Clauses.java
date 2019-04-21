@@ -36,7 +36,7 @@ public class Clauses {
      */
     public boolean checkVALID(Assignments assignments) {
         for (Clause clause : clauses) {
-            boolean valid = clause.checkVALID(assignments);
+            boolean valid = clause.checkSAT(assignments);
             if (!valid) return false;
         }
         return true;

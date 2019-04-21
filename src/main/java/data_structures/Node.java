@@ -71,10 +71,18 @@ public class Node {
     }
 
     public void removeSubtree() {
-        for (Edge out : outEdges) {
-            out.getToNode().removeSubtree();
-            out.getToNode().getInEdges().clear();
+        while (!outEdges.isEmpty()) {
+            Edge outEdge = outEdges.remove(0);
+            outEdge.getToNode().removeInEdge(outEdge.getDueToClause());
         }
-        outEdges.clear();
+    }
+
+    private void removeInEdge(Clause dueToClause) {
+        for (int i = 0; i < inEdges.size(); i++) {
+            if (inEdges.get(i).getDueToClause().equals(dueToClause)) {
+                inEdges.remove(i);
+                i--;
+            }
+        }
     }
 }
