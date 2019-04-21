@@ -172,7 +172,13 @@ public class BayesianEncoder {
 
     //TODO
     private int bitsToInteger(boolean[] bits) {
-
+        int val = 0;
+        for (int i = 0 ; i < bits.length; i++) {
+            if (bits[i]){
+                val += Math.pow(2, i);
+            }
+        }
+        return val;
     }
 
     // Returns a Small Endian array
