@@ -109,18 +109,23 @@ public class CDCLSolver2 {
 
         // Do resolution until only one literal is in the current decision level
         int numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
+        System.out.println("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel);
+        printNodeSet(candidates);
         cutEdges = new HashSet<>();
         for (Node candidate : candidates) {
             cutEdges.addAll(candidate.getInEdges());
         }
         Iterator<Edge> edgeIterator = cutEdges.iterator();
-        while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty()) {
+        while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty() && edgeIterator.hasNext()) {
             Edge cutEdge = edgeIterator.next();
             if (cutEdge.getToNode().getDecisionLevel() > conflictDecisionLevel) {
                 continue;
             }
-            candidates.addAll(assignments.getNodes(cutEdge.getDueToClause()));
+            candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
             numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
+            System.out.println("Resolved with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString());
+            printNodeSet(candidates);
+            System.out.println("#@decision level = " + numLiteralsAtDecisionLevel);
         }
 
         // Generate new learnt clause
@@ -144,6 +149,33 @@ public class CDCLSolver2 {
         assignments.removeAssignment(conflictingNode.getVariable());
 
         return assertionLevel;
+    }
+
+    private Set<Node> resolve(Set<Node> candidates, Set<Node> clause, Variable resolvableVariable) {
+        System.out.print("RESOLVING: clause ");
+        printNodeSet(clause);
+        System.out.print("with cands ");
+        printNodeSet(candidates);
+        Set<Node> resolvedClause = new HashSet<>();
+        for (Node candidate : candidates) {
+            if (!candidate.getVariable().equals(resolvableVariable)) {
+                resolvedClause.add(candidate);
+            }
+        }
+        for (Node clauseNode : clause) {
+            if (!clauseNode.getVariable().equals(resolvableVariable)) {
+                resolvedClause.add(clauseNode);
+            }
+        }
+        return resolvedClause;
+    }
+
+    private void printNodeSet(Set<Node> nodes) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Node node : nodes) {
+            joiner.add((assignments.getVariableAssignment(node.getVariable()) ? "-" : "") + String.valueOf(node.getVariable().getId()));
+        }
+        System.out.println(joiner.toString());
     }
 
     private int countLiteralsAtDecisionLevel(Set<Node> nodes, int decisionLevel) {
@@ -173,32 +205,31 @@ public class CDCLSolver2 {
         // for possibility for unit resolution again.
         while (performedUnitResolution) {
             performedUnitResolution = false;
-            Variable lastAssignedVar = null;
 
             for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments, lastAssignedVar);
+                Variable lastInferredVariable = lastInferredNode == null? null : lastInferredNode.getVariable();
+                Literal unitLiteral = clause.getUnitLiteral(assignments, lastInferredVariable);
 
                 if (unitLiteral != null) {
                     // Found unit literal, do unit resolution
                     Variable unitLiteralVariable = unitLiteral.getVariable();
-                    lastAssignedVar = unitLiteralVariable;
                     boolean inferredNodeAssignment = !unitLiteral.isNegated();
+                    System.out.println("Inferred " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
 
                     // Add to implication graph
                     lastInferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
 
-                    // Add assignment of unit literal
-                    System.out.println("Inferred " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
-
                     // Check if assignment is conflicting
                     if(conflictsWithExistingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
+                        assignments.printVariableAssignments();
                         System.out.println("Found conflicting assignment for " + unitLiteralVariable.getId() + " in clause " + clause.toString());
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true, decisionLevel);
                     }
 
                     assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
+                    assignments.printVariableAssignments();
 
                     performedUnitResolution = true;
                 }
@@ -209,8 +240,6 @@ public class CDCLSolver2 {
     }
 
     private boolean conflictsWithExistingAssignment(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
-        System.out.println("Checking if assignment of " + inferredNodeAssignment + " to " + unitLiteralVariable.getId() + " is conflicting...");
-        assignments.printVariableAssignments();
         if(assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
             return true;
         }

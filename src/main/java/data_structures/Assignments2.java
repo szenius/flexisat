@@ -45,6 +45,7 @@ public class Assignments2 {
     }
 
     public void addAssignment(Variable variable, Node node, boolean assignment, boolean isRoot) {
+        System.out.println("Adding assignment for " + variable.getId() + "=" + assignment);
         addNode(variable, node);
         addVariableAssignment(variable, assignment);
         if (isRoot) addRoot(variable, node);

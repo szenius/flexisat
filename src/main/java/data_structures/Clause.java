@@ -34,7 +34,6 @@ public class Clause {
     }
 
     public Literal getUnitLiteral(Assignments2 assignments, Variable lastAssignedVariable) {
-//        System.out.println("Trying to find unit literal from clause " + toString());
         Literal unitLiteral = null;
         boolean clauseValue = false;
         for (Literal literal : literals) {
@@ -42,35 +41,22 @@ public class Clause {
                 // Found unassigned literal
                 if (unitLiteral != null) {
                     // Found more than one unassigned literal, so there is no unit literal
-//                    System.out.println("Found more than one unassigned literal, so there is no unit literal");
                     return null;
                 }
                 unitLiteral = literal;
             } else {
-                //System.out.println("Found assigned variable " + literal.getVariable().getId() + ", checking if was last assigned " + (lastAssignedVariable == null ? "null" : lastAssignedVariable.getId()));
-                if (literal.getVariable().equals(lastAssignedVariable)) {
-                    // Found assigned literal
-                    List<Edge> edges = assignments.getNode(literal.getVariable()).getInEdges();
-                    boolean foundEdgeDueToThisClause = false;
-                    for (Edge edge : edges) {
-                        if (edge.getDueToClause().equals(this)) {
-                            foundEdgeDueToThisClause = true;
-//                            System.out.println("Found edge due to clause " + toString() + " for variable " + literal.getVariable().getId());
-                            break;
-                        }
-                    }
-                    if (!foundEdgeDueToThisClause) {
-                        // Assigned literal was not due to this clause
-//                        System.out.println("Variable " + literal.getVariable().getId() + " was assigned but has no edge due to clause " + toString());
-                        unitLiteral = literal;
-                    }
-                }
                 clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
             }
         }
         if (clauseValue) {
-//            System.out.println("Clause " + toString() + " evaluates to true, so cannot infer unit literal");
             return null;
+        }
+        if (unitLiteral == null && lastAssignedVariable != null) {
+            for (Literal literal : getLiterals()) {
+                if (literal.getVariable().equals(lastAssignedVariable)) {
+                    return literal;
+                }
+            }
         }
         return unitLiteral;
     }
