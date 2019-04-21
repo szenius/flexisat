@@ -24,21 +24,27 @@ public class BayesianEncoder {
     // Pa1b1c1 = 2n+5, Pa1b1c2 = 2n+6 ... ,Pa2b2c2 = 2n+12
     public void encodeBayesianQueryIntoCNF(int numVariables,
                                            List<BayesianClique> cliques, Map<Integer,Boolean> evidence) {
-        String fileName = new String("test.cnf");
+        String fileNameCNFEncoding = "test_encoder.cnf";
+        String fileNameWeights = "test_weights.txt";
         // Create CNF file
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-            createCNFHeaders(writer, numVariables, cliques, evidence);
-            createTypeOneConstraints(writer, numVariables);
-            createTypeTwoConstraints(writer, numVariables, cliques);
-            createHints(writer, evidence);
-            writer.close();
+            BufferedWriter encodingWriter = new BufferedWriter(new FileWriter(fileNameCNFEncoding));
+            BufferedWriter weightsWriter = new BufferedWriter(new FileWriter(fileNameWeights));
+
+            createCNFHeaders(encodingWriter, weightsWriter, numVariables, cliques, evidence);
+
+            createTypeOneConstraints(encodingWriter, weightsWriter, numVariables);
+            createTypeTwoConstraints(encodingWriter, weightsWriter, numVariables, cliques);
+
+            createHints(encodingWriter, evidence);
+            encodingWriter.close();
+            weightsWriter.close();
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 
-    private void createCNFHeaders(BufferedWriter writer, int numVariables, List<BayesianClique> cliques,
+    private void createCNFHeaders(BufferedWriter encoderWriter, BufferedWriter weightsWriter,int numVariables, List<BayesianClique> cliques,
                                   Map<Integer, Boolean> evidence) throws IOException{
         int totalNumVariables = 0;
         int totalNumClauses = 0;
@@ -52,28 +58,34 @@ public class BayesianEncoder {
         }
         // Evidence
         totalNumClauses += evidence.size();
-        writer.write("c SAT CNF BAYESIAN ENCODING \n");
-        writer.write("p cnf " + totalNumVariables + " " +  totalNumClauses + "\n");
+        encoderWriter.write("c SAT CNF BAYESIAN ENCODING \n");
+        encoderWriter.write("p cnf " + totalNumVariables + " " +  totalNumClauses + "\n");
+        weightsWriter.write("p " + totalNumVariables + "\n");
     }
+
 
     /**
      * Creates the CNF that fulfils Type 1 constraints. Only 1 indicator variable allowed.
      */
-    private void createTypeOneConstraints(BufferedWriter writer, int numVariables) throws IOException{
+    private void createTypeOneConstraints(BufferedWriter encoderWriter, BufferedWriter weightsWriter, int numVariables) throws IOException{
         if (numVariables == 0) {
             return;
         }
         for (int i = 0 ; i < numVariables; i++) {
             // Ia1 -> Ia2
-            String rightImplication = "-" + 2*i + " " + 2*i+1 + CNF_ENDER;
-            writer.write(rightImplication);
+            String rightImplication = "-" + (2*i) + " " + 2*i+1 + CNF_ENDER;
+            encoderWriter.write(rightImplication);
             // Ia2 -> Ia1
-            String leftImplication = "-" + 2*i+1 + " " + 2*i + CNF_ENDER;
-            writer.write(leftImplication);
+            String leftImplication = "-" + (2*i+1) + " " + 2*i + CNF_ENDER;
+            encoderWriter.write(leftImplication);
+
+            // All indicator variables will have weights of 1
+            weightsWriter.write("w " + (2*i) + " 1 0\n");
+            weightsWriter.write("w -" + (2*i+1) + " 1 0\n");
         }
     }
 
-    private void createTypeTwoConstraints(BufferedWriter writer,
+    private void createTypeTwoConstraints(BufferedWriter encoderWriter, BufferedWriter weightsWriter,
                                           int numVariables, List<BayesianClique> cliques) throws IOException {
         int parameterVariableID = 2 * numVariables + 1;
         for (BayesianClique clique : cliques) {
@@ -95,10 +107,11 @@ public class BayesianEncoder {
                         indicatorVariable = 2*j+1;
                     }
                     String rightImplication = "-" + parameterVariableID + " " + indicatorVariable + CNF_ENDER;
-                    writer.write(rightImplication);
+                    encoderWriter.write(rightImplication);
                     String leftImplication = "-" + indicatorVariable + " " + parameterVariableID + CNF_ENDER;
-                    writer.write(leftImplication);
+                    encoderWriter.write(leftImplication);
                 }
+
                 parameterVariableID++;
             }
         }

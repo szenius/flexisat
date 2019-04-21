@@ -10,7 +10,6 @@ public class Variable {
     public int getId() {
         return this.id;
     }
-    
     @Override
     public int hashCode(){
         // note: Not sure if this will cause any errors in the future.

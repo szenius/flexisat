@@ -1,19 +1,25 @@
 package bayesian_encoder;
 
+import data_structures.BayesianClique;
 import data_structures.Literal;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WeightsCalculator {
 
-    Map<Literal, Integer> weights;
+    public void calculateWeights(List<BayesianClique> cliques) {
+        String fileName = "test_weights.txt";
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 
-    public WeightsCalculator() {
-        this.weights = new HashMap<>();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-
-
-
 }
