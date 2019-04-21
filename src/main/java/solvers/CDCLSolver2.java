@@ -169,7 +169,7 @@ public class CDCLSolver2 {
         }
 
         // Default assertion level when only one literal in learnt clause or all literals have same decision level
-        if (learntClause.size() == 1 || maxLevel != -1) {
+        if (learntClause.size() == 1 || (maxLevel != -1 && assertionLevel == -1)) {
             return 0;
         }
 
