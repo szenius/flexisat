@@ -40,6 +40,12 @@ public class IntegrationTest2 {
         }
     }
 
+    @Test
+    @DisplayName("Single example test")
+    void testSingleExample() {
+        assertTrue(runSatSolverTest("input/sat/uf20-0117.cnf"), "Returned UNSAT for SAT test case " + "uf20-0117.cnf");
+    }
+
     boolean runSatSolverTest(String testInput) {
         Parser parser = new Parser();
         parser.parse(testInput);

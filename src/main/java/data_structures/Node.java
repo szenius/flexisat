@@ -45,6 +45,11 @@ public class Node {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(this.getVariable().getId()) + "@" + String.valueOf(this.getDecisionLevel());
+    }
+
+    @Override
     public int hashCode() {
         return getVariable().hashCode();
 //        return (String.valueOf(getVariable().hashCode()) + "+" + String.valueOf(getDecisionLevel())).hashCode();

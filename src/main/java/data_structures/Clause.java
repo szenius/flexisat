@@ -120,4 +120,8 @@ public class Clause {
         }
         return this.toString().equals(obj.toString());
     }
+
+    public int size() {
+        return this.getLiterals().size();
+    }
 }

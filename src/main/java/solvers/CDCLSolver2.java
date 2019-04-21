@@ -101,35 +101,39 @@ public class CDCLSolver2 {
         Node conflictingNode = conflict.getConflictingNode();
         int conflictDecisionLevel = conflict.getConflictDecisionLevel();
 
+        System.out.println("Doing Conflict Analysis for inferred node " + inferredNode.toString() + " and conflict node " + conflictingNode.toString());
+
         // Collect edges to cut for learning clause. We cut the edges that directly lead to the conflict.
-        Set<Edge> cutEdges = new HashSet<>(conflictingNode.getInEdges());
+        Queue<Edge> cutEdges = new LinkedList<>(conflictingNode.getInEdges());
         cutEdges.addAll(inferredNode.getInEdges());
 
         // Find the closest nodes to conflict side
         Set<Node> candidates = new HashSet<>();
-        for (Edge cutEdge : cutEdges) {
-            candidates.add(cutEdge.getFromNode());
+        while (!cutEdges.isEmpty()) {
+            candidates.add(cutEdges.poll().getFromNode());
         }
 
         // Do resolution until only one literal is in the current decision level
         int numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
-        System.out.println("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel);
+        System.out.print("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel + ": ");
         printNodeSet(candidates);
-        cutEdges = new HashSet<>();
         for (Node candidate : candidates) {
+            // TODO: dupe edges to the same node by the same dueToClaus should not be added
             cutEdges.addAll(candidate.getInEdges());
         }
-        Iterator<Edge> edgeIterator = cutEdges.iterator();
-        while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty() && edgeIterator.hasNext()) {
-            Edge cutEdge = edgeIterator.next();
+        while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty()) {
+            Edge cutEdge = cutEdges.poll();
             if (cutEdge.getToNode().getDecisionLevel() > conflictDecisionLevel) {
                 continue;
             }
             candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
             numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
+            cutEdges.addAll(cutEdge.getFromNode().getInEdges());
+
             System.out.println("Resolved with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString());
-            printNodeSet(candidates);
             System.out.println("#@decision level = " + numLiteralsAtDecisionLevel);
+            System.out.print("New learnt clause: ");
+            printNodeSet(candidates);
         }
 
         // Generate new learnt clause
@@ -152,14 +156,14 @@ public class CDCLSolver2 {
         // Remove assignment of conflicting nodes
         assignments.removeAssignment(conflictingNode.getVariable());
 
+        if (learntClause.size() == 1) {
+            return 0;
+        }
+
         return assertionLevel;
     }
 
     private Set<Node> resolve(Set<Node> candidates, Set<Node> clause, Variable resolvableVariable) {
-        System.out.print("RESOLVING: clause ");
-        printNodeSet(clause);
-        System.out.print("with cands ");
-        printNodeSet(candidates);
         Set<Node> resolvedClause = new HashSet<>();
         for (Node candidate : candidates) {
             if (!candidate.getVariable().equals(resolvableVariable)) {

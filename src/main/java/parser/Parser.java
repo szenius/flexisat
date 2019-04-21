@@ -54,13 +54,10 @@ public class Parser {
         try {
             // Read all comment lines
             line = br.readLine();
-            System.out.println("Read: " + line);
             while (line.startsWith("c")) {
                 line = br.readLine();
-                System.out.println("Read: " + line);
             }
 
-            System.out.println("Finished");
 
             // First line after comment lines should start with "p"
             String[] secondLine = line.trim().split("\\s+");
@@ -70,7 +67,6 @@ public class Parser {
             Set<Clause> clauses = new HashSet<>();
             for (int i = 0 ; i < numClauses; i++ ) {
                 line = br.readLine();
-                System.out.println("Found clause line " + line);
                 try {
                     clauses.add(createClause(line));
                 } catch (Exception e){
@@ -80,7 +76,7 @@ public class Parser {
             }
             this.clauses = new Clauses(clauses);
             br.close();
-            System.out.println("Parsed input file.");
+            System.out.println("Parsed input file " + filePath);
             return this.clauses;
         } catch (IOException e) {
             e.printStackTrace();
