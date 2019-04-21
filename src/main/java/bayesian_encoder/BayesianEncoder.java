@@ -10,12 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public class BayesianEncoder {
-
-    List<BayesianVariable> variables;
-    Clauses formula;
-    enum VariableType{
-        INDICATOR, PARAMETER
-    }
+    
+    String CNF_ENDER = " 0\n";
 
     // Variables coding scheme:
     // Example:
@@ -27,20 +23,37 @@ public class BayesianEncoder {
     // Pa1 = 2n+1, Pa2 = 2n+2, Pb1 = 2n+3, Pb2 = 2n+4
     // Pa1b1c1 = 2n+5, Pa1b1c2 = 2n+6 ... ,Pa2b2c2 = 2n+12
     public void encodeBayesianQueryIntoCNF(int numVariables,
-                                           List<BayesianClique> cliques, Map<Integer,Integer> evidence) {
-        createVariables(numVariables);
+                                           List<BayesianClique> cliques, Map<Integer,Boolean> evidence) {
         String fileName = new String("test.cnf");
         // Create CNF file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-            createCNFHeaders(writer, numVariables, cliques);
+            createCNFHeaders(writer, numVariables, cliques, evidence);
             createTypeOneConstraints(writer, numVariables);
             createTypeTwoConstraints(writer, numVariables, cliques);
-
+            createHints(writer, evidence);
             writer.close();
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    private void createCNFHeaders(BufferedWriter writer, int numVariables, List<BayesianClique> cliques,
+                                  Map<Integer, Boolean> evidence) throws IOException{
+        int totalNumVariables = 0;
+        int totalNumClauses = 0;
+        // Indicator variables
+        totalNumVariables += 2 * numVariables;
+        totalNumClauses += 2 * numVariables;
+        // Parameter variables
+        for (BayesianClique clique : cliques) {
+            totalNumVariables += Math.pow(2,clique.getVariables().size());
+            totalNumClauses += 2 * clique.getVariables().size() * Math.pow(2, clique.getVariables().size());
+        }
+        // Evidence
+        totalNumClauses += evidence.size();
+        writer.write("c SAT CNF BAYESIAN ENCODING \n");
+        writer.write("p cnf " + totalNumVariables + " " +  totalNumClauses + "\n");
     }
 
     /**
@@ -52,10 +65,10 @@ public class BayesianEncoder {
         }
         for (int i = 0 ; i < numVariables; i++) {
             // Ia1 -> Ia2
-            String rightImplication = "-" + 2*i + " " + 2*i+1 + " " + 0 + "\n";
+            String rightImplication = "-" + 2*i + " " + 2*i+1 + CNF_ENDER;
             writer.write(rightImplication);
             // Ia2 -> Ia1
-            String leftImplication = "-" + 2*i+1 + " " + 2*i + " " + 0 + "\n";
+            String leftImplication = "-" + 2*i+1 + " " + 2*i + CNF_ENDER;
             writer.write(leftImplication);
         }
     }
@@ -65,116 +78,51 @@ public class BayesianEncoder {
         int parameterVariableID = 2 * numVariables + 1;
         for (BayesianClique clique : cliques) {
             List<Integer> variables = clique.getVariables();
-            for (int variable : variables) {
-                //
-                String rightImplication = "-" +  parameterVariableID + " " + 2*variable + " " + 0 + "\n";
-                writer.write(rightImplication);
+            double totalNumCombinations = Math.pow(2, variables.size());
+
+            for (int i = 0 ; i < totalNumCombinations; i++) {
+                // Get the bits of i to retrieve the value of indicator variable
+                // If bit is true, we will use 2n*variable_value
+                // If bit is false, we will use 2n*variable_value + 1
+                boolean[] integerBits = getBitsOfInteger(variables.size(), i);
+                for (int j = 0 ; j < integerBits.length; j++) {
+                    // Right implication
+                    // Px1x2x3.. -> Ix1
+                    int indicatorVariable;
+                    if (integerBits[j])
+                        indicatorVariable = 2*j;
+                    else {
+                        indicatorVariable = 2*j+1;
+                    }
+                    String rightImplication = "-" + parameterVariableID + " " + indicatorVariable + CNF_ENDER;
+                    writer.write(rightImplication);
+                    String leftImplication = "-" + indicatorVariable + " " + parameterVariableID + CNF_ENDER;
+                    writer.write(leftImplication);
+                }
+                parameterVariableID++;
             }
         }
     }
 
-    private void createCNFHeaders(BufferedWriter writer, int numVariables, List<BayesianClique> cliques) {
-
-    }
-
-
-    public Clauses getFormula() {
-        return this.formula;
-    }
-
-
-
-    /**
-     * We will create 2 data_structure Variables for each variable input.
-     * 1 will be happen and 1 will be not happen, similar to a1 and a2 in lecture notes.
-     * @param numVariables
-     */
-    private void createVariables(int numVariables) {
-        this.variables = new ArrayList<>();
-        for (int i = 0 ; i < numVariables; i++) {
-            BayesianVariable variableOne = new BayesianVariable(i, 1, VariableType.INDICATOR);
-            BayesianVariable variableTwo = new BayesianVariable(i, 2, VariableType.INDICATOR);
-            this.variables.add(variableOne);
-            this.variables.add(variableTwo);
-        }
-    }
-
-
-
-    /**
-     * TODO: Very inefficient! Better to store it in a Map with var id to variable for faster access.
-     * @param variableId
-     * @param isHappen
-     * @return
-     */
-    private Variable findVariable(int variableId, boolean isHappen) {
-        for (Variable variable : this.variables) {
-            if (variable.getId() == variableId &&
-                    variable.isHappen() == isHappen) {
-                return variable;
+    private void createHints(BufferedWriter writer, Map<Integer,Boolean> evidence) throws IOException {
+        for (Map.Entry<Integer, Boolean> entry : evidence.entrySet()) {
+            int indicatorVariable;
+            if (entry.getValue()) {
+                indicatorVariable = 2 * entry.getKey();
+            } else {
+                indicatorVariable = 2 * entry.getKey() + 1;
             }
-        }
-        return null;
-    }
-
-    /**
-     * This is variable which can either be an Indicative Variable or Pr
-     */
-    public class BayesianVariable {
-        int id;
-        // According to the convention taught in class, 1 = true and 2 = false.
-        int type;
-        VariableType variableType;
-
-        private BayesianVariable(int id, int type, VariableType variableType) {
-            this.id = id;
-            this.type = type;
-            this.variableType = variableType;
-        }
-
-        public VariableType getVariableType() {
-            return this.variableType;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            BayesianVariable other = (BayesianVariable) obj;
-            if (other.id == this.id && other.type == this.type && other.variableType == this.variableType)
-                return true;
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            String firstLetter;
-            firstLetter = this.variableType == VariableType.INDICATOR ? "I" : "P";
-            return firstLetter + this.id + type;
+            writer.write(Integer.toString(indicatorVariable));
         }
     }
 
-    /**
-     * TODO: MIGHT NOT NEED THIS.
-     */
-    public class Literal {
-        Variable variable;
-        boolean isNegated;
-
-        public Literal(Variable variable, boolean isNegated) {
-            this.variable = variable;
-            this.isNegated = isNegated;
+    // Returns a Small Endian array
+    private boolean[] getBitsOfInteger (int numBits,int value) {
+        boolean[] bitArray = new boolean[numBits];
+        for (int i = numBits - 1; i >= 0; i --) {
+            bitArray[i] = (value & (1 << i)) != 0;
         }
-
-        public boolean isNegated() {
-            return this.isNegated;
-        }
-
+        return bitArray;
     }
-
 
 }

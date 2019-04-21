@@ -8,7 +8,7 @@ import java.util.*;
 public class UAIParser {
 
     List<BayesianClique> cliques;
-    Map<Integer, Integer> queryValues;
+    Map<Integer, Boolean> queryValues;
     int numVariables;
 
     public void parse(String filePath) {
@@ -133,7 +133,8 @@ public class UAIParser {
                 System.exit(1);
             }
             for (int i = 0 ; i < numObservedVariables ; i++) {
-                this.queryValues.put(Integer.parseInt(values[i * 2 + 1]), Integer.parseInt(values[i * 2 + 2]));
+                boolean val = (Integer.parseInt(values[i*2 +2]) == 0) ? false : true;
+                this.queryValues.put(Integer.parseInt(values[i * 2 + 1]), val);
             }
             br.close();
 
@@ -147,7 +148,7 @@ public class UAIParser {
         return this.cliques;
     }
 
-    public Map<Integer, Integer> getQueryValues() {
+    public Map<Integer, Boolean> getQueryValues() {
         return this.queryValues;
     }
 
