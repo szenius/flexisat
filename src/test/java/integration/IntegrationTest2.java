@@ -38,12 +38,6 @@ public class IntegrationTest2 {
         }
     }
 
-    //@Test
-    void test() {
-        runSatSolverTest("input/default.cnf");
-    }
-
-
     boolean runSatSolverTest(String testInput) {
         Parser parser = new Parser();
         parser.parse(testInput);
