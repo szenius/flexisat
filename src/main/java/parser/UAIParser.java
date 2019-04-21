@@ -9,6 +9,7 @@ public class UAIParser {
 
     List<BayesianClique> cliques;
     Map<Integer, Integer> queryValues;
+    int numVariables;
 
     public void parse(String filePath) {
         File file = new File(filePath);
@@ -33,7 +34,7 @@ public class UAIParser {
             // Second line: Num variables
             line = br.readLine();
             int numVariables = Integer.parseInt(line);
-
+            this.numVariables = numVariables;
             // Third line: Cardinality of each variable
             // Since we are only doing Bayesian, the cardinality of each variable
             // should be 2.
@@ -144,6 +145,14 @@ public class UAIParser {
 
     public List<BayesianClique> getCliques() {
         return this.cliques;
+    }
+
+    public Map<Integer, Integer> getQueryValues() {
+        return this.queryValues;
+    }
+
+    public int getNumVariables() {
+        return this.numVariables;
     }
 
 }

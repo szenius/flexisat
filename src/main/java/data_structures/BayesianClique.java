@@ -13,8 +13,16 @@ public class BayesianClique {
         this.functionTable = new float[2][(int)totalEntries];
     }
 
+
     public void setFunctionTable(float[][] functionTable) {
         this.functionTable = functionTable;
     }
 
+    public float[][] getFunctionTable() {
+        return this.functionTable;
+    }
+
+    public List<Integer> getVariables() {
+        return this.variables;
+    }
 }
