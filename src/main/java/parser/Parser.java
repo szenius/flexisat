@@ -37,6 +37,7 @@ public class Parser {
     }
 
     public Clauses parse(String filePath) {
+        System.out.println("Trying to parse CNF file " + filePath);
 
         File file = new File(filePath);
         FileInputStream fis = null;
@@ -51,17 +52,25 @@ public class Parser {
         
         String line;
         try {
-            // First line: comment line
+            // Read all comment lines
             line = br.readLine();
-            // Second line: p
-            line = br.readLine();
-            String[] secondLine = line.split(" ");
-            int numVariables = Integer.parseInt(secondLine[2]);
+            System.out.println("Read: " + line);
+            while (line.startsWith("c")) {
+                line = br.readLine();
+                System.out.println("Read: " + line);
+            }
+
+            System.out.println("Finished");
+
+            // First line after comment lines should start with "p"
+            String[] secondLine = line.trim().split("\\s+");
             int numClauses = Integer.parseInt(secondLine[3]);
 
+            // Read in clauses
             Set<Clause> clauses = new HashSet<>();
             for (int i = 0 ; i < numClauses; i++ ) {
                 line = br.readLine();
+                System.out.println("Found clause line " + line);
                 try {
                     clauses.add(createClause(line));
                 } catch (Exception e){
@@ -84,7 +93,7 @@ public class Parser {
         if (line == null){
             throw new Exception("Clause does not exist.");
         }  
-        String[] splitLine = line.split(" ");
+        String[] splitLine = line.trim().split("\\s+");
         // The last number of each line should be 0
         if (splitLine.length != EXPECTED_CLAUSE_SIZE + 1) {
             System.out.println(splitLine.length);

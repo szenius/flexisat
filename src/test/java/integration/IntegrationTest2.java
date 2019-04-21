@@ -6,6 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
 import solvers.CDCLSolver2;
+
+import java.io.File;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,28 +15,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegrationTest2 {
 
+    private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
+    private static final String SAT_DIRECTORY_PATH = "input/sat/";
 
     @Test
     @DisplayName("VALID examples test")
     void testValidCNF() {
-        String[] validTestFilenames = {
-                "input/valid_input1.cnf",
-                "input/valid_input2.cnf",
-                "input/valid_input3.cnf"};
-        for (String filename : validTestFilenames) {
-            assertTrue(runSatSolverTest(filename), "Returned UNSAT for VALID test case " + filename);
+        File satDir = new File(SAT_DIRECTORY_PATH);
+        File[] satFiles = satDir.listFiles();
+        for (File file : satFiles) {
+            assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for VALID test case " + file.getName());
+            System.out.println("=======================");
         }
     }
 
     @Test
     @DisplayName("UNSAT examples test")
     void testUnsatCNF() {
-        String[] unsatTestFilenames = {
-                "input/unsat_input1.cnf",
-                "input/unsat_input2.cnf",
-                "input/unsat_input3.cnf"};
-        for (String filename : unsatTestFilenames) {
-            assertFalse(runSatSolverTest(filename), "Returned VALID for UNSAT test case " + filename);
+        File unsatDir = new File(UNSAT_DIRECTORY_PATH);
+        File[] unsatFiles = unsatDir.listFiles();
+        for (File file : unsatFiles) {
+            assertFalse(runSatSolverTest(file.getAbsolutePath()), "Returned VALID for UNSAT test case " + file.getName());
+            System.out.println("=======================");
         }
     }
 
