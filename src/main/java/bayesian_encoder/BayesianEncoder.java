@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -111,10 +112,50 @@ public class BayesianEncoder {
                     String leftImplication = "-" + indicatorVariable + " " + parameterVariableID + CNF_ENDER;
                     encoderWriter.write(leftImplication);
                 }
-
+                float val = findWeightValue(integerBits, clique.getFunctionTable());
+                String literal = parameterVariableID + val + " 0\n";
+                weightsWriter.write(literal);
+                String negatedLiteral = "-" + parameterVariableID + " 1 0\n";
+                weightsWriter.write(negatedLiteral);
                 parameterVariableID++;
             }
         }
+    }
+
+        /*
+      X Y Z P(X|Y,Z)
+    0 F F F ...
+    1 F F T ...
+    2 F T F ...
+    3 F T T ...
+    4 T F F ...
+    5 T F T ...
+    6 T T F ...
+    7 T T T ...
+            0 1 2 3
+            4 5 6 7
+    */
+    // EG: 3 = 011 => FALSE, TRUE, TRUE: [0,3]
+    // EG: 4 = 100 => TRUE, FALSE, FALSE: [1,0]
+    // EG: 5 = 101 => TRUE, FALSE, TRUE: [1,1]
+    // EG: 6 = 110 => TRUE, TRUE, FALSE: [1,2]
+    // EG: 7 = 111 => TRUE, TRUE, TRUE: [1,3]
+
+    /**
+     * findWeightValue maps a particular Parameter variable to its weight value
+     * @param integerBits
+     * @param functionTable
+     * @return
+     */
+    private float findWeightValue(boolean[] integerBits, float[][] functionTable) {
+        int firstIndex;
+        if (integerBits[integerBits.length - 1]) {
+            firstIndex = 1;
+        } else {
+            firstIndex = 0;
+        }
+        int secondIndex = bitsToInteger(Arrays.copyOfRange(integerBits, 0, integerBits.length - 1));
+        return functionTable[firstIndex][secondIndex];
     }
 
     private void createHints(BufferedWriter writer, Map<Integer,Boolean> evidence) throws IOException {
@@ -127,6 +168,11 @@ public class BayesianEncoder {
             }
             writer.write(Integer.toString(indicatorVariable));
         }
+    }
+
+    //TODO
+    private int bitsToInteger(boolean[] bits) {
+
     }
 
     // Returns a Small Endian array
