@@ -105,4 +105,10 @@ public class Assignments2 {
         }
         return nodes;
     }
+
+    public void clear() {
+        this.implicationGraphRoots = new HashMap<>();
+        this.implicationGraphNodes = new HashMap<>();
+        this.variableAssignments = new HashMap<>();
+    }
 }

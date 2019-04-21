@@ -75,18 +75,24 @@ public class CDCLSolver2 {
      */
     private void backtrack(int assertionLevel) {
         System.out.println("Backtracking...");
-        List<Variable> variablesToRemove = new ArrayList<>();
-        for (Node node : assignments.getImplicationGraphNodes().values()) {
-            if (node.getDecisionLevel() > assertionLevel) {
-                System.out.println("Removing all nodes that led to node " + node.getVariable().getId());
-                for (Edge inEdge : node.getInEdges()) {
-                    inEdge.getFromNode().removeOutEdge(inEdge);
+        if (assertionLevel == 0) {
+            // Remove all assignments
+            assignments.clear();
+
+        } else {
+            List<Variable> variablesToRemove = new ArrayList<>();
+            for (Node node : assignments.getImplicationGraphNodes().values()) {
+                if (node.getDecisionLevel() > assertionLevel) {
+                    System.out.println("Removing all nodes that led to node " + node.getVariable().getId());
+                    for (Edge inEdge : node.getInEdges()) {
+                        inEdge.getFromNode().removeOutEdge(inEdge);
+                    }
+                    variablesToRemove.add(node.getVariable());
                 }
-                variablesToRemove.add(node.getVariable());
             }
-        }
-        for (Variable variable : variablesToRemove) {
-            assignments.removeAssignment(variable);
+            for (Variable variable : variablesToRemove) {
+                assignments.removeAssignment(variable);
+            }
         }
     }
 
@@ -131,7 +137,6 @@ public class CDCLSolver2 {
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
 
             System.out.println("Resolved with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString());
-            System.out.println("#@decision level = " + numLiteralsAtDecisionLevel);
             System.out.print("New learnt clause: ");
             printNodeSet(candidates);
         }
@@ -230,14 +235,12 @@ public class CDCLSolver2 {
                     // Check if assignment is conflicting
                     if(conflictsWithExistingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
-                        assignments.printVariableAssignments();
                         System.out.println("Found conflicting assignment for " + unitLiteralVariable.getId() + " in clause " + clause.toString());
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true, decisionLevel);
                     }
 
                     assignments.addAssignment(unitLiteralVariable, lastInferredNode, inferredNodeAssignment, false);
-                    assignments.printVariableAssignments();
 
                     performedUnitResolution = true;
                 }
