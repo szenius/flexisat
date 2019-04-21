@@ -146,9 +146,11 @@ public class Assignments2 {
 
     private void removeTree(Node root) {
         List<Edge> outEdges = root.getOutEdges();
-        while (!outEdges.isEmpty()) {
-            Edge outEdge = outEdges.remove(0);
+        int i = 0;
+        while (i < outEdges.size()) {
+            Edge outEdge = outEdges.get(i);
             removeTree(outEdge.getToNode());
+            i++;
         }
         List<Edge> inEdges = root.getInEdges();
         while (!inEdges.isEmpty()) {
