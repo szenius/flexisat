@@ -17,20 +17,14 @@ public class BayesianMain {
 
         List<BayesianClique> cliques = parser.getCliques();
         parser.parseEvidence(evidenceFileName);
-        Map<Integer, Integer> queryVariables = parser.getQueryValues();
+        Map<Integer, Boolean> queryVariables = parser.getQueryValues();
         BayesianEncoder networkEncoder = new BayesianEncoder();
 
         networkEncoder.encodeBayesianQueryIntoCNF(parser.getNumVariables(),
                 cliques, parser.getQueryValues());
 
         calculateWeights(parser.getCliques());
-        createDimacsFile();
 
-
-
-    }
-
-    private static void createDimacsFile() {
 
     }
 

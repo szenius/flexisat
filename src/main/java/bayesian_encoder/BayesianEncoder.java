@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BayesianEncoder {
-    
+
     String CNF_ENDER = " 0\n";
 
     // Variables coding scheme:
