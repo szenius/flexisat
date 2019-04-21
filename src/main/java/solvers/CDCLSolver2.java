@@ -37,7 +37,6 @@ public class CDCLSolver2 {
         // Perform unit resolution
         int decisionLevel = 0;
         if (unitPropagation(decisionLevel).isConflict()) {
-            System.out.println("CONFLICT from Unit Propagation at decision level " + decisionLevel + "!");
             return false;
         }
 
@@ -47,12 +46,11 @@ public class CDCLSolver2 {
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
             assignments.addAssignment(pickedVariable, newNode, false, true);
-            System.out.println("Assigned " + pickedVariable.getId() + "=" + assignments.getVariableAssignment(pickedVariable) + "@" + decisionLevel);
+            System.out.println("ASSIGNED " + pickedVariable.getId() + "=" + assignments.getVariableAssignment(pickedVariable) + "@" + decisionLevel);
 
             // Run unit propagation
             UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
             while (unitResolutionResult.isConflict()) {
-                System.out.println("CONFLICT from Unit Propagation at decision level " + decisionLevel + "!");
                 int assertionLevel = conflictAnalysis(unitResolutionResult);
                 System.out.println("Asserting at level " + assertionLevel);
                 if (assertionLevel < 0) {
@@ -83,7 +81,6 @@ public class CDCLSolver2 {
             List<Variable> variablesToRemove = new ArrayList<>();
             for (Node node : assignments.getImplicationGraphNodes().values()) {
                 if (node.getDecisionLevel() > assertionLevel) {
-                    System.out.println("Removing all nodes that led to node " + node.getVariable().getId());
                     for (Edge inEdge : node.getInEdges()) {
                         inEdge.getFromNode().removeOutEdge(inEdge);
                     }
@@ -94,6 +91,7 @@ public class CDCLSolver2 {
                 assignments.removeAssignment(variable);
             }
         }
+        assignments.printImplicationGraph();
     }
 
     /**
@@ -107,36 +105,46 @@ public class CDCLSolver2 {
         Node conflictingNode = conflict.getConflictingNode();
         int conflictDecisionLevel = conflict.getConflictDecisionLevel();
 
-        System.out.println("Doing Conflict Analysis for inferred node " + inferredNode.toString() + " and conflict node " + conflictingNode.toString());
+        // Remove all outgoing edges from the conflicting nodes
+        inferredNode.removeSubtree();
+        conflictingNode.removeSubtree();
 
-        // Collect edges to cut for learning clause. We cut the edges that directly lead to the conflict.
+        // Collect edges that directly lead to the conflict.
         Queue<Edge> cutEdges = new LinkedList<>(conflictingNode.getInEdges());
         cutEdges.addAll(inferredNode.getInEdges());
 
-        // Find the closest nodes to conflict side
+        // Find the closest nodes to conflict site
         Set<Node> candidates = new HashSet<>();
         while (!cutEdges.isEmpty()) {
             candidates.add(cutEdges.poll().getFromNode());
         }
 
-        // Do resolution until only one literal is in the current decision level
         int numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
         System.out.print("Found closest nodes to conflict side with #@decision level = " + numLiteralsAtDecisionLevel + ": ");
         printNodeSet(candidates);
         for (Node candidate : candidates) {
-            // TODO: dupe edges to the same node by the same dueToClaus should not be added
             cutEdges.addAll(candidate.getInEdges());
         }
+        Set<Node> visited = new HashSet<>();
         while (numLiteralsAtDecisionLevel > 1 && !cutEdges.isEmpty()) {
-            Edge cutEdge = cutEdges.poll();
-            if (cutEdge.getToNode().getDecisionLevel() > conflictDecisionLevel) {
+                Edge cutEdge = cutEdges.poll();
+            if (cutEdge.getToNode().equals(conflictingNode) || cutEdge.getToNode().equals(inferredNode)) {
+                // Cannot do resolution with conflicting nodes
                 continue;
             }
+            if (cutEdge.getToNode().getDecisionLevel() > conflictDecisionLevel) {
+                // Don't consider learning literals assigned at decision level higher than conflict level
+                continue;
+            }
+//            if (!visited.add(cutEdge.getToNode())) {
+//                // Already visited this node
+//                continue;
+//            }
             candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
             numLiteralsAtDecisionLevel = countLiteralsAtDecisionLevel(candidates, conflictDecisionLevel);
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
 
-            System.out.println("Resolved with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString());
+            System.out.print("RESOLVED with " + cutEdge.getToNode().getVariable().getId() + "@" + conflictDecisionLevel + ", clause " + cutEdge.getDueToClause().toString() + " ===> ");
             System.out.print("New learnt clause: ");
             printNodeSet(candidates);
         }
@@ -156,7 +164,7 @@ public class CDCLSolver2 {
         }
         Clause learntClause = new Clause(new ArrayList<>(learntLiterals));
         clauses.addClause(learntClause);
-        System.out.println("Learnt new clause " + learntClause.toString());
+        System.out.println("LEARNT new clause " + learntClause.toString());
 
         // Remove assignment of conflicting nodes
         assignments.removeAssignment(conflictingNode.getVariable());
@@ -188,7 +196,7 @@ public class CDCLSolver2 {
         for (Node node : nodes) {
             joiner.add((assignments.getVariableAssignment(node.getVariable()) ? "-" : "") + String.valueOf(node.getVariable().getId()));
         }
-        System.out.println(joiner.toString());
+        System.out.println("[[" + joiner.toString() + "]]");
     }
 
     private int countLiteralsAtDecisionLevel(Set<Node> nodes, int decisionLevel) {
@@ -227,7 +235,7 @@ public class CDCLSolver2 {
                     // Found unit literal, do unit resolution
                     Variable unitLiteralVariable = unitLiteral.getVariable();
                     boolean inferredNodeAssignment = !unitLiteral.isNegated();
-                    System.out.println("Inferred " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
+                    System.out.println("INFERRED " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
 
                     // Add to implication graph
                     lastInferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
@@ -235,7 +243,7 @@ public class CDCLSolver2 {
                     // Check if assignment is conflicting
                     if(conflictsWithExistingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
                         // Conflicting assignment
-                        System.out.println("Found conflicting assignment for " + unitLiteralVariable.getId() + " in clause " + clause.toString());
+                        System.out.println("CONFLICT: " + unitLiteralVariable.getId() + "@" + decisionLevel + " due to clause " + clause.toString());
                         Node conflictingNode = assignments.getNode(unitLiteralVariable);
                         return new UnitResolutionResult(lastInferredNode, conflictingNode, true, decisionLevel);
                     }
@@ -271,7 +279,6 @@ public class CDCLSolver2 {
             if (literal.getVariable() != unitLiteralVariable) {
                 Node fromNode = assignments.getNode(literal.getVariable());
                 Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
-                System.out.println("Added edge from " + fromNode.getVariable().getId() + " to " + lastInferredNode.getVariable().getId() + " using clause " + dueToClause.toString());
                 fromNode.addOutEdge(newEdge);
                 lastInferredNode.addInEdge(newEdge);
             }

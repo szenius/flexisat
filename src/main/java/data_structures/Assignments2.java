@@ -45,7 +45,6 @@ public class Assignments2 {
     }
 
     public void addAssignment(Variable variable, Node node, boolean assignment, boolean isRoot) {
-        System.out.println("Adding assignment for " + variable.getId() + "=" + assignment);
         addNode(variable, node);
         addVariableAssignment(variable, assignment);
         if (isRoot) addRoot(variable, node);
@@ -58,7 +57,6 @@ public class Assignments2 {
     }
 
     private void removeVariableAssignment(Variable variable) {
-        System.out.println("Removing assignment from variable " + variable.getId());
         variableAssignments.remove(variable);
     }
 
@@ -110,5 +108,22 @@ public class Assignments2 {
         this.implicationGraphRoots = new HashMap<>();
         this.implicationGraphNodes = new HashMap<>();
         this.variableAssignments = new HashMap<>();
+    }
+
+    public void printImplicationGraph() {
+        System.out.println("*********************");
+        for (Node root : implicationGraphRoots.values()) {
+            System.out.println("Exploring root " + root.toString());
+            traverse(root);
+        }
+        System.out.println("*********************");
+    }
+
+    private void traverse(Node root) {
+        List<Edge> outgoing = root.getOutEdges();
+        for (Edge edge : outgoing) {
+            System.out.println(edge.toString());
+            traverse(edge.getToNode());
+        }
     }
 }

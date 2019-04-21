@@ -55,6 +55,7 @@ public class Node {
 //        return (String.valueOf(getVariable().hashCode()) + "+" + String.valueOf(getDecisionLevel())).hashCode();
     }
 
+    // NOTE: The equals for Node only cares about whether the variable is the same and not the decision level.
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -67,10 +68,13 @@ public class Node {
             return false;
         }
         return ((Node) obj).getVariable() == this.getVariable();
-//        if (((Node) obj).getVariable() == this.getVariable()
-//                && ((Node) obj).getDecisionLevel() == this.getDecisionLevel()) {
-//            return true;
-//        }
-//        return false;
+    }
+
+    public void removeSubtree() {
+        for (Edge out : outEdges) {
+            out.getToNode().removeSubtree();
+            out.getToNode().getInEdges().clear();
+        }
+        outEdges.clear();
     }
 }

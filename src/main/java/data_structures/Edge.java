@@ -24,6 +24,11 @@ public class Edge {
     }
 
     @Override
+    public String toString() {
+        return fromNode.toString() + "---" + dueToClause.toString() + "-->" + toNode.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

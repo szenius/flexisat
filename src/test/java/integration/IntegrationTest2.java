@@ -19,12 +19,12 @@ public class IntegrationTest2 {
     private static final String SAT_DIRECTORY_PATH = "input/sat/";
 
     @Test
-    @DisplayName("VALID examples test")
-    void testValidCNF() {
+    @DisplayName("SAT examples test")
+    void testSatCNF() {
         File satDir = new File(SAT_DIRECTORY_PATH);
         File[] satFiles = satDir.listFiles();
         for (File file : satFiles) {
-            assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for VALID test case " + file.getName());
+            assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for SAT test case " + file.getName());
             System.out.println("=======================");
         }
     }
