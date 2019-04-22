@@ -58,7 +58,7 @@ public class IntegrationTest {
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
         CDCLSolver solver = new CDCLSolver(clauses, variables);
-        return solver.solve();
+        return solver.solve().isSat();
     }
 
 }
