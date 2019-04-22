@@ -1,8 +1,13 @@
 package data_structures;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 public class Assignments {
+    private static final Logger logger = LoggerFactory.getLogger(Assignments.class);
+
     private Map<Variable, Node> implicationGraphRoots;
     private Map<Variable, Node> implicationGraphNodes;
     private Map<Variable, Boolean> variableAssignments;
@@ -129,22 +134,22 @@ public class Assignments {
                     .append(variableAssignments.get(assignedVars))
                     .append(',');
         }
-        System.out.println(sb.toString());
+        logger.debug(sb.toString());
     }
 
     public void printImplicationGraph() {
-        System.out.println("*********************");
+        logger.debug("*********************");
         for (Node root : implicationGraphRoots.values()) {
-            System.out.println("Exploring root " + root.toString());
+            logger.debug("Exploring root {}", root.toString());
             traverse(root);
         }
-        System.out.println("*********************");
+        logger.debug("*********************");
     }
 
     private void traverse(Node root) {
         List<Edge> outgoing = root.getOutEdges();
         for (Edge edge : outgoing) {
-            System.out.println(edge.toString());
+            logger.debug(edge.toString());
             traverse(edge.getToNode());
         }
     }

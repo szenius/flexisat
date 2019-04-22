@@ -1,10 +1,13 @@
 package conflict_analysers;
 
 import data_structures.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class UIPConflictAnalyser extends ConflictAnalyserExtended {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UIPConflictAnalyser.class);
 
     @Override
     public ConflictAnalyserResult learnClause(UnitResolutionResult conflict, Assignments assignments) {
@@ -65,7 +68,7 @@ public class UIPConflictAnalyser extends ConflictAnalyserExtended {
             }
         }
         Clause learntClause = new Clause(new ArrayList<>(learntLiterals));
-        System.out.println("LEARNT new clause " + learntClause.toString());
+        LOGGER.debug("LEARNT new clause {}", learntClause.toString());
 
         // Remove assignment of the conflicting node which came second
         List<Edge> inEdges = inferredNode.getInEdges();

@@ -10,6 +10,8 @@ import data_structures.Clause;
 import data_structures.Clauses;
 import data_structures.Literal;
 import data_structures.Variable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 public class Parser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Parser.class);
+
     private Clauses clauses;
     private Set<Variable> variables;
     private BranchPicker branchPicker;
@@ -72,7 +76,7 @@ public class Parser {
             clauses = new Clauses(clauseSet);
 
             br.close();
-            System.out.println("Parsed input file " + filename);
+            LOGGER.debug("Parsed input file {}", filename);
             return clauses;
         } catch (IOException e) {
             e.printStackTrace();

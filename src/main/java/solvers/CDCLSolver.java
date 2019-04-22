@@ -3,11 +3,15 @@ package solvers;
 import branch_pickers.BranchPicker;
 import conflict_analysers.ConflictAnalyser;
 import data_structures.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import parser.Parser;
 
 import java.util.*;
 
 public class CDCLSolver implements Solver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDCLSolver.class);
+
     private Clauses clauses;
     private Set<Variable> variables;
     private Assignments assignments;
@@ -37,19 +41,19 @@ public class CDCLSolver implements Solver {
      */
     @Override
     public SolverResult solve() {
-        System.out.println("Running CDCLSolver...");
+        LOGGER.debug("Running CDCLSolver...");
 
         long startTime = System.currentTimeMillis();
 
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
-            System.out.println("Found empty formula!");
+            LOGGER.debug("Found empty formula!");
             return new SolverResult(true, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
         // Check if there is any empty clause
         if (clauses.hasEmptyClause()) {
-            System.out.println("Found empty clause!");
+            LOGGER.debug("Found empty clause!");
             return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
@@ -65,18 +69,18 @@ public class CDCLSolver implements Solver {
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
             assignments.addAssignment(pickedVariable, newNode, false, true);
-            System.out.println("ASSIGNED " + pickedVariable.getId() + "=" + assignments.getVariableAssignment(pickedVariable) + "@" + decisionLevel);
+            LOGGER.debug("ASSIGNED {}={}@{}", pickedVariable.getId(), assignments.getVariableAssignment(pickedVariable),decisionLevel);
 
             // Run unit propagation
             UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
             while (unitResolutionResult.isConflict()) {
                 int assertionLevel = conflictAnalysis(unitResolutionResult);
-                System.out.println("ASSERTING at level " + assertionLevel);
+                LOGGER.debug("ASSERTING at level {}", assertionLevel);
                 if (assertionLevel < 0) {
                     return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
                 } else {
                     backtrack(assertionLevel);
-                    System.out.println("BACKTRACKED to decision level " + assertionLevel);
+                    LOGGER.debug("BACKTRACKED to decision level {}", assertionLevel);
                     decisionLevel = assertionLevel;
                 }
                 unitResolutionResult = unitPropagation(decisionLevel);
@@ -138,7 +142,7 @@ public class CDCLSolver implements Solver {
                     // Found unit literal, do unit resolution
                     Variable unitLiteralVariable = unitLiteral.getVariable();
                     boolean inferredNodeAssignment = !unitLiteral.isNegated();
-                    System.out.println("INFERRED " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
+                    LOGGER.debug("INFERRED {}={}@{} by clause {}", unitLiteralVariable.getId(), inferredNodeAssignment, decisionLevel, clause.toString());
 
                     // Add to implication graph + assign variable
                     Node inferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
@@ -148,7 +152,7 @@ public class CDCLSolver implements Solver {
                     Clause disagreeingClause = propagateAssignment(inferredNode, clause);
                     if (disagreeingClause != null) {
                         // Found conflicting assignment
-                        System.out.println("CONFLICT: " + unitLiteralVariable.getId() + "@" + decisionLevel + " due to clauses " + clause.toString() + " and " + disagreeingClause.toString());
+                        LOGGER.debug("CONFLICT: {}@{} due to clauses {} and {}", unitLiteralVariable.getId(), decisionLevel, clause.toString(), disagreeingClause.toString());
                         Node conflictingNode = addToImplicationGraph(disagreeingClause, inferredNode);
                         return new UnitResolutionResult(inferredNode, conflictingNode, true, decisionLevel);
                     }
@@ -264,6 +268,6 @@ public class CDCLSolver implements Solver {
         for (Node node : nodes) {
             joiner.add((assignments.getVariableAssignment(node.getVariable()) ? "-" : "") + String.valueOf(node.getVariable().getId()));
         }
-        System.out.println("[[" + joiner.toString() + "]]");
+        LOGGER.debug("[[{}]]", joiner.toString());
     }
 }
