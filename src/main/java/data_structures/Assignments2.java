@@ -45,13 +45,15 @@ public class Assignments2 {
     }
 
     public void addAssignment(Variable variable, Node node, boolean assignment, boolean isRoot) {
+//        System.out.println("Adding assignment for " + variable.getId());
         addNode(variable, node);
         addVariableAssignment(variable, assignment);
         if (isRoot) addRoot(variable, node);
+        printImplicationGraph();
     }
 
     public void removeAssignment(Variable variable) {
-        System.out.println("Removing assignment for " + variable.getId());
+//        System.out.println("Removing assignment for " + variable.getId());
         removeNode(variable);
         removeRoot(variable);
         removeVariableAssignment(variable);
@@ -137,14 +139,18 @@ public class Assignments2 {
         for (Variable variable : variables) {
             Node node = implicationGraphNodes.get(variable);
             if (node.getDecisionLevel() > assertionLevel) {
-                System.out.println("Removing node " + node.toString());
+//                System.out.println("Removing node " + node.toString());
                 for (Edge inEdge : node.getInEdges()) {
-                    System.out.println("Removing edge " + inEdge.toString());
+//                    System.out.println("Removing edge " + inEdge.toString());
                     inEdge.getFromNode().removeOutEdge(inEdge);
                 }
                 node.getInEdges().clear();
                 removeAssignment(variable);
             }
         }
+    }
+
+    public boolean isEmpty() {
+        return this.implicationGraphRoots.isEmpty();
     }
 }

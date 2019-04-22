@@ -22,7 +22,7 @@ public class Clause {
         return null;
     }
 
-    public Literal getUnitLiteral(Assignments2 assignments, Variable lastAssignedVariable) {
+    public Literal getUnitLiteral(Assignments2 assignments) {
         Literal unitLiteral = null;
         boolean clauseValue = false;
         for (Literal literal : literals) {
@@ -39,45 +39,6 @@ public class Clause {
         }
         if (clauseValue) {
             return null;
-        }
-        if (unitLiteral == null && lastAssignedVariable != null) {
-            // All variables have been assigned but this clause evaluates to false
-            // We find the last assigned literal to return
-            Set<Node> nodes = assignments.getNodes(this);
-            Map<Integer, List<Node>> nodesByDecisionLevel = new HashMap<>();
-            int maxDecisionLevel = Integer.MIN_VALUE;
-            for (Node node : nodes) {
-                int decisionLevel = node.getDecisionLevel();
-                List<Node> nodesAtDecisionLevel = nodesByDecisionLevel.getOrDefault(decisionLevel, new ArrayList<>());
-                nodesAtDecisionLevel.add(node);
-                nodesByDecisionLevel.putIfAbsent(decisionLevel, nodesAtDecisionLevel);
-                maxDecisionLevel = Math.max(maxDecisionLevel, decisionLevel);
-            }
-            if (nodesByDecisionLevel.size() == 3) {
-                // All literals were assigned at different decision levels. Return the one assigned last.
-                return findLiteralByNode(nodesByDecisionLevel.get(maxDecisionLevel).get(0));
-            }
-            List<Node> candidates = nodesByDecisionLevel.get(maxDecisionLevel);
-            Node reserveCand = candidates.get(0);
-            int i = 0;
-            while (i < candidates.size()) {
-                Node candidate = candidates.get(i);
-                if (candidate.getOutEdges().isEmpty()) {
-                    // Found a leaf in the implication graph
-                    return findLiteralByNode(candidate);
-                }
-                if (assignments.hasRoot(candidate)) {
-                    // Remove roots from candidates
-                    candidates.remove(i);
-                }
-                i++;
-            }
-            if (candidates.isEmpty()) {
-                // All candidates were roots
-                return findLiteralByNode(reserveCand);
-            }
-            // Find the literal that was last assigned in the implication graph
-            return findLiteralByNode(findDeepestNode(candidates.get(0), candidates.get(0), candidates));
         }
         return unitLiteral;
     }
@@ -136,5 +97,31 @@ public class Clause {
 
     public int size() {
         return this.getLiterals().size();
+    }
+
+    public Literal findUnitLiteral(Variable variable, Assignments2 assignments) {
+        // Count number of literals assigned other than the one corr to the input variable
+        int numAssigned = 0;
+        boolean clauseValue = false;
+        Literal unitLiteral = null;
+        for (Literal literal : getLiterals()) {
+            if (assignments.hasAssignedVariable(literal)) {
+                clauseValue = clauseValue | (literal.isNegated() ^ assignments.getVariableAssignment(literal));
+                if (literal.getVariable().equals(variable)) {
+                    unitLiteral = literal;
+                    continue;
+                }
+                numAssigned++;
+            }
+        }
+        // If clause evaluates to true, no unit literal can be inferred
+        if (clauseValue) {
+            return null;
+        }
+        // Return the literal corr to the input variable if it's the only literal which has not been assigned
+        if (numAssigned == literals.size() - 1) {
+            return unitLiteral;
+        }
+        return null;
     }
 }
