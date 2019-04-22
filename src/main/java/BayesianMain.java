@@ -22,14 +22,6 @@ public class BayesianMain {
 
         networkEncoder.encodeBayesianQueryIntoCNF(parser.getNumVariables(),
                 cliques, parser.getQueryValues());
-
-        calculateWeights(parser.getCliques());
-
-
-    }
-
-    private static void calculateWeights(List<BayesianClique> cliques) {
-
     }
 
 }

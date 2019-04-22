@@ -12,6 +12,7 @@ public class UAIParser {
     int numVariables;
 
     public void parse(String filePath) {
+        System.out.println("Parsing model file now.");
         File file = new File(filePath);
         FileInputStream fis = null;
         try {
@@ -25,7 +26,7 @@ public class UAIParser {
 
         String line;
         try {
-            // First line: Should be BAYESIAN
+            // First line: Should be BAYES
             line = br.readLine();
             if (!line.equals("BAYES")) {
                 System.out.println("Wrong file format.");
@@ -61,6 +62,7 @@ public class UAIParser {
                 // TODO: Is there a more idiomatic way to do this in Java?
                 for (int j = 0 ; j < numVariablesInClique; j++) {
                     int variable = Integer.parseInt(scopeOfClique[j+1]);
+                    variablesInClique.add(variable);
                 }
                 BayesianClique cliqueToAdd = new BayesianClique(variablesInClique);
                 cliques.add(cliqueToAdd);
@@ -79,6 +81,7 @@ public class UAIParser {
                 float [][] variableFunctionValues = new float[2][numEntries/2];
                 for (int j = 0 ; j < 2; j++) {
                     line = br.readLine();
+                    line = line.trim();
                     String[] functions = line.split(" ");
                     if (numEntries / 2 != functions.length) {
                         System.out.println("Error in function table length.");
@@ -97,7 +100,7 @@ public class UAIParser {
 
             this.cliques = cliques;
             br.close();
-            System.out.println("Parsing done!");
+            System.out.println("Model parsing done.");
 
 
         } catch (IOException e) {
@@ -111,6 +114,7 @@ public class UAIParser {
      * @param filePath
      */
     public void parseEvidence(String filePath) {
+        System.out.println("Parsing evidence file now.");
         File file = new File(filePath);
         FileInputStream fis = null;
         try {
@@ -137,7 +141,7 @@ public class UAIParser {
                 this.queryValues.put(Integer.parseInt(values[i * 2 + 1]), val);
             }
             br.close();
-
+            System.out.println("Parsing evidence done.");
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

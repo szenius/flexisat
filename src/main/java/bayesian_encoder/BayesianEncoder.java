@@ -35,6 +35,11 @@ public class BayesianEncoder {
             createCNFHeaders(encodingWriter, weightsWriter, numVariables, cliques, evidence);
 
             createTypeOneConstraints(encodingWriter, weightsWriter, numVariables);
+            // DEBUG
+            for (BayesianClique clique : cliques) {
+                System.out.println(clique.getVariables().size());
+            }
+
             createTypeTwoConstraints(encodingWriter, weightsWriter, numVariables, cliques);
 
             createHints(encodingWriter, evidence);
@@ -74,10 +79,10 @@ public class BayesianEncoder {
         }
         for (int i = 0 ; i < numVariables; i++) {
             // Ia1 -> Ia2
-            String rightImplication = "-" + (2*i) + " " + 2*i+1 + CNF_ENDER;
+            String rightImplication = "-" + (2*i) + " " + (2*i+1) + CNF_ENDER;
             encoderWriter.write(rightImplication);
             // Ia2 -> Ia1
-            String leftImplication = "-" + (2*i+1) + " " + 2*i + CNF_ENDER;
+            String leftImplication = "-" + (2*i+1) + " " + (2*i) + CNF_ENDER;
             encoderWriter.write(leftImplication);
 
             // All indicator variables will have weights of 1
@@ -96,7 +101,11 @@ public class BayesianEncoder {
             for (int i = 0 ; i < totalNumCombinations; i++) {
                 // Get the bits of i to retrieve the value of indicator variable
                 // If bit is true, we will use 2n*variable_value
-                // If bit is false, we will use 2n*variable_value + 1
+                // If bit is false, we will use 2n*variable_value +
+                if (variables.size() == 0) {
+                    System.out.println("WEIRD");
+                    System.exit(1);
+                }
                 boolean[] integerBits = getBitsOfInteger(variables.size(), i);
                 for (int j = 0 ; j < integerBits.length; j++) {
                     // Right implication
@@ -166,7 +175,7 @@ public class BayesianEncoder {
             } else {
                 indicatorVariable = 2 * entry.getKey() + 1;
             }
-            writer.write(Integer.toString(indicatorVariable));
+            writer.write(Integer.toString(indicatorVariable) + " 0\n");
         }
     }
 
@@ -182,7 +191,7 @@ public class BayesianEncoder {
     }
 
     // Returns a Small Endian array
-    private boolean[] getBitsOfInteger (int numBits,int value) {
+    private boolean[] getBitsOfInteger (int numBits, int value) {
         boolean[] bitArray = new boolean[numBits];
         for (int i = numBits - 1; i >= 0; i --) {
             bitArray[i] = (value & (1 << i)) != 0;
