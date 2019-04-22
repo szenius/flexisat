@@ -8,7 +8,7 @@ import parser.Parser;
 import solvers.CDCLSolver2;
 
 import java.io.File;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,11 +18,14 @@ public class IntegrationTest2 {
     private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
     private static final String SAT_DIRECTORY_PATH = "input/sat/";
 
+    private static final boolean QUICK_TESTS_MODE = true;
+    private static final int QUICK_TESTS_SIZE = 10;
+
     @Test
-    @DisplayName("SAT examples test")
-    void testSatCNF() {
+    @DisplayName("SAT tests")
+    public void testSatCNF() throws Exception {
         File satDir = new File(SAT_DIRECTORY_PATH);
-        File[] satFiles = satDir.listFiles();
+        List<File> satFiles = getTestFiles(satDir);
         for (File file : satFiles) {
             assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for SAT test case " + file.getName());
             System.out.println("=======================");
@@ -30,21 +33,23 @@ public class IntegrationTest2 {
     }
 
     @Test
-    @DisplayName("UNSAT examples test")
-    void testUnsatCNF() {
+    @DisplayName("UNSAT tests")
+    public void testUnsatCNF() throws Exception {
         File unsatDir = new File(UNSAT_DIRECTORY_PATH);
-        File[] unsatFiles = unsatDir.listFiles();
+        List<File> unsatFiles = getTestFiles(unsatDir);
         for (File file : unsatFiles) {
             assertFalse(runSatSolverTest(file.getAbsolutePath()), "Returned VALID for UNSAT test case " + file.getName());
             System.out.println("=======================");
         }
     }
 
-    @Test
-    @DisplayName("Single example test")
-    void testSingleExample() {
-        String filename = "input/sat/uf20-0103.cnf";
-        assertTrue(runSatSolverTest(filename), "Returned UNSAT for SAT test case " + filename);
+    private List<File> getTestFiles(File directory) throws Exception {
+        List<File> testFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
+        if (QUICK_TESTS_MODE) {
+            Collections.shuffle(testFiles);
+            testFiles = testFiles.subList(0, QUICK_TESTS_SIZE);
+        }
+        return testFiles;
     }
 
     boolean runSatSolverTest(String testInput) {
