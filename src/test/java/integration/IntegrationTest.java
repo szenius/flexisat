@@ -1,7 +1,5 @@
 package integration;
 
-import data_structures.Clauses;
-import data_structures.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
@@ -10,16 +8,18 @@ import solvers.CDCLSolver;
 import java.io.File;
 import java.util.*;
 
+import static branch_pickers.BranchPickerType.SEQ;
+import static conflict_analysers.ConflictAnalyserType.UIP;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegrationTest {
+    // NOTE: if you want to test against full suite of test files, change the following to false.
+    private static final boolean QUICK_TESTS_MODE = true;
+    private static final int QUICK_TESTS_SIZE = 10;
 
     private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
     private static final String SAT_DIRECTORY_PATH = "input/sat/";
-
-    private static final boolean QUICK_TESTS_MODE = true;
-    private static final int QUICK_TESTS_SIZE = 10;
 
     @Test
     @DisplayName("SAT tests")
@@ -53,11 +53,8 @@ public class IntegrationTest {
     }
 
     boolean runSatSolverTest(String testInput) {
-        Parser parser = new Parser();
-        parser.parse(testInput);
-        Clauses clauses = parser.getClauses();
-        Set<Variable> variables = parser.getVariables();
-        CDCLSolver solver = new CDCLSolver(clauses, variables);
+        Parser parser = new Parser(new String[]{testInput, SEQ.getType(), UIP.getType()});
+        CDCLSolver solver = new CDCLSolver(parser);
         return solver.solve().isSat();
     }
 

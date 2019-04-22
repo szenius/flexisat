@@ -1,14 +1,13 @@
 package parser;
 
 import data_structures.Clause;
-import data_structures.Literal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
+import static branch_pickers.BranchPickerType.SEQ;
+import static conflict_analysers.ConflictAnalyserType.UIP;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
@@ -17,8 +16,8 @@ public class ParserTest {
     @DisplayName("Parses a valid cnf.")
     void validParseTest() {
         String filePath = "input/valid_input1.cnf";
-        Parser testParser = new Parser();
-        List<Clause> listOfClause = new ArrayList<>(testParser.parse(filePath).getClauses());
+        Parser testParser = new Parser(new String[]{filePath, SEQ.getType(), UIP.getType()});
+        Set<Clause> listOfClause = testParser.getClauses().getClauses();
 
         assertEquals(2, listOfClause.size());
         for (Clause clause : listOfClause) {

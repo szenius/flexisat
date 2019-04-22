@@ -13,15 +13,6 @@ public class Clause {
         return this.literals;
     }
 
-    public Literal findLiteralByNode(Node node) {
-        for (Literal literal : literals) {
-            if (node.getVariable().equals(literal.getVariable())) {
-                return literal;
-            }
-        }
-        return null;
-    }
-
     public Literal getUnitLiteral(Assignments assignments) {
         Literal unitLiteral = null;
         boolean clauseValue = false;
@@ -41,33 +32,6 @@ public class Clause {
             return null;
         }
         return unitLiteral;
-    }
-
-    private Node findDeepestNode(Node currNode, Node lastFoundNode, List<Node> nodes) {
-        if (nodes.contains(currNode)) {
-            lastFoundNode = currNode;
-        }
-        if (currNode.getOutEdges().isEmpty()) {
-            return lastFoundNode;
-        }
-        List<Edge> paths = currNode.getOutEdges();
-        for (Edge path : paths) {
-            findDeepestNode(path.getToNode(), lastFoundNode, nodes);
-        }
-        return lastFoundNode;
-    }
-
-    public boolean checkSAT(Assignments assignments) {
-        boolean clauseVal = false;
-        for (Literal literal : literals) {
-            if (assignments.getUnassignedVarIds().contains(literal.getVariable().getId())) {
-                // There are still unassigned variables, cannot determine VALID
-                return true;
-            }
-            clauseVal |= literal.getValue(assignments.getAssignmentValue(literal.getVariable().getId()));
-        }
-        //System.out.println("Clause: Checked clause " + toString() + "... valid? " + clauseVal);
-        return clauseVal;
     }
 
     @Override

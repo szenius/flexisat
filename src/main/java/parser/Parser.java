@@ -17,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static conflict_analysers.ConflictAnalyserType.*;
-
 public class Parser {
     private Clauses clauses;
     private Set<Variable> variables;
@@ -26,6 +24,9 @@ public class Parser {
     private ConflictAnalyser conflictAnalyser;
 
     public Parser(String[] args) {
+        if (args.length != 3) {
+            throw new IllegalArgumentException("Wrong input format.\nUsage: <CNF_file_path> <branch_picker> <conflict_analyser>");
+        }
         this.variables = new HashSet<>();
 
         parse(args[0]);
@@ -81,7 +82,7 @@ public class Parser {
     }
 
     private void setConflictAnalyser(String conflictAnalyserType) {
-        switch (Enum.valueOf(ConflictAnalyserType.class, conflictAnalyserType.toLowerCase())) {
+        switch (Enum.valueOf(ConflictAnalyserType.class, conflictAnalyserType.toUpperCase())) {
             case UIP:
             default:
                 conflictAnalyser = new UIPConflictAnalyser();
@@ -89,8 +90,8 @@ public class Parser {
     }
 
     private void setBranchPicker(String branchPickerType) {
-        switch (Enum.valueOf(BranchPickerType.class, branchPickerType.toLowerCase())) {
-            case SEQUENTIAL:
+        switch (Enum.valueOf(BranchPickerType.class, branchPickerType.toUpperCase())) {
+            case SEQ:
             default:
                 branchPicker = new SequentialBranchPicker(variables);
         }
