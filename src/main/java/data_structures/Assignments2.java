@@ -49,7 +49,7 @@ public class Assignments2 {
         addNode(variable, node);
         addVariableAssignment(variable, assignment);
         if (isRoot) addRoot(variable, node);
-        printImplicationGraph();
+//        printImplicationGraph();
     }
 
     public void removeAssignment(Variable variable) {

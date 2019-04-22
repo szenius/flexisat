@@ -80,7 +80,7 @@ public class CDCLSolver2 {
             // Remove all assignments made beyond assertion level
             assignments.removeAssignmentsBeyondLevel(assertionLevel);
         }
-        assignments.printImplicationGraph();
+//        assignments.printImplicationGraph();
     }
 
     /**
