@@ -1,5 +1,11 @@
 package parser;
 
+import branch_pickers.BranchPicker;
+import branch_pickers.BranchPickerType;
+import branch_pickers.SequentialBranchPicker;
+import conflict_analysers.ConflictAnalyser;
+import conflict_analysers.ConflictAnalyserType;
+import conflict_analysers.UIPConflictAnalyser;
 import data_structures.Clause;
 import data_structures.Clauses;
 import data_structures.Literal;
@@ -11,35 +17,24 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static conflict_analysers.ConflictAnalyserType.*;
+
 public class Parser {
-
-    private final static int EXPECTED_CLAUSE_SIZE = 3;
-
     private Clauses clauses;
     private Set<Variable> variables;
-    private Set<Integer> varIds;
+    private BranchPicker branchPicker;
+    private ConflictAnalyser conflictAnalyser;
 
-    public Parser() {
+    public Parser(String[] args) {
         this.variables = new HashSet<>();
-        this.varIds = new HashSet<>();
+
+        parse(args[0]);
+        setBranchPicker(args[1]);
+        setConflictAnalyser(args[2]);
     }
 
-    public Clauses getClauses() {
-        return this.clauses;
-    }
-
-    public Set<Variable> getVariables() {
-        return this.variables;
-    }
-
-    public Set<Integer> getVarIds() {
-        return this.varIds;
-    }
-
-    public Clauses parse(String filePath) {
-        System.out.println("Trying to parse CNF file " + filePath);
-
-        File file = new File(filePath);
+    private Clauses parse(String filename) {
+        File file = new File(filename);
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
@@ -58,26 +53,26 @@ public class Parser {
                 line = br.readLine();
             }
 
-
             // First line after comment lines should start with "p"
-            String[] secondLine = line.trim().split("\\s+");
-            int numClauses = Integer.parseInt(secondLine[3]);
+            String[] tokens = line.trim().split("\\s+");
+            int numClauses = Integer.parseInt(tokens[3]);
 
             // Read in clauses
-            Set<Clause> clauses = new HashSet<>();
+            Set<Clause> clauseSet = new HashSet<>();
             for (int i = 0 ; i < numClauses; i++ ) {
                 line = br.readLine();
                 try {
-                    clauses.add(createClause(line));
+                    clauseSet.add(createClause(line));
                 } catch (Exception e){
                     e.printStackTrace();
                     System.exit(1);
                 }
             }
-            this.clauses = new Clauses(clauses);
+            clauses = new Clauses(clauseSet);
+
             br.close();
-            System.out.println("Parsed input file " + filePath);
-            return this.clauses;
+            System.out.println("Parsed input file " + filename);
+            return clauses;
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -85,30 +80,44 @@ public class Parser {
         return null;
     }
 
-    private Clause createClause(String line) throws Exception {
+    private void setConflictAnalyser(String conflictAnalyserType) {
+        switch (Enum.valueOf(ConflictAnalyserType.class, conflictAnalyserType.toLowerCase())) {
+            case UIP:
+            default:
+                conflictAnalyser = new UIPConflictAnalyser();
+        }
+    }
+
+    private void setBranchPicker(String branchPickerType) {
+        switch (Enum.valueOf(BranchPickerType.class, branchPickerType.toLowerCase())) {
+            case SEQUENTIAL:
+            default:
+                branchPicker = new SequentialBranchPicker(variables);
+        }
+    }
+
+    private Clause createClause(String line) {
         if (line == null){
-            throw new Exception("Clause does not exist.");
-        }  
-        String[] splitLine = line.trim().split("\\s+");
-        // The last number of each line should be 0
-        if (splitLine.length != EXPECTED_CLAUSE_SIZE + 1) {
-            System.out.println(splitLine.length);
-            throw new Exception("Clause size is not " + EXPECTED_CLAUSE_SIZE);
+            throw new IllegalArgumentException("Cannot create clause from NULL line.");
         }
-        if (Integer.parseInt(splitLine[3]) != 0) {
-            throw new Exception("Format of clause is incorrect. Last number of the line should be 0.");
+
+        String[] tokens = line.trim().split("\\s+");
+
+        if (Integer.parseInt(tokens[3]) != 0) {
+            // Line did not end with 0. Unexpected format
+            throw new IllegalArgumentException("Format of clause is incorrect. Last number of the line should be 0.");
         }
-        List<Literal> literals = new ArrayList<Literal>();
-        // Temporarily stores the variables
-        for (int i = 0; i < EXPECTED_CLAUSE_SIZE; i++ ) {
-            int literalValue = Integer.parseInt(splitLine[i]);
+
+        // Collect literals from line and create new clause
+        List<Literal> literals = new ArrayList<>();
+        for (int i = 0; i < tokens.length - 1; i++ ) {
+            int literalValue = Integer.parseInt(tokens[i]);
+            literals.add(createLiteral(literalValue));
             Variable variable = new Variable(Math.abs(literalValue));
-            this.variables.add(variable);
-            this.varIds.add(Math.abs(literalValue));
-            literals.add(createLiteral(Integer.parseInt(splitLine[i])));
-        }   
+            addVariable(variable);
+        }
         return new Clause(literals);
-    }       
+    }
 
     private static Literal createLiteral(int value) {
         Variable variable = new Variable(Math.abs(value));
@@ -119,5 +128,25 @@ public class Parser {
             literal = new Literal(variable, false);
         }
         return literal;
+    }
+
+    private void addVariable(Variable variable) {
+        variables.add(variable);
+    }
+
+    public Clauses getClauses() {
+        return this.clauses;
+    }
+
+    public Set<Variable> getVariables() {
+        return this.variables;
+    }
+
+    public BranchPicker getBranchPicker() {
+        return branchPicker;
+    }
+
+    public ConflictAnalyser getConflictAnalyser() {
+        return conflictAnalyser;
     }
 }

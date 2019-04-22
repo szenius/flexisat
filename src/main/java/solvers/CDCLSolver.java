@@ -3,6 +3,7 @@ package solvers;
 import branch_pickers.BranchPicker;
 import conflict_analysers.ConflictAnalyser;
 import data_structures.*;
+import parser.Parser;
 
 import java.util.*;
 
@@ -15,12 +16,12 @@ public class CDCLSolver implements Solver {
     private ConflictAnalyser conflictAnalyser;
     private int pickBranchingCount;
 
-    public CDCLSolver(Clauses clauses, Set<Variable> variables, BranchPicker branchPicker, ConflictAnalyser conflictAnalyser) {
-        this.clauses = clauses;
-        this.variables = variables;
+    public CDCLSolver(Parser parser) {
+        this.clauses = parser.getClauses();
+        this.variables = parser.getVariables();
+        this.branchPicker = parser.getBranchPicker();
+        this.conflictAnalyser = parser.getConflictAnalyser();
         this.assignments = new Assignments();
-        this.branchPicker = branchPicker;
-        this.conflictAnalyser = conflictAnalyser;
         this.pickBranchingCount = 0;
     }
 
