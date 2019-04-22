@@ -25,7 +25,7 @@ public class Parser {
 
     public Parser(String[] args) {
         if (args.length != 3) {
-            throw new IllegalArgumentException("Wrong input format.\nUsage: <CNF_file_path> <branch_picker> <conflict_analyser>");
+            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type>");
         }
         this.variables = new HashSet<>();
 
