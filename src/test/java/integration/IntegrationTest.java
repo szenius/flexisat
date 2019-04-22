@@ -23,7 +23,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("SAT tests")
-    public void testSatCNF() throws Exception {
+    public void testSatCNF() {
         File satDir = new File(SAT_DIRECTORY_PATH);
         List<File> satFiles = getTestFiles(satDir);
         for (File file : satFiles) {
@@ -34,7 +34,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("UNSAT tests")
-    public void testUnsatCNF() throws Exception {
+    public void testUnsatCNF() {
         File unsatDir = new File(UNSAT_DIRECTORY_PATH);
         List<File> unsatFiles = getTestFiles(unsatDir);
         for (File file : unsatFiles) {
@@ -43,7 +43,7 @@ public class IntegrationTest {
         }
     }
 
-    private List<File> getTestFiles(File directory) throws Exception {
+    private List<File> getTestFiles(File directory) {
         List<File> testFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
         if (QUICK_TESTS_MODE) {
             Collections.shuffle(testFiles);
