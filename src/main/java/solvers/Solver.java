@@ -1,10 +1,8 @@
 package solvers;
 
-import performance.PerformanceTester;
+import data_structures.SolverResult;
 
 public interface Solver {
-    boolean solveWithTimer(PerformanceTester perfTester);
-
-    boolean solve(PerformanceTester perfTester);
+    SolverResult solve();
 
 }

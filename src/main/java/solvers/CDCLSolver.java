@@ -4,7 +4,7 @@ import data_structures.*;
 
 import java.util.*;
 
-public class CDCLSolver {
+public class CDCLSolver implements Solver {
     private Clauses clauses;
     private Set<Variable> variables;
     private Assignments assignments;
