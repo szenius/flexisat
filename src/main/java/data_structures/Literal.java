@@ -27,4 +27,33 @@ public class Literal {
     public boolean getValue(boolean assignment) {
         return this.isNegated ^ assignment;
     }
+
+    @Override
+    public String toString(){
+        if (this.isNegated()) {
+            return "-" + Integer.toString(this.getVariable().getId());
+        } else {
+            return Integer.toString(this.getVariable().getId());
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return (String.valueOf(this.variable.getId()) + this.isNegated()).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Literal literal = (Literal) obj;
+        return this.variable == literal.getVariable() && this.isNegated == literal.isNegated();
+    }
 }
