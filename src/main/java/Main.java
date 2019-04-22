@@ -1,6 +1,7 @@
 import data_structures.*;
 import parser.Parser;
 import solvers.CDCLSolver;
+import solvers.Solver;
 
 import java.util.Set;
 
@@ -15,9 +16,9 @@ class Main {
         Set<Variable> variables = parser.getVariables();
 
         // Run solver
-        CDCLSolver solver = new CDCLSolver(clauses, variables);
-        boolean sat = solver.solve();
-        if (sat) {
+        Solver solver = new CDCLSolver(clauses, variables);
+        SolverResult result = solver.solve();
+        if (result.isSat()) {
             System.out.println("SAT");
         } else {
             System.out.println("UNSAT");
