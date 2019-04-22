@@ -11,10 +11,18 @@ gradle clean
 gradle fatJar
 ```
 
+Alternatively, if you have this project setup in your IDE, you can click on the `clean` and `fatJar` tasks in your Gradle toolbar as well. For IntelliJ, the specific steps are:
+1. In the top navigation bar, click on View > Tool Windows > Gradle. The Gradle toolbar should pop out on your left.
+2. Click on Tasks > build > clean
+3. Click on Tasks > other > fatJar
+
 ### Running the SAT Solver
 In the project root directory, run this:
 ```
 java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <conflict_analsyer_type>
+
+# e.g.
+# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq uip
 ```
 * `filename`: A CNF file following the DIMACS format
 * `pick_branching_type`: How variables should be picked for assignment. Can be "seq". Please see [Branch Pickers](#branch-pickers) for more explanation.
