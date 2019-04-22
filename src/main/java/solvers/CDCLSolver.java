@@ -1,267 +1,367 @@
 package solvers;
 
 import data_structures.*;
-import data_structures.Assignments;
-import data_structures.Clause;
-import data_structures.Clauses;
-import performance.PerformanceTester;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-
-public class CDCLSolver implements Solver {
-    Clauses clauses;
-    Set<Variable> variables;
-    Assignments assignments;
-
+public class CDCLSolver {
+    private Clauses clauses;
+    private Set<Variable> variables;
+    private Assignments assignments;
+    private int pickBranchingCount;
 
     public CDCLSolver(Clauses clauses, Set<Variable> variables) {
         this.clauses = clauses;
         this.variables = variables;
-        this.assignments = new Assignments(variables);
+        this.assignments = new Assignments();
+        this.pickBranchingCount = 0;
     }
 
-    @Override
-    public boolean solve(PerformanceTester perfTester) {
+    /**
+     * Check if CNF formula is SAT or UNSAT by CDCL.
+     * Generally: Try to do unit propagation wherever possible.
+     *            If conflict in inferred assignment during unit propagation, do analysis and learn a new clause.
+     *            If it's not possible to do unit propagation, pick a branching variable to assign FALSE.
+     *            If the decision level becomes negative, return UNSAT.
+     *            Else if all variables are assigned without conflict, return SAT.
+     *
+     * @return SolverResult object
+     */
+    public SolverResult solve() {
         System.out.println("Running CDCLSolver...");
+
+        long startTime = System.currentTimeMillis();
+
         // Check if formula is empty
         if (clauses.getClauses().isEmpty()) {
             System.out.println("Found empty formula!");
-            return true;
+            return new SolverResult(true, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
         // Check if there is any empty clause
         if (clauses.hasEmptyClause()) {
             System.out.println("Found empty clause!");
-            return false;
+            return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
+        // Perform unit resolution
         int decisionLevel = 0;
-
-        if (performUnitResolution(clauses, variables, assignments, decisionLevel) == unitResolutionResults.FALSE) {
-            System.out.println("Conflict from Unit Propagation at decision level " + decisionLevel + "!");
-            return false;
+        if (unitPropagation(decisionLevel).isConflict()) {
+            return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
-        while (!isAllVariablesAssigned(assignments)) {
+        while (assignments.getNumAssigned() < variables.size()) {
             // Pick branching variable to assign
-            int pickedVariableId = pickBranchingVariable(assignments, perfTester);
-            Assignment newNode = new Assignment(pickedVariableId, true, decisionLevel, null);
-            if (!assignments.addAssignment(newNode)) {
-                System.out.println("UNSAT!!! NOT POSSIBLE.");
-                return false;
-            }
+            Variable pickedVariable = pickBranchingVariable();
+            decisionLevel++;
+            Node newNode = new Node(pickedVariable, decisionLevel);
+            assignments.addAssignment(pickedVariable, newNode, false, true);
+            System.out.println("ASSIGNED " + pickedVariable.getId() + "=" + assignments.getVariableAssignment(pickedVariable) + "@" + decisionLevel);
 
-            boolean success = false;
-            while (!success) {
-                // Run unit propagation
-                unitResolutionResults results = performUnitResolution(clauses, variables, assignments, decisionLevel);
-                switch (results) {
-                    case UNSAT:
-                        return false;
-                    case TRUE:
-                        success = true;
-                        break;
-                    case FALSE:
-                        success = false;
-                        break;
-                    default:
-                        System.out.println("Not possible.");
-                        System.exit(1);
+            // Run unit propagation
+            UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
+            while (unitResolutionResult.isConflict()) {
+                int assertionLevel = conflictAnalysis(unitResolutionResult);
+                System.out.println("ASSERTING at level " + assertionLevel);
+                if (assertionLevel < 0) {
+                    return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
+                } else {
+                    backtrack(assertionLevel);
+                    System.out.println("BACKTRACKED to decision level " + assertionLevel);
+                    decisionLevel = assertionLevel;
                 }
-
-                // Get the new decision level if there was a conflict.
-                if (!success) {
-                    decisionLevel = assignments.getHighestDecisionLevel();
-                    // TODO: DEBUGGING
-                   // printStateCheck();
-                    // DEBUGGING
-                }
-            }
-            // TODO: DEBUGGING
-            // printStateCheck();
-            // DEBUGGING
-
-            if (decisionLevel == 0 && assignments.getVariablesInDecisionLevel(decisionLevel) == null ) {
-                decisionLevel = 0;
-            } else {
-                decisionLevel++;
-            }
-
-            // This is not possible. Our decision level should never be higher than the total number of variables.
-            if (decisionLevel > variables.size()) {
-                // TODO: DEBUGGING
-                System.out.println("************Error in implementation.*********** It is not possible for the decision level to be higher " +
-                        "than the number of variables.");
-                printStateCheck();
-                System.exit(1);
-                // DEBUGGING
+                unitResolutionResult = unitPropagation(decisionLevel);
             }
         }
-        // Final check to prevent implementation errors.
-        if (clauses.checkVALID(assignments)) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-
-
-    @Override
-    public boolean solveWithTimer(PerformanceTester perfTester) {
-        perfTester.startTimer();
-        boolean isSat = this.solve(perfTester);
-        perfTester.stopTimer();
-
-        perfTester.printExecutionTime();
-        perfTester.printNumPickBranchingVariablesCalled();
-        return isSat;
-    }
-
-
-    /* TODO: Debug print function.
-     * This prints the entire state of the decisionLevelToVariableId map.
-     */
-    private void printStateCheck() {
-        System.out.println("====== STATE CHECK=====");
-        for (int i = 0 ; i <= assignments.getHighestDecisionLevel(); i++) {
-            System.out.println("Decision Level = " + i);
-            List<Integer> varsInDecisionLevel = assignments.getVariablesInDecisionLevel(i);
-            if (varsInDecisionLevel == null){
-                System.out.println("NULL WEIRD.");
-                //System.exit(1);
-            } else {
-                for (Integer var : varsInDecisionLevel) {
-                    System.out.print(var + " ");
-                    if (assignments.getAssignment(var) == null) {
-                        System.out.println("ERROR. " + var + "'s assignment does not exist.");
-                        System.exit(1);
-                    }
-                }
-                System.out.println();
-            }
-        }
-        System.out.println("~~~~~~~ STATE CHECK END ~~~~~~~~");
-    }
-
-    enum unitResolutionResults {
-        UNSAT, TRUE, FALSE
+        return new SolverResult(true, getPickBranchingCount(), computeTimeTaken(startTime));
     }
 
     /**
-     * Tries to perform unit resolution for whichever unit clause found.
-     * After performing unit resolution, check if the assignment is satisfiable.
-     * If its not a valid assignment, we will call conflict analysis to resolve the conflict.
-     * @param clauses
-     * @param assignments
-     * @param decisionLevel
-     * @return - unitResolutionResults.TRUE if unit resolution was done and the resulting assignment is satisfiable,
-     *          OR if unit resolution was not done at all.
-     *         - unitResolutionResults.FALSE if unit resolution was done and there was a conflicting assignment.
-     *         - unitResolutionResults.UNSAT if unit resolution was done on a clause with only 1 literal and is
-     *         a conflicting assignment.
+     * Remove all nodes which have decision levels higher than the input assertionLevel.
+     *
+     * @param assertionLevel
      */
-    private unitResolutionResults performUnitResolution(Clauses clauses, Set<Variable> variables, Assignments assignments, int decisionLevel) {
+    private void backtrack(int assertionLevel) {
+        if (assertionLevel == 0) {
+            // Remove all assignments
+            assignments.clear();
+        } else {
+            // Remove all assignments made beyond assertion level
+            assignments.removeAssignmentsBeyondLevel(assertionLevel);
+        }
+    }
+
+    /**
+     * Analyse conflict in implication graph in order to learn a new clause
+     *
+     * @param conflict
+     * @return Assertion level
+     */
+    private int conflictAnalysis(UnitResolutionResult conflict) {
+        Node inferredNode = conflict.getInferredNode();
+        Node conflictingNode = conflict.getConflictingNode();
+        int conflictDecisionLevel = conflict.getConflictDecisionLevel();
+
+        // Remove all outgoing edges from the conflicting nodes
+        inferredNode.removeSubtree();
+        conflictingNode.removeSubtree();
+
+        // Collect edges that directly lead to the conflict
+        Queue<Edge> cutEdges = new LinkedList<>(conflictingNode.getInEdges());
+        cutEdges.addAll(inferredNode.getInEdges());
+
+        // Find the nodes leading to conflict site
+        Set<Node> candidates = new HashSet<>();
+        while (!cutEdges.isEmpty()) {
+            candidates.add(cutEdges.poll().getFromNode());
+        }
+
+        // Do resolution to find learnt clause
+        int numLiteralsAtDecisionLevel = countNodesAtDecisionLevel(candidates, conflictDecisionLevel);
+        for (Node candidate : candidates) {
+            cutEdges.addAll(candidate.getInEdges());
+        }
+        Set<Node> visited = new HashSet<>();
+        while (numLiteralsAtDecisionLevel != 1 && !cutEdges.isEmpty()) {
+            Edge cutEdge = cutEdges.poll();
+            if (cutEdge.getToNode().equals(conflictingNode) || cutEdge.getToNode().equals(inferredNode)) {
+                // Cannot do resolution with conflicting nodes
+                continue;
+            }
+            if (cutEdge.getToNode().getDecisionLevel() > conflictDecisionLevel) {
+                // Don't consider learning literals assigned at decision level higher than conflict level
+                continue;
+            }
+            if (!visited.add(cutEdge.getToNode())) {
+                // Don't resolve with previously resolved with nodes
+                continue;
+            }
+            candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
+            numLiteralsAtDecisionLevel = countNodesAtDecisionLevel(candidates, conflictDecisionLevel);
+            cutEdges.addAll(cutEdge.getFromNode().getInEdges());
+        }
+
+        // Generate new learnt clause
+        int maxLevel = -1;
+        int assertionLevel = -1;
+        Set<Literal> learntLiterals = new HashSet<>();
+        for (Node candidate : candidates) {
+            learntLiterals.add(new Literal(candidate.getVariable(), assignments.getVariableAssignment(candidate.getVariable())));
+            if (candidate.getDecisionLevel() > maxLevel) {
+                assertionLevel = maxLevel;
+                maxLevel = candidate.getDecisionLevel();
+            } else if (candidate.getDecisionLevel() < maxLevel && candidate.getDecisionLevel() > assertionLevel) {
+                assertionLevel = candidate.getDecisionLevel();
+            }
+        }
+        Clause learntClause = new Clause(new ArrayList<>(learntLiterals));
+        clauses.addClause(learntClause);
+        System.out.println("LEARNT new clause " + learntClause.toString());
+
+        // Remove assignment of the conflicting node which came second
+        List<Edge> inEdges = inferredNode.getInEdges();
+        for (Edge inEdge : inEdges) {
+            inEdge.getFromNode().removeOutEdge(inEdge);
+        }
+
+        // Default assertion level when only one literal in learnt clause or all literals have same decision level
+        if (learntClause.size() == 1 || (maxLevel != -1 && assertionLevel == -1)) {
+            return 0;
+        }
+
+        return assertionLevel;
+    }
+
+    /**
+     * Do resolution on the candidate nodes as a clause, and clause as another clause.
+     *
+     * @param candidates First clause
+     * @param clause Second clause
+     * @param resolvableVariable The variable being removed from both clauses for resolution
+     * @return The resulting clause after resolution as a set of nodes
+     */
+    private Set<Node> resolve(Set<Node> candidates, Set<Node> clause, Variable resolvableVariable) {
+        Set<Node> resolvedClause = new HashSet<>();
+        for (Node candidate : candidates) {
+            if (!candidate.getVariable().equals(resolvableVariable)) {
+                resolvedClause.add(candidate);
+            }
+        }
+        for (Node clauseNode : clause) {
+            if (!clauseNode.getVariable().equals(resolvableVariable)) {
+                resolvedClause.add(clauseNode);
+            }
+        }
+        return resolvedClause;
+    }
+
+    /**
+     * Count the number of nodes assigned at the given decision level
+     *
+     * @param nodes
+     * @param decisionLevel
+     * @return Number of nodes assigned at the given decision level
+     */
+    private int countNodesAtDecisionLevel(Set<Node> nodes, int decisionLevel) {
+        int numAtDecisionLevel = 0;
+        for (Node node : nodes) {
+            if (node.getDecisionLevel() == decisionLevel) {
+                numAtDecisionLevel++;
+            }
+        }
+        return numAtDecisionLevel;
+    }
+
+    /**
+     * Perform unit resolution while possible.
+     * Unit resolution is performed by running through each clause and checking if there is any unit literal which has
+     *      to be assigned to true for that clause to be true.
+     * Once an unit literal is found and assigned, we run through all clauses again to check if there is a clause
+     *      that disagrees with the assignment.
+     * If any such disagreeing clause is found, return conflict.
+     *
+     * @param decisionLevel The decision level at which the unit propagation was triggered.
+     * @return
+     */
+    private UnitResolutionResult unitPropagation(int decisionLevel) {
         boolean performedUnitResolution = true;
+
+        // If for any round of going through all clauses we did unit resolution, we go another round to check
+        // for possibility for unit resolution again.
         while (performedUnitResolution) {
             performedUnitResolution = false;
-            // Try to perform unit resolution until a pass where no unit resolution was performed
+
             for (Clause clause : clauses.getClauses()) {
-                if (assignments.assignUnitClause(clause, decisionLevel)) {
-                    performedUnitResolution = true;
-                    if (!clauses.checkVALID(assignments)) {
-                        // UNSAT. If clause only consists of 1 literal and still invalid.
-                        if (clause.getLiterals().size() == 1) {
-                            return unitResolutionResults.UNSAT;
-                        }
-                        conflictAnalysis(clauses, assignments, variables);
-                        return unitResolutionResults.FALSE;
+                Literal unitLiteral = clause.getUnitLiteral(assignments);
+
+                if (unitLiteral != null) {
+                    // Found unit literal, do unit resolution
+                    Variable unitLiteralVariable = unitLiteral.getVariable();
+                    boolean inferredNodeAssignment = !unitLiteral.isNegated();
+                    System.out.println("INFERRED " + unitLiteralVariable.getId() + "=" + inferredNodeAssignment + "@" + decisionLevel + " by clause " + clause.toString());
+
+                    // Add to implication graph + assign variable
+                    Node inferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
+                    assignments.addAssignment(unitLiteralVariable, inferredNode, inferredNodeAssignment, assignments.isEmpty());
+
+                    // Try to find conflicting assignment
+                    Clause disagreeingClause = propagateAssignment(inferredNode, clause);
+                    if (disagreeingClause != null) {
+                        // Found conflicting assignment
+                        System.out.println("CONFLICT: " + unitLiteralVariable.getId() + "@" + decisionLevel + " due to clauses " + clause.toString() + " and " + disagreeingClause.toString());
+                        Node conflictingNode = addToImplicationGraph(disagreeingClause, inferredNode);
+                        return new UnitResolutionResult(inferredNode, conflictingNode, true, decisionLevel);
                     }
+
+                    performedUnitResolution = true;
                 }
             }
         }
-        return unitResolutionResults.TRUE;
-    }
 
-    private boolean isAllVariablesAssigned(Assignments assignments) {
-        return (assignments.getUnassignedVarIds().size() == 0);
+        return new UnitResolutionResult(null, false, decisionLevel);
     }
 
     /**
-     * Conflict Analysis will use the root heuristics to get the root variables.
-     * It will add the root variables clause that implied the assignments that led to the UNSAT assignment.
-     * @param clauses
-     * @param assignments
-     * @param variables
-     */
-    private int conflictAnalysis(Clauses clauses, Assignments assignments, Set<Variable> variables) {
-        int lastAssignedId = assignments.getLastAssignment();
-        Set<Integer> variablesThatCausedUNSAT = getVariablesThatImpliedUNSATAssignment(clauses, assignments, lastAssignedId);
-        List<Literal> literals = createNewConflictClause(variablesThatCausedUNSAT, assignments, variables);
-        clauses.addClause(new Clause(literals));
-        assignments.revertAssignments(literals);
-        return assignments.getHighestDecisionLevel();
-    }
-
-
-    private int pickBranchingVariable(Assignments assignments, PerformanceTester performanceTester) {
-        performanceTester.pickBranchingVariablesCalled();
-        return (int) assignments.getUnassignedVarIds().toArray()[0];
-    }
-
-
-    /**
-     * Get the variable assignments that caused the UNSAT conflict.
-     * As of now the affected variables are defined as the root variables.
+     * Propagate the assignment of a node that was inferred during unit resolution.
      *
-     * @param clauses
-     * @param assignments
-     * @param unSatVarId
-     * @return
+     * @param inferredNode the node that was just inferred and assigned
+     * @param originalClause the clause which led to the unit resolution of inferredNode
+     * @return Any clause which disagrees with the assignment of the node. Null if no such clause is found.
      */
-    private Set<Integer> getVariablesThatImpliedUNSATAssignment(Clauses clauses, Assignments assignments, Integer unSatVarId) {
-        Assignment conflictVariableUnit = assignments.getAssignment(unSatVarId);
-        List<Integer> affectedVariables = conflictVariableUnit.getImplicationGraphRoots();
-
-        // TODO: Debug prints for root variables
-        /*
-        System.out.println("::::::CONFLICT ANALYSIS:::::: root variables that implied UNSAT");
-        for (int varId: affectedVariables) {
-            System.out.print(varId + " ");
-        }
-        System.out.println();
-        // DEBUG::::*/
-
-        Set<Integer> affectedVariablesDedupped = new HashSet<>();
-        for (Integer varIds : affectedVariables) {
-            affectedVariablesDedupped.add(varIds);
-        }
-
-        return affectedVariablesDedupped;
-    }
-
-
-    /**
-     * This method creates a new clause with the values of each literal being
-     * the input variables and negating its current assignment.
-     * @param affectedVariables
-     * @param assignments
-     * @param variables
-     * @return
-     */
-    private List<Literal> createNewConflictClause(Set<Integer> affectedVariables,
-                                                  Assignments assignments, Set<Variable> variables) {
-        List<Literal> clause = new ArrayList<>();
-        for (Integer affectedVarId : affectedVariables) {
-            Assignment currentAssignment = assignments.getAssignment(affectedVarId);
-            if (variables.contains(new Variable(affectedVarId))){
-                Literal literalToAdd = new Literal(new Variable(affectedVarId), currentAssignment.getAssignmentValue());
-                clause.add(literalToAdd);
+    private Clause propagateAssignment(Node inferredNode, Clause originalClause) {
+        for (Clause clause : clauses.getClauses()) {
+            if (clause.equals(originalClause)) {
+                // Don't consider the clause which led to the inferred node's assignment
+                continue;
+            }
+            Literal unitLiteral = clause.findUnitLiteral(inferredNode.getVariable(), assignments);
+            if (unitLiteral != null) {
+                // Found another clause which helps us infer the same variable we just inferred
+                boolean inferredNodeAssignment = !unitLiteral.isNegated();
+                if (conflictsWithExistingAssignment(unitLiteral.getVariable(), inferredNodeAssignment)) {
+                    // The two clauses produce conflicting assignments
+                    return clause;
+                }
             }
         }
-        return clause;
+        return null;
+    }
+
+    private boolean conflictsWithExistingAssignment(Variable unitLiteralVariable, boolean inferredNodeAssignment) {
+        if(assignments.hasConflictingAssignment(unitLiteralVariable, inferredNodeAssignment)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Given a unit clause, we add edges from each assigned literal in this unit clause to its unit literal.
+     *
+     * @param dueToClause Unit clause containing the unitLiteralVariable
+     * @param unitLiteralVariable Unit literal that was inferred by the dueToClause
+     * @param decisionLevel decision level at which the unitLiteralVariable was inferred at
+     * @return The last added node in the graph
+     */
+    private Node addToImplicationGraph(Clause dueToClause, Variable unitLiteralVariable, int decisionLevel) {
+        Node lastInferredNode = new Node(unitLiteralVariable, decisionLevel);
+        return addToImplicationGraph(dueToClause, lastInferredNode);
+    }
+
+    /**
+     * Given a unit clause, we add edges from each assigned literal in this unit clause to its unit literal.
+     *
+     * @param dueToClause Unit clause containing the lastInferredNode
+     * @param lastInferredNode The node last inferred by unit resolution
+     * @return The last added node in the graph
+     */
+    private Node addToImplicationGraph(Clause dueToClause, Node lastInferredNode) {
+        for (Literal literal : dueToClause.getLiterals()) {
+            if (!literal.getVariable().equals(lastInferredNode.getVariable())) {
+                Node fromNode = assignments.getNode(literal.getVariable());
+                Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
+                fromNode.addOutEdge(newEdge);
+                lastInferredNode.addInEdge(newEdge);
+            }
+        }
+        return lastInferredNode;
+    }
+
+    /**
+     * Returns a variable that has not been assigned
+     *
+     * @return Variable that has not been assigned
+     */
+    private Variable pickBranchingVariable() {
+        incrementPickBranchingCount();
+        for (Variable variable : variables) {
+            if (!assignments.getImplicationGraphNodes().containsKey(variable)) {
+                return variable;
+            }
+        }
+        return null;
+    }
+
+    private void incrementPickBranchingCount() {
+        pickBranchingCount++;
+    }
+
+    private int getPickBranchingCount() {
+        return pickBranchingCount;
+    }
+
+    private long computeTimeTaken(long startTime) {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    /**********************************/
+    /** HELPER METHODS FOR DEBUGGING **/
+    /**********************************/
+
+    private void printNodeSet(Set<Node> nodes) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Node node : nodes) {
+            joiner.add((assignments.getVariableAssignment(node.getVariable()) ? "-" : "") + String.valueOf(node.getVariable().getId()));
+        }
+        System.out.println("[[" + joiner.toString() + "]]");
     }
 }

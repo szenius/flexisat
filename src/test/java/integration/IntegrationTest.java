@@ -1,51 +1,55 @@
 package integration;
 
-import data_structures.Assignments;
 import data_structures.Clauses;
 import data_structures.Variable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
-import performance.PerformanceTester;
 import solvers.CDCLSolver;
-import solvers.Solver;
 
-import java.util.Set;
+import java.io.File;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegrationTest {
 
+    private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
+    private static final String SAT_DIRECTORY_PATH = "input/sat/";
+
+    private static final boolean QUICK_TESTS_MODE = true;
+    private static final int QUICK_TESTS_SIZE = 10;
+
     @Test
-    @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
-            "are supposed to return SAT returns SAT.")
-    void satCDCLSolverTest() {
-        String[] satTestInputs = {
-                "input/valid_input1.cnf",
-                "input/valid_input2.cnf",
-                "input/valid_input3.cnf"};
-        for (String testInput : satTestInputs) {
-            boolean sat = runSatSolverTest(testInput);
-            assertTrue(sat);
-            System.out.println();
-            System.out.println();
+    @DisplayName("SAT tests")
+    public void testSatCNF() throws Exception {
+        File satDir = new File(SAT_DIRECTORY_PATH);
+        List<File> satFiles = getTestFiles(satDir);
+        for (File file : satFiles) {
+            assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for SAT test case " + file.getName());
+            System.out.println("=======================");
         }
     }
 
-    
     @Test
-    @DisplayName("Runs a few tests on the SAT Solver to make sure that formulas that " +
-            "are supposed to return UNSAT returns UNSAT.")
-    void unsatCDCLSolverTest() {
-        String[] unsatTestInputs = {
-                "input/unsat_input1.cnf",
-                "input/unsat_input2.cnf",
-                "input/unsat_input3.cnf"};
-        for (String testInput : unsatTestInputs) {
-            boolean sat = runSatSolverTest(testInput);
-            assertFalse(sat);
+    @DisplayName("UNSAT tests")
+    public void testUnsatCNF() throws Exception {
+        File unsatDir = new File(UNSAT_DIRECTORY_PATH);
+        List<File> unsatFiles = getTestFiles(unsatDir);
+        for (File file : unsatFiles) {
+            assertFalse(runSatSolverTest(file.getAbsolutePath()), "Returned VALID for UNSAT test case " + file.getName());
+            System.out.println("=======================");
         }
+    }
+
+    private List<File> getTestFiles(File directory) throws Exception {
+        List<File> testFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
+        if (QUICK_TESTS_MODE) {
+            Collections.shuffle(testFiles);
+            testFiles = testFiles.subList(0, QUICK_TESTS_SIZE);
+        }
+        return testFiles;
     }
 
     boolean runSatSolverTest(String testInput) {
@@ -53,9 +57,8 @@ public class IntegrationTest {
         parser.parse(testInput);
         Clauses clauses = parser.getClauses();
         Set<Variable> variables = parser.getVariables();
-        Solver solver = new CDCLSolver(clauses, variables);
-        PerformanceTester perfTester = new PerformanceTester();
-
-        return solver.solveWithTimer(perfTester);
+        CDCLSolver solver = new CDCLSolver(clauses, variables);
+        return solver.solve();
     }
+
 }

@@ -22,7 +22,7 @@ public class Clause {
         return null;
     }
 
-    public Literal getUnitLiteral(Assignments2 assignments) {
+    public Literal getUnitLiteral(Assignments assignments) {
         Literal unitLiteral = null;
         boolean clauseValue = false;
         for (Literal literal : literals) {
@@ -99,7 +99,7 @@ public class Clause {
         return this.getLiterals().size();
     }
 
-    public Literal findUnitLiteral(Variable variable, Assignments2 assignments) {
+    public Literal findUnitLiteral(Variable variable, Assignments assignments) {
         // Count number of literals assigned other than the one corr to the input variable
         int numAssigned = 0;
         boolean clauseValue = false;
