@@ -152,13 +152,13 @@ public class ClassBayesianEncoder extends BayesianEncoder{
      * @return
      */
     private float findWeightValue(boolean[] integerBits, float[][] functionTable) {
-        int firstIndex;
+        int secondIndex;
         if (integerBits[integerBits.length - 1]) {
-            firstIndex = 1;
+            secondIndex = 1;
         } else {
-            firstIndex = 0;
+            secondIndex = 0;
         }
-        int secondIndex = Helper.bitsToInteger(Arrays.copyOfRange(integerBits, 0, integerBits.length - 1));
+        int firstIndex = Helper.bitsToInteger(Arrays.copyOfRange(integerBits, 0, integerBits.length - 1));
         return functionTable[firstIndex][secondIndex];
     }
 
