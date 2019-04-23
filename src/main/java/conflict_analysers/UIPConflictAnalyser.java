@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class UIPConflictAnalyser extends ConflictAnalyserExtended {
+public class UIPConflictAnalyser extends ResolutionBasedConflictAnalyser {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIPConflictAnalyser.class);
 
     @Override

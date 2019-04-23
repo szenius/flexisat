@@ -6,7 +6,7 @@ import data_structures.Variable;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class ConflictAnalyserExtended implements ConflictAnalyser {
+public abstract class ResolutionBasedConflictAnalyser implements ConflictAnalyser {
     /**
      * Do resolution on the candidate nodes as a clause, and clause as another clause.
      *

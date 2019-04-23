@@ -51,7 +51,7 @@ No other special installations are required.
 4. Add documentation in the [User Guide](#branch-pickers).
 
 ### Adding a Conflict Analyzer
-1. Add a new class in `src/main/java/conflict_analysers`. This class needs to **extend** the `ConflictAnalyserExtended.java` abstract class.
+1. Add a new class in `src/main/java/conflict_analysers`. This class needs to **extend** the `ResolutionBasedConflictAnalyser.java` abstract class OR **implement** the `ConflictAnalyser.java` interface.
 2. Add a new enum field in `ConflictAnalyserType.java` for your new conflict analyser.
 3. In `Parser.java`, add your conflict analyser to the `switch` statement in `setConflictAnalyser`.
 4. Add documentation in the [User Guide](#conflict-analysers).
