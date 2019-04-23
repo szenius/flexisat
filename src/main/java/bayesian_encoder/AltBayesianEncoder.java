@@ -40,8 +40,8 @@ public class AltBayesianEncoder extends BayesianEncoder{
         // The starting offset for the all the subsequent chance nodes.
         int literalId = numVariables;
 
-        // DEBUG
-        System.out.println("Literal ID @ start" + literalId);
+        // This keeps track of State Nodes that have already been encoded to prevent double encoding.
+        Set<Integer> stateNodeEncoded = new HashSet<>();
 
         for (BayesianClique clique : cliques) {
             List<Integer> variables = clique.getVariables();
@@ -51,14 +51,18 @@ public class AltBayesianEncoder extends BayesianEncoder{
                 String negativeLiteralWeight = "w -" + variables.get(0) + " " + clique.getFunctionTable()[0][0] + " 0\n";
                 weightsWriter.write(positiveLiteralWeight);
                 weightsWriter.write(negativeLiteralWeight);
+                stateNodeEncoded.add(variables.get(0));
+
             } else {
                 // Creating weights for State Nodes of variables. They should all be of weight 1.
                 for (int var : variables) {
-                    if (!sourceNodes.contains(var)) {
+                    if (!sourceNodes.contains(var) && !stateNodeEncoded.contains(var)) {
+                        // TODO: 1,2 encoded twice cos they appeared twice.
                         String positiveLiteralWeight = "w " + var + " 1 0\n";
                         String negativeLiteralWeight = "w -" + var + " 1 0\n";
                         weightsWriter.write(positiveLiteralWeight);
                         weightsWriter.write(negativeLiteralWeight);
+                        stateNodeEncoded.add(var);
                     }
                 }
 
@@ -80,7 +84,6 @@ public class AltBayesianEncoder extends BayesianEncoder{
                         }
                     }
                     int literalIdOfChanceNode = literalId + chanceNodeId;
-                    System.out.println("Literal ID being added: " + literalId);
                     // Right side of implication. Chance node with State Node of current Bayesian Node.
                     // Will need 2 of this.
                     String rightSideImplicationOne = "-" + nodeId + " " + literalIdOfChanceNode + " 0\n";
@@ -90,9 +93,9 @@ public class AltBayesianEncoder extends BayesianEncoder{
 
                     // Create Weights for Chance Nodes according to clique.
                     String positiveLiteralWeight = "w " + literalIdOfChanceNode + " " +
-                            clique.getFunctionTable()[1][chanceNodeId];
+                            clique.getFunctionTable()[1][chanceNodeId] + " 0\n";
                     String negativeLiteralWeight = "w -" + literalIdOfChanceNode + " " +
-                            clique.getFunctionTable()[0][chanceNodeId];
+                            clique.getFunctionTable()[0][chanceNodeId] + " 0\n";
                     weightsWriter.write(positiveLiteralWeight);
                     weightsWriter.write(negativeLiteralWeight);
                 }
