@@ -3,9 +3,7 @@ package parser;
 import branch_pickers.BranchPicker;
 import branch_pickers.BranchPickerType;
 import branch_pickers.SequentialBranchPicker;
-import conflict_analysers.ConflictAnalyser;
-import conflict_analysers.ConflictAnalyserType;
-import conflict_analysers.UIPConflictAnalyser;
+import conflict_analysers.*;
 import data_structures.Clause;
 import data_structures.Clauses;
 import data_structures.Literal;
@@ -87,9 +85,15 @@ public class Parser {
 
     private void setConflictAnalyser(String conflictAnalyserType) {
         switch (Enum.valueOf(ConflictAnalyserType.class, conflictAnalyserType.toUpperCase())) {
+            case ROOTS:
+                conflictAnalyser = new RootsConflictAnalyser();
+                break;
+            case BASIC:
+                conflictAnalyser = new NoUIPConflictAnalyser();
+                break;
             case UIP:
             default:
-                conflictAnalyser = new UIPConflictAnalyser();
+                conflictAnalyser = new SingleUIPConflictAnalyser();
         }
     }
 

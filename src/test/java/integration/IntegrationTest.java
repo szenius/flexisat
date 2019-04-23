@@ -24,7 +24,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("SAT tests")
-    public void testSatCNF() {
+    void testSatCNF() {
         File satDir = new File(SAT_DIRECTORY_PATH);
         List<File> satFiles = getTestFiles(satDir);
         for (File file : satFiles) {
@@ -35,7 +35,7 @@ public class IntegrationTest {
 
     @Test
     @DisplayName("UNSAT tests")
-    public void testUnsatCNF() {
+    void testUnsatCNF() {
         File unsatDir = new File(UNSAT_DIRECTORY_PATH);
         List<File> unsatFiles = getTestFiles(unsatDir);
         for (File file : unsatFiles) {
@@ -56,12 +56,12 @@ public class IntegrationTest {
     private void runSatSolverTests(String testInput, boolean expectedOutput) {
         // Try all types of branch picking
         for (BranchPickerType branchPickerType : BranchPickerType.values()) {
-            assertEquals(expectedOutput, runSatSolverTest(testInput, branchPickerType.getType(), UIP.getType()), "Wrong output for " + testInput);
+            assertEquals(expectedOutput, runSatSolverTest(testInput, branchPickerType.getType(), UIP.getType()), "Wrong output for " + testInput + " using " + branchPickerType.getType() + " as pick branching");
         }
 
         // Try all types of conflict analysers
         for (ConflictAnalyserType conflictAnalyserType : ConflictAnalyserType.values()) {
-            assertEquals(expectedOutput, runSatSolverTest(testInput, SEQ.getType(), conflictAnalyserType.getType()));
+            assertEquals(expectedOutput, runSatSolverTest(testInput, SEQ.getType(), conflictAnalyserType.getType()), "Wrong output for " + testInput + " using " + conflictAnalyserType.getType() + " as conflict analysis");
         }
     }
 

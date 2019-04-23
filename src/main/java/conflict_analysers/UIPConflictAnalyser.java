@@ -4,10 +4,15 @@ import data_structures.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
-public class UIPConflictAnalyser extends ExtendedConflictAnalyser {
+public abstract class UIPConflictAnalyser extends ExtendedConflictAnalyser {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIPConflictAnalyser.class);
+
+    abstract int getUIPCriteria();
 
     @Override
     public ConflictAnalyserResult learnClause(UnitResolutionResult conflict, Assignments assignments) {
@@ -35,7 +40,7 @@ public class UIPConflictAnalyser extends ExtendedConflictAnalyser {
             cutEdges.addAll(candidate.getInEdges());
         }
         Set<Node> visited = new HashSet<>();
-        while (numLiteralsAtDecisionLevel != 1 && !cutEdges.isEmpty()) {
+        while (numLiteralsAtDecisionLevel != getUIPCriteria() && !cutEdges.isEmpty()) {
             Edge cutEdge = cutEdges.poll();
             if (cutEdge.getToNode().equals(conflictingNode) || cutEdge.getToNode().equals(inferredNode)) {
                 // Cannot do resolution with conflicting nodes

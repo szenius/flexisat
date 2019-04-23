@@ -2,7 +2,8 @@ package conflict_analysers;
 
 public enum ConflictAnalyserType {
     BASIC("basic"),
-    UIP("uip");
+    UIP("uip"),
+    ROOTS("roots");
 
     private String type;
 
