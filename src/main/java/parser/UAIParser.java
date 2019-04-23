@@ -72,23 +72,20 @@ public class UAIParser {
             line = br.readLine();
 
             // Parsing function tables
-            // TODO: Currently assuming that the format is a 2 lines format where the first line is 0 for MSV
-            //  (most significant variable) and second line is 1 for MSV.
             for (int i = 0 ; i < numCliques; i++) {
                 // Number of entries given
                 line = br.readLine();
                 int numEntries = Integer.parseInt(line);
-                float [][] variableFunctionValues = new float[2][numEntries/2];
-                for (int j = 0 ; j < 2; j++) {
+                float [][] variableFunctionValues = new float[numEntries/2][2];
+                for (int j = 0 ; j < numEntries/2; j++) {
                     line = br.readLine();
                     line = line.trim();
                     String[] functions = line.split(" ");
-                    if (numEntries / 2 != functions.length) {
-                        System.out.println("Error in function table length.");
+                    if (functions.length != 2) {
+                        System.out.println("Error in function table length. Each row should be of length 2.");
                         System.exit(1);
                     }
                     float[] functionValues = new float[functions.length];
-                    // TODO: Check if the first space affects this.
                     // Converting each entry from string into float values.
                     for (int k = 0 ; k < functions.length ; k ++ ){
                         functionValues[k] = Float.parseFloat(functions[k]);

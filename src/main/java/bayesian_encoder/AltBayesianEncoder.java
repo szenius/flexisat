@@ -47,7 +47,7 @@ public class AltBayesianEncoder extends BayesianEncoder{
             List<Integer> variables = clique.getVariables();
             // Source node. Can just write in the weights for its Chance Nodes.
             if (variables.size() == 1) {
-                String positiveLiteralWeight = "w " + variables.get(0) + " " + clique.getFunctionTable()[1][0] + " 0\n";
+                String positiveLiteralWeight = "w " + variables.get(0) + " " + clique.getFunctionTable()[0][1] + " 0\n";
                 String negativeLiteralWeight = "w -" + variables.get(0) + " " + clique.getFunctionTable()[0][0] + " 0\n";
                 weightsWriter.write(positiveLiteralWeight);
                 weightsWriter.write(negativeLiteralWeight);
@@ -93,9 +93,9 @@ public class AltBayesianEncoder extends BayesianEncoder{
 
                     // Create Weights for Chance Nodes according to clique.
                     String positiveLiteralWeight = "w " + literalIdOfChanceNode + " " +
-                            clique.getFunctionTable()[1][chanceNodeId] + " 0\n";
+                            clique.getFunctionTable()[chanceNodeId][1] + " 0\n";
                     String negativeLiteralWeight = "w -" + literalIdOfChanceNode + " " +
-                            clique.getFunctionTable()[0][chanceNodeId] + " 0\n";
+                            clique.getFunctionTable()[chanceNodeId][0] + " 0\n";
                     weightsWriter.write(positiveLiteralWeight);
                     weightsWriter.write(negativeLiteralWeight);
                 }
