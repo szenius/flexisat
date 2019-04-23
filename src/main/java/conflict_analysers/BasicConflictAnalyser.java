@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BasicConflictAnalyser extends ResolutionBasedConflictAnalyser {
+public class BasicConflictAnalyser extends ExtendedConflictAnalyser {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicConflictAnalyser.class);
 
     @Override
@@ -56,33 +56,13 @@ public class BasicConflictAnalyser extends ResolutionBasedConflictAnalyser {
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
         }
 
-        // Generate new learnt clause
-        int maxLevel = -1;
-        int assertionLevel = -1;
-        Set<Literal> learntLiterals = new HashSet<>();
-        for (Node candidate : candidates) {
-            learntLiterals.add(new Literal(candidate.getVariable(), assignments.getVariableAssignment(candidate.getVariable())));
-            if (candidate.getDecisionLevel() > maxLevel) {
-                assertionLevel = maxLevel;
-                maxLevel = candidate.getDecisionLevel();
-            } else if (candidate.getDecisionLevel() < maxLevel && candidate.getDecisionLevel() > assertionLevel) {
-                assertionLevel = candidate.getDecisionLevel();
-            }
-        }
-        Clause learntClause = new Clause(new ArrayList<>(learntLiterals));
-        LOGGER.debug("LEARNT new clause {}", learntClause.toString());
+        // Build result with learnt clause and assertion level
+        ConflictAnalyserResult result = buildConflictAnalyserResult(candidates, assignments);
+        LOGGER.debug("LEARNT new clause {}", result.getLearntClause().toString());
 
         // Remove assignment of the conflicting node which came second
-        List<Edge> inEdges = inferredNode.getInEdges();
-        for (Edge inEdge : inEdges) {
-            inEdge.getFromNode().removeOutEdge(inEdge);
-        }
+        removeConflictingNodeFromGraph(inferredNode);
 
-        // Default assertion level when only one literal in learnt clause or all literals have same decision level
-        if (learntClause.size() == 1 || (maxLevel != -1 && assertionLevel == -1)) {
-            return new ConflictAnalyserResult(0, learntClause);
-        }
-
-        return new ConflictAnalyserResult(assertionLevel, learntClause);
+        return result;
     }
 }

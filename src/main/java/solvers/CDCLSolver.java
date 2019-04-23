@@ -59,7 +59,7 @@ public class CDCLSolver implements Solver {
 
         // Perform unit resolution
         int decisionLevel = 0;
-        if (unitPropagation(decisionLevel).isConflict()) {
+        if (unitPropagation(decisionLevel, null).isConflict()) {
             return new SolverResult(false, getPickBranchingCount(), computeTimeTaken(startTime));
         }
 
@@ -72,7 +72,7 @@ public class CDCLSolver implements Solver {
             LOGGER.debug("ASSIGNED {}={}@{}", pickedVariable.getId(), assignments.getVariableAssignment(pickedVariable),decisionLevel);
 
             // Run unit propagation
-            UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel);
+            UnitResolutionResult unitResolutionResult = unitPropagation(decisionLevel, newNode);
             while (unitResolutionResult.isConflict()) {
                 int assertionLevel = conflictAnalysis(unitResolutionResult);
                 LOGGER.debug("ASSERTING at level {}", assertionLevel);
@@ -83,7 +83,7 @@ public class CDCLSolver implements Solver {
                     LOGGER.debug("BACKTRACKED to decision level {}", assertionLevel);
                     decisionLevel = assertionLevel;
                 }
-                unitResolutionResult = unitPropagation(decisionLevel);
+                unitResolutionResult = unitPropagation(decisionLevel, newNode);
             }
         }
         return new SolverResult(true, getPickBranchingCount(), computeTimeTaken(startTime));
@@ -125,9 +125,10 @@ public class CDCLSolver implements Solver {
      * If any such disagreeing clause is found, return conflict.
      *
      * @param decisionLevel The decision level at which the unit propagation was triggered.
+     * @param ancestor
      * @return
      */
-    private UnitResolutionResult unitPropagation(int decisionLevel) {
+    private UnitResolutionResult unitPropagation(int decisionLevel, Node ancestor) {
         boolean performedUnitResolution = true;
 
         // If for any round of going through all clauses we did unit resolution, we go another round to check
@@ -145,7 +146,7 @@ public class CDCLSolver implements Solver {
                     LOGGER.debug("INFERRED {}={}@{} by clause {}", unitLiteralVariable.getId(), inferredNodeAssignment, decisionLevel, clause.toString());
 
                     // Add to implication graph + assign variable
-                    Node inferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel);
+                    Node inferredNode = addToImplicationGraph(clause, unitLiteralVariable, decisionLevel, ancestor);
                     assignments.addAssignment(unitLiteralVariable, inferredNode, inferredNodeAssignment, assignments.isEmpty());
 
                     // Try to find conflicting assignment
@@ -153,7 +154,7 @@ public class CDCLSolver implements Solver {
                     if (disagreeingClause != null) {
                         // Found conflicting assignment
                         LOGGER.debug("CONFLICT: {}@{} due to clauses {} and {}", unitLiteralVariable.getId(), decisionLevel, clause.toString(), disagreeingClause.toString());
-                        Node conflictingNode = addToImplicationGraph(disagreeingClause, inferredNode);
+                        Node conflictingNode = addToImplicationGraph(disagreeingClause, inferredNode, ancestor);
                         return new UnitResolutionResult(inferredNode, conflictingNode, true, decisionLevel);
                     }
 
@@ -213,9 +214,9 @@ public class CDCLSolver implements Solver {
      * @param decisionLevel decision level at which the unitLiteralVariable was inferred at
      * @return The last added node in the graph
      */
-    private Node addToImplicationGraph(Clause dueToClause, Variable unitLiteralVariable, int decisionLevel) {
+    private Node addToImplicationGraph(Clause dueToClause, Variable unitLiteralVariable, int decisionLevel, Node ancestor) {
         Node lastInferredNode = new Node(unitLiteralVariable, decisionLevel);
-        return addToImplicationGraph(dueToClause, lastInferredNode);
+        return addToImplicationGraph(dueToClause, lastInferredNode, ancestor);
     }
 
     /**
@@ -225,13 +226,15 @@ public class CDCLSolver implements Solver {
      * @param lastInferredNode The node last inferred by unit resolution
      * @return The last added node in the graph
      */
-    private Node addToImplicationGraph(Clause dueToClause, Node lastInferredNode) {
+    private Node addToImplicationGraph(Clause dueToClause, Node lastInferredNode, Node ancestor) {
         for (Literal literal : dueToClause.getLiterals()) {
             if (!literal.getVariable().equals(lastInferredNode.getVariable())) {
                 Node fromNode = assignments.getNode(literal.getVariable());
                 Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
                 fromNode.addOutEdge(newEdge);
                 lastInferredNode.addInEdge(newEdge);
+                lastInferredNode.addAncestor(ancestor);
+                lastInferredNode.addAncestors(fromNode.getAncestors());
             }
         }
         return lastInferredNode;
