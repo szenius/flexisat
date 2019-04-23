@@ -71,9 +71,9 @@ public class AltBayesianEncoder {
                 // TODO: Can further optimise for those with values 1.
                 int nodeId = variables.get(variables.size() - 1 );
                 double numChanceNodes = Math.pow(2, variables.size() - 1);
-                for (int i = 0 ; i < numChanceNodes; i++ ) {
+                for (int chanceNodeId = 0 ; chanceNodeId < numChanceNodes; chanceNodeId++ ) {
                     // All the other nodes
-                    boolean[] bits = Helper.getBitsOfInteger(variables.size() - 1, i);
+                    boolean[] bits = Helper.getBitsOfInteger(variables.size() - 1, chanceNodeId);
                     // Left side of implication. All the State Nodes.
                     String leftSideImplication = "";
                     for (int j = 0 ; j < bits.length; j++) {
@@ -83,13 +83,15 @@ public class AltBayesianEncoder {
                             leftSideImplication += variables.get(j) + " ";
                         }
                     }
+                    int literalIdOfChanceNode = literalId + chanceNodeId;
                     // Right side of implication. Chance node with State Node of current Bayesian Node.
                     // Will need 2 of this.
-                    String rightSideImplicationOne = "-" + nodeId + " " + i + " 0\n";
-                    String rightSideImplicationTwo = "-" + i + " " + nodeId + " 0\n";
+                    String rightSideImplicationOne = "-" + nodeId + " " + literalIdOfChanceNode + " 0\n";
+                    String rightSideImplicationTwo = "-" + literalIdOfChanceNode + " " + nodeId + " 0\n";
                     encoderWriter.write(leftSideImplication + rightSideImplicationOne);
                     encoderWriter.write(leftSideImplication + rightSideImplicationTwo);
                 }
+                literalId += numChanceNodes;
             }
         }
     }
