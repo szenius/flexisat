@@ -90,6 +90,7 @@ public class ClassBayesianEncoder extends BayesianEncoder{
                                           int numVariables, List<BayesianClique> cliques) throws IOException {
         int parameterVariableID = 2 * numVariables + 1;
         for (BayesianClique clique : cliques) {
+            // The last variable is the Bayesian Node being implied.
             List<Integer> variables = clique.getVariables();
             double totalNumCombinations = Math.pow(2, variables.size());
 
@@ -101,15 +102,17 @@ public class ClassBayesianEncoder extends BayesianEncoder{
                     System.out.println("WEIRD");
                     System.exit(1);
                 }
+                // Bit Array is Big Endian : integerBits[0] is the Bayesian Node being implied.
                 boolean[] integerBits = Helper.getBitsOfInteger(variables.size(), i);
                 for (int j = 0 ; j < integerBits.length; j++) {
                     // Right implication
                     // Px1x2x3.. -> Ix1
                     int indicatorVariable;
+                    // Mapping Integer bits to its respective Indicator Variable.
                     if (integerBits[j])
-                        indicatorVariable = 2*j;
+                        indicatorVariable = 2 * variables.get(integerBits.length - 1 - j);
                     else {
-                        indicatorVariable = 2*j+1;
+                        indicatorVariable = 2 * variables.get(integerBits.length - 1 - j + 1);
                     }
                     String rightImplication = "-" + parameterVariableID + " " + indicatorVariable + CNF_ENDER;
                     encoderWriter.write(rightImplication);
@@ -126,25 +129,6 @@ public class ClassBayesianEncoder extends BayesianEncoder{
         }
     }
 
-        /*
-      X Y Z P(X|Y,Z)
-    0 F F F ...
-    1 F F T ...
-    2 F T F ...
-    3 F T T ...
-    4 T F F ...
-    5 T F T ...
-    6 T T F ...
-    7 T T T ...
-            0 1 2 3
-            4 5 6 7
-    */
-    // EG: 3 = 011 => FALSE, TRUE, TRUE: [0,3]
-    // EG: 4 = 100 => TRUE, FALSE, FALSE: [1,0]
-    // EG: 5 = 101 => TRUE, FALSE, TRUE: [1,1]
-    // EG: 6 = 110 => TRUE, TRUE, FALSE: [1,2]
-    // EG: 7 = 111 => TRUE, TRUE, TRUE: [1,3]
-
     /**
      * findWeightValue maps a particular Parameter variable to its weight value
      * @param integerBits
@@ -153,7 +137,8 @@ public class ClassBayesianEncoder extends BayesianEncoder{
      */
     private float findWeightValue(boolean[] integerBits, float[][] functionTable) {
         int secondIndex;
-        if (integerBits[integerBits.length - 1]) {
+        // Bit Array is Big Endian : integerBits[0] is the Bayesian Node being implied.
+        if (integerBits[0]) {
             secondIndex = 1;
         } else {
             secondIndex = 0;
