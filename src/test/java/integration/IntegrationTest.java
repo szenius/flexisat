@@ -1,5 +1,7 @@
 package integration;
 
+import branch_pickers.BranchPickerType;
+import conflict_analysers.ConflictAnalyserType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import parser.Parser;
@@ -10,8 +12,7 @@ import java.util.*;
 
 import static branch_pickers.BranchPickerType.SEQ;
 import static conflict_analysers.ConflictAnalyserType.UIP;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IntegrationTest {
     // NOTE: if you want to test against full suite of test files, change the following to false.
@@ -27,7 +28,7 @@ public class IntegrationTest {
         File satDir = new File(SAT_DIRECTORY_PATH);
         List<File> satFiles = getTestFiles(satDir);
         for (File file : satFiles) {
-            assertTrue(runSatSolverTest(file.getAbsolutePath()), "Returned UNSAT for SAT test case " + file.getName());
+            runSatSolverTests(file.getAbsolutePath(), true);
             System.out.println("=======================");
         }
     }
@@ -38,7 +39,7 @@ public class IntegrationTest {
         File unsatDir = new File(UNSAT_DIRECTORY_PATH);
         List<File> unsatFiles = getTestFiles(unsatDir);
         for (File file : unsatFiles) {
-            assertFalse(runSatSolverTest(file.getAbsolutePath()), "Returned VALID for UNSAT test case " + file.getName());
+            runSatSolverTests(file.getAbsolutePath(), false);
             System.out.println("=======================");
         }
     }
@@ -52,8 +53,20 @@ public class IntegrationTest {
         return testFiles;
     }
 
-    boolean runSatSolverTest(String testInput) {
-        Parser parser = new Parser(new String[]{testInput, SEQ.getType(), UIP.getType()});
+    private void runSatSolverTests(String testInput, boolean expectedOutput) {
+        // Try all types of branch picking
+        for (BranchPickerType branchPickerType : BranchPickerType.values()) {
+            assertEquals(expectedOutput, runSatSolverTest(testInput, branchPickerType.getType(), UIP.getType()), "Wrong output for " + testInput);
+        }
+
+        // Try all types of conflict analysers
+        for (ConflictAnalyserType conflictAnalyserType : ConflictAnalyserType.values()) {
+            assertEquals(expectedOutput, runSatSolverTest(testInput, SEQ.getType(), conflictAnalyserType.getType()));
+        }
+    }
+
+    private boolean runSatSolverTest(String testInput, String branchPickerType, String conflictAnalyserType) {
+        Parser parser = new Parser(new String[]{testInput, branchPickerType, conflictAnalyserType});
         CDCLSolver solver = new CDCLSolver(parser);
         return solver.solve().isSat();
     }
