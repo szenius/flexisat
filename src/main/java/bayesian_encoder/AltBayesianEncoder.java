@@ -9,7 +9,7 @@ import java.util.*;
 
 public class AltBayesianEncoder extends BayesianEncoder{
 
-    Set<Integer> sourceNodes;
+    private Set<Integer> sourceNodes;
 
     @Override
     public void encodeBayesianQueryIntoCNF(int numVariables,
@@ -38,13 +38,16 @@ public class AltBayesianEncoder extends BayesianEncoder{
                                    int numVariables, List<BayesianClique> cliques) throws IOException {
 
         // The starting offset for the all the subsequent chance nodes.
-        int literalId = numVariables + 1;
+        int literalId = numVariables;
+
+        // DEBUG
+        System.out.println("Literal ID @ start" + literalId);
 
         for (BayesianClique clique : cliques) {
             List<Integer> variables = clique.getVariables();
             // Source node. Can just write in the weights for its Chance Nodes.
             if (variables.size() == 1) {
-                String positiveLiteralWeight = "w " + variables.get(0) + " " + clique.getFunctionTable()[0][1] + " 0\n";
+                String positiveLiteralWeight = "w " + variables.get(0) + " " + clique.getFunctionTable()[1][0] + " 0\n";
                 String negativeLiteralWeight = "w -" + variables.get(0) + " " + clique.getFunctionTable()[0][0] + " 0\n";
                 weightsWriter.write(positiveLiteralWeight);
                 weightsWriter.write(negativeLiteralWeight);
@@ -77,6 +80,7 @@ public class AltBayesianEncoder extends BayesianEncoder{
                         }
                     }
                     int literalIdOfChanceNode = literalId + chanceNodeId;
+                    System.out.println("Literal ID being added: " + literalId);
                     // Right side of implication. Chance node with State Node of current Bayesian Node.
                     // Will need 2 of this.
                     String rightSideImplicationOne = "-" + nodeId + " " + literalIdOfChanceNode + " 0\n";

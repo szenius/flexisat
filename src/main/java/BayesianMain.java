@@ -1,3 +1,5 @@
+import bayesian_encoder.AltBayesianEncoder;
+import bayesian_encoder.BayesianEncoder;
 import bayesian_encoder.ClassBayesianEncoder;
 import data_structures.BayesianClique;
 import parser.UAIParser;
@@ -17,7 +19,7 @@ public class BayesianMain {
         List<BayesianClique> cliques = parser.getCliques();
         parser.parseEvidence(evidenceFileName);
         Map<Integer, Boolean> queryVariables = parser.getQueryValues();
-        ClassBayesianEncoder networkEncoder = new ClassBayesianEncoder();
+        BayesianEncoder networkEncoder = new AltBayesianEncoder();
 
         networkEncoder.encodeBayesianQueryIntoCNF(parser.getNumVariables(),
                 cliques, parser.getQueryValues());
