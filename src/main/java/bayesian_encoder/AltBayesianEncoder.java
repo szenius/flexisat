@@ -7,11 +7,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class AltBayesianEncoder {
+public class AltBayesianEncoder extends BayesianEncoder{
 
-    Map<Integer, Integer> bayesianVarIdToLiteralId;
-    Map<Integer, Integer> bayesianVarIdToChanceId;
+    Set<Integer> sourceNodes;
 
+    @Override
     public void encodeBayesianQueryIntoCNF(int numVariables,
                                            List<BayesianClique> cliques, Map<Integer,Boolean> evidence){
         String fileNameCNFEncoding = "test_encoder.cnf";
@@ -20,6 +20,8 @@ public class AltBayesianEncoder {
         try {
             BufferedWriter encodingWriter = new BufferedWriter(new FileWriter(fileNameCNFEncoding));
             BufferedWriter weightsWriter = new BufferedWriter(new FileWriter(fileNameWeights));
+
+            identifySourceNodes(cliques);
 
             createCNFHeaders(encodingWriter, weightsWriter, numVariables, cliques, evidence);
             createConstraints(encodingWriter, weightsWriter, numVariables, cliques);
@@ -32,17 +34,8 @@ public class AltBayesianEncoder {
         }
     }
 
-
     private void createConstraints(BufferedWriter encoderWriter, BufferedWriter weightsWriter,
                                    int numVariables, List<BayesianClique> cliques) throws IOException {
-        // Identify all the source nodes. For Source Nodes, their literal represents the Chance Variable.
-        // TODO: Might not need this at all.
-        Set<Integer> sourceNodes = new HashSet<>();
-        for (BayesianClique clique : cliques) {
-            if (clique.getVariables().size() == 1){
-                sourceNodes.add(clique.getVariables().get(0));
-            }
-        }
 
         // The starting offset for the all the subsequent chance nodes.
         int literalId = numVariables + 1;
@@ -90,6 +83,14 @@ public class AltBayesianEncoder {
                     String rightSideImplicationTwo = "-" + literalIdOfChanceNode + " " + nodeId + " 0\n";
                     encoderWriter.write(leftSideImplication + rightSideImplicationOne);
                     encoderWriter.write(leftSideImplication + rightSideImplicationTwo);
+
+                    // Create Weights for Chance Nodes according to clique.
+                    String positiveLiteralWeight = "w " + literalIdOfChanceNode + " " +
+                            clique.getFunctionTable()[1][chanceNodeId];
+                    String negativeLiteralWeight = "w -" + literalIdOfChanceNode + " " +
+                            clique.getFunctionTable()[0][chanceNodeId];
+                    weightsWriter.write(positiveLiteralWeight);
+                    weightsWriter.write(negativeLiteralWeight);
                 }
                 literalId += numChanceNodes;
             }
@@ -97,32 +98,47 @@ public class AltBayesianEncoder {
     }
 
 
-
-    private int getChanceVariableOffset(List<BayesianClique> cliques) {
-        int offset = 0;
-        for (BayesianClique clique : cliques) {
-            if (clique.getVariables().size() != 1) {
-                offset++;
-            }
-        }
-        return offset;
-    }
-
-
     private void createCNFHeaders(BufferedWriter encoderWriter, BufferedWriter weightsWriter, int numVariables, List<BayesianClique> cliques,
                                   Map<Integer, Boolean> evidence) throws IOException {
+        // Initialised to number of State Variables
+        int totalNumVariables = numVariables;
+        int totalNumClauses = 0;
 
+        // Total number of chance variables
+        for (BayesianClique clique : cliques){
+            if (clique.getVariables().size() > 1 ) {
+                totalNumVariables += Math.pow(2, clique.getVariables().size() - 1);
+                totalNumClauses += 2 * Math.pow(2, clique.getVariables().size() - 1);
+            }
+        }
+        // Add clauses created by evidence
+        totalNumClauses += evidence.size();
+
+        encoderWriter.write("c SAT CNF BAYESIAN ENCODING \n");
+        encoderWriter.write("p cnf " + totalNumVariables + " " +  totalNumClauses + "\n");
+        weightsWriter.write("p " + totalNumVariables + "\n");
     }
 
-    private void createHints(BufferedWriter writer, Map<Integer,Boolean> evidence) throws IOException {
-        for (Map.Entry<Integer, Boolean> entry : evidence.entrySet()) {
-            int indicatorVariable;
-            if (entry.getValue()) {
-                indicatorVariable = 2 * entry.getKey();
-            } else {
-                indicatorVariable = 2 * entry.getKey() + 1;
+
+    private void identifySourceNodes(List<BayesianClique> cliques) {
+        this.sourceNodes = new HashSet<>();
+        for (BayesianClique clique : cliques) {
+            if (clique.getVariables().size() == 1){
+                sourceNodes.add(clique.getVariables().get(0));
             }
-            writer.write(Integer.toString(indicatorVariable) + " 0\n");
+        }
+    }
+
+    private void createHints(BufferedWriter encoderWriter, Map<Integer,Boolean> evidence) throws IOException {
+        for (Map.Entry<Integer, Boolean> entry : evidence.entrySet()) {
+            String indicatorVariable;
+            // Adding constraints to the State Nodes
+            if (entry.getValue()) {
+                indicatorVariable = "-" + entry.getKey();
+            } else {
+                indicatorVariable = entry.getKey().toString();
+            }
+            encoderWriter.write(indicatorVariable + " 0\n");
         }
     }
 
