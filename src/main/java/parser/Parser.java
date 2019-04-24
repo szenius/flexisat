@@ -1,9 +1,6 @@
 package parser;
 
-import branch_pickers.BranchPicker;
-import branch_pickers.BranchPickerType;
-import branch_pickers.RandomBranchPicker;
-import branch_pickers.SequentialBranchPicker;
+import branch_pickers.*;
 import conflict_analysers.*;
 import conflict_analysers.uip.NoUIPConflictAnalyser;
 import conflict_analysers.uip.SingleUIPConflictAnalyser;
@@ -109,8 +106,11 @@ public class Parser {
                 branchPicker = new RandomBranchPicker(variables);
                 break;
             case SEQ:
-            default:
                 branchPicker = new SequentialBranchPicker(variables);
+                break;
+            case TWO_CLAUSE:
+            default:
+                branchPicker = new TwoClauseBranchPicker(variables, clauses);
         }
     }
 

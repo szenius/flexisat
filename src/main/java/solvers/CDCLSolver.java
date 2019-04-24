@@ -137,7 +137,7 @@ public class CDCLSolver implements Solver {
             performedUnitResolution = false;
 
             for (Clause clause : clauses.getClauses()) {
-                Literal unitLiteral = clause.getUnitLiteral(assignments);
+                Literal unitLiteral = clause.findUnitLiteral(assignments);
 
                 if (unitLiteral != null) {
                     // Found unit literal, do unit resolution
@@ -179,7 +179,7 @@ public class CDCLSolver implements Solver {
                 // Don't consider the clause which led to the inferred node's assignment
                 continue;
             }
-            Literal unitLiteral = clause.findUnitLiteral(inferredNode.getVariable(), assignments);
+            Literal unitLiteral = clause.findTargetUnitLiteral(inferredNode.getVariable(), assignments);
             if (unitLiteral != null) {
                 // Found another clause which helps us infer the same variable we just inferred
                 boolean inferredNodeAssignment = !unitLiteral.isNegated();
