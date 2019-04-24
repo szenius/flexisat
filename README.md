@@ -25,7 +25,7 @@ java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <co
 # java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip
 
 # e.g. with optional parameters (format: key=value)
-# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip bump=1 
+# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip bump=1 decay_factor=0.5 decay_interval=1
 ```
 * `filename`: A CNF file following the DIMACS format
 * `pick_branching_type`: "seq", "random", "two_clause", "vsids", "chaff", "minisat". Please see [Branch Pickers](#branch-pickers) for more explanation.
