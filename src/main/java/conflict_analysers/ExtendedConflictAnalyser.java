@@ -48,7 +48,7 @@ public abstract class ExtendedConflictAnalyser implements ConflictAnalyser {
         return numAtDecisionLevel;
     }
 
-    public ConflictAnalyserResult buildConflictAnalyserResult(Set<Node> candidates, Assignments assignments) {
+    public ConflictAnalyserResult buildConflictAnalyserResult(Set<Node> candidates, Assignments assignments, Set<Variable> variablesResolved) {
         // Generate new learnt clause
         int maxLevel = -1;
         int assertionLevel = -1;
@@ -69,7 +69,11 @@ public abstract class ExtendedConflictAnalyser implements ConflictAnalyser {
             assertionLevel = 0;
         }
 
-        return new ConflictAnalyserResult(assertionLevel, learntClause);
+        return new ConflictAnalyserResult(assertionLevel, learntClause, variablesResolved);
+    }
+
+    public ConflictAnalyserResult buildConflictAnalyserResult(Set<Node> candidates, Assignments assignments) {
+        return buildConflictAnalyserResult(candidates, assignments, new HashSet<>());
     }
 
     public void removeConflictingNodeFromGraph(Node inferredNode) {

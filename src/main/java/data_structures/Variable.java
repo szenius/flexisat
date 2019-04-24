@@ -1,6 +1,6 @@
 package data_structures;
 
-public class Variable {
+public class Variable implements Comparable<Variable> {
     private int id;
 
     public Variable(int id) {
@@ -29,5 +29,15 @@ public class Variable {
         }
         Variable other = (Variable) obj;
         return this.getId() == other.getId();
+    }
+
+    @Override
+    public int compareTo(Variable o) {
+        if (getId() < o.getId()) {
+            return -1;
+        } else if (getId() > o.getId()) {
+            return 1;
+        }
+        return 0;
     }
 }

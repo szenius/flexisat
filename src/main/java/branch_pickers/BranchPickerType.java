@@ -1,7 +1,12 @@
 package branch_pickers;
 
 public enum BranchPickerType {
-    SEQ("seq");
+    RANDOM("random"),
+    SEQ("seq"),
+    TWO_CLAUSE("two_clause"),
+    VSIDS("vsids"),
+    CHAFF("chaff"),
+    MINISAT("minisat");
 
     private String type;
 

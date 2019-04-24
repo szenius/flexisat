@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class IntegrationTest {
     // NOTE: if you want to test against full suite of test files, change the following to false.
     private static final boolean QUICK_TESTS_MODE = true;
-    private static final int QUICK_TESTS_SIZE = 5;
+    private static final int QUICK_TESTS_SIZE = 1;
 
     private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
     private static final String SAT_DIRECTORY_PATH = "input/sat/";

@@ -1,8 +1,9 @@
 package parser;
 
-import branch_pickers.BranchPicker;
-import branch_pickers.BranchPickerType;
-import branch_pickers.SequentialBranchPicker;
+import branch_pickers.*;
+import branch_pickers.vsids.ChaffVSIDSBranchPicker;
+import branch_pickers.vsids.MiniSATVSIDSBranchPicker;
+import branch_pickers.vsids.VSIDSBranchPicker;
 import conflict_analysers.*;
 import conflict_analysers.uip.NoUIPConflictAnalyser;
 import conflict_analysers.uip.SingleUIPConflictAnalyser;
@@ -22,23 +23,67 @@ import java.util.Set;
 public class Parser {
     private static final Logger LOGGER = LoggerFactory.getLogger(Parser.class);
 
+    private static final int FILENAME_ARGS_INDEX = 0;
+    private static final int BRANCH_PICKER_ARGS_INDEX = 1;
+    private static final int CONFLICT_ANALYSER_ARGS_INDEX = 2;
+    private static final int OPTIONAL_PARAMS_START_INDEX = 3;
+
     private Clauses clauses;
     private Set<Variable> variables;
     private BranchPicker branchPicker;
     private ConflictAnalyser conflictAnalyser;
 
+    private double decayFactor;
+    private int bump;
+    private int decayInterval;
+
     public Parser(String[] args) {
         if (args.length != 3) {
-            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type>");
+            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type> <branching_decay_chance>");
         }
         this.variables = new HashSet<>();
-
-        parse(args[0]);
-        setBranchPicker(args[1]);
-        setConflictAnalyser(args[2]);
+        init(args);
     }
 
-    private Clauses parse(String filename) {
+    // DO NOT CHANGE ORDER IN THIS METHOD
+    private void init(String[] args) {
+        setOptionalParameters(args);
+        parseCnfFile(args[FILENAME_ARGS_INDEX]);
+        setBranchPicker(args[BRANCH_PICKER_ARGS_INDEX]);
+        setConflictAnalyser(args[CONFLICT_ANALYSER_ARGS_INDEX]);
+    }
+
+    private void setOptionalParameters(String[] args) {
+        // Default configurations
+        decayFactor = 0.5;
+        decayInterval = 1;
+        bump = 1;
+
+        // Replace with user configurations, if any
+        for (int i = OPTIONAL_PARAMS_START_INDEX; i < args.length; i++) {
+            String[] tokens = args[i].trim().split("=");
+
+            if (tokens.length != 2) {
+                throw new IllegalArgumentException("Wrong format for optional parameters! Expected format: key=value");
+            }
+
+            switch(tokens[0]) {
+                case "decay_factor":
+                    decayFactor = Double.parseDouble(tokens[1]);
+                    break;
+                case "decay_interval":
+                    decayInterval = Integer.parseInt(tokens[1]);
+                    break;
+                case "bump":
+                    bump = Integer.parseInt(tokens[1]);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid optional parameter key " + tokens[0]);
+            }
+        }
+    }
+
+    private Clauses parseCnfFile(String filename) {
         File file = new File(filename);
         FileInputStream fis = null;
         try {
@@ -97,16 +142,35 @@ public class Parser {
                 conflictAnalyser = new NoUIPConflictAnalyser();
                 break;
             case SINGLE_UIP:
-            default:
                 conflictAnalyser = new SingleUIPConflictAnalyser();
+                break;
+            default:
+                throw new IllegalArgumentException("Conflict Analyser " + conflictAnalyserType + " does not exist!");
         }
     }
 
     private void setBranchPicker(String branchPickerType) {
         switch (Enum.valueOf(BranchPickerType.class, branchPickerType.toUpperCase())) {
+            case RANDOM:
+                branchPicker = new RandomBranchPicker(variables);
+                break;
             case SEQ:
-            default:
                 branchPicker = new SequentialBranchPicker(variables);
+                break;
+            case TWO_CLAUSE:
+                branchPicker = new TwoClauseBranchPicker(variables, clauses);
+                break;
+            case VSIDS:
+                branchPicker = new VSIDSBranchPicker(variables, decayFactor, bump, decayInterval);
+                break;
+            case CHAFF:
+                branchPicker = new ChaffVSIDSBranchPicker(variables);
+                break;
+            case MINISAT:
+                branchPicker = new MiniSATVSIDSBranchPicker(variables);
+                break;
+            default:
+                throw new IllegalArgumentException("Branch Picker " + branchPickerType + " does not exist!");
         }
     }
 

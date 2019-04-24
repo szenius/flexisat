@@ -27,7 +27,11 @@ public class Assignments {
     }
 
     public boolean hasAssignedVariable(Literal literal) {
-        return variableAssignments.containsKey(literal.getVariable());
+        return hasAssignedVariable(literal.getVariable());
+    }
+
+    public boolean hasAssignedVariable(Variable variable) {
+        return variableAssignments.containsKey(variable);
     }
 
     public boolean getVariableAssignment(Literal literal) {
