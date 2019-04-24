@@ -68,6 +68,7 @@ public class CDCLSolver implements Solver {
             Variable pickedVariable = pickBranchingVariable();
             decisionLevel++;
             Node newNode = new Node(pickedVariable, decisionLevel);
+            newNode.addAncestor(newNode);
             assignments.addAssignment(pickedVariable, newNode, false, true);
             LOGGER.debug("ASSIGNED {}={}@{}", pickedVariable.getId(), assignments.getVariableAssignment(pickedVariable),decisionLevel);
 
@@ -232,6 +233,7 @@ public class CDCLSolver implements Solver {
                 Edge newEdge = new Edge(fromNode, lastInferredNode, dueToClause);
                 fromNode.addOutEdge(newEdge);
                 lastInferredNode.addInEdge(newEdge);
+                lastInferredNode.addAncestors(fromNode.getAncestors());
             }
         }
         return lastInferredNode;
@@ -257,17 +259,5 @@ public class CDCLSolver implements Solver {
 
     private long computeTimeTaken(long startTime) {
         return System.currentTimeMillis() - startTime;
-    }
-
-    /**********************************/
-    /** HELPER METHODS FOR DEBUGGING **/
-    /**********************************/
-
-    private void printNodeSet(Set<Node> nodes) {
-        StringJoiner joiner = new StringJoiner(",");
-        for (Node node : nodes) {
-            joiner.add((assignments.getVariableAssignment(node.getVariable()) ? "-" : "") + String.valueOf(node.getVariable().getId()));
-        }
-        LOGGER.debug("[[{}]]", joiner.toString());
     }
 }

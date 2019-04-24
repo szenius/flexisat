@@ -1,19 +1,25 @@
 package data_structures;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class Node {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Node.class);
+
     private Variable variable;
     private int decisionLevel;
     private List<Edge> inEdges;
     private List<Edge> outEdges;
+    private Set<Node> ancestors;
 
     public Node(Variable variable, int decisionLevel) {
         this.variable = variable;
         this.decisionLevel = decisionLevel;
         this.inEdges = new ArrayList<>();
         this.outEdges = new ArrayList<>();
+        this.ancestors = new HashSet<>();
     }
 
     public Variable getVariable() {
@@ -30,6 +36,22 @@ public class Node {
 
     public List<Edge> getOutEdges() {
         return outEdges;
+    }
+
+    public Set<Node> getAncestors() {
+        return ancestors;
+    }
+
+    public void addAncestor(Node ancestor) {
+        if (ancestor != null) this.ancestors.add(ancestor);
+    }
+
+    public void addAncestors(Set<Node> ancestors) {
+        this.ancestors.addAll(ancestors);
+    }
+
+    public void clearAncestors() {
+        this.ancestors.clear();
     }
 
     public void addInEdge(Edge inEdge) {
@@ -52,7 +74,6 @@ public class Node {
     @Override
     public int hashCode() {
         return getVariable().hashCode();
-//        return (String.valueOf(getVariable().hashCode()) + "+" + String.valueOf(getDecisionLevel())).hashCode();
     }
 
     // NOTE: The equals for Node only cares about whether the variable is the same and not the decision level.
@@ -80,11 +101,26 @@ public class Node {
     private void removeInEdge(Clause dueToClause) {
         for (int i = 0; i < inEdges.size(); i++) {
             if (inEdges.get(i).getDueToClause().equals(dueToClause)) {
-//                System.out.println("Removing children of conflicting node: " + inEdges.get(i).toString());
                 Edge inEdge = inEdges.remove(i);
                 inEdge.getFromNode().removeOutEdge(inEdge);
                 i--;
             }
         }
+    }
+
+    /**********************************/
+    /** HELPER METHODS FOR DEBUGGING **/
+    /**********************************/
+
+    public void printAncestors() {
+        LOGGER.debug("{} <- {}", toString(), getNodeSetString(ancestors));
+    }
+
+    private static String getNodeSetString(Set<Node> nodes) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Node node : nodes) {
+            joiner.add(node.toString());
+        }
+        return joiner.toString();
     }
 }

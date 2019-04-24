@@ -25,8 +25,8 @@ java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <co
 # java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq uip
 ```
 * `filename`: A CNF file following the DIMACS format
-* `pick_branching_type`: How variables should be picked for assignment. Can be "seq". Please see [Branch Pickers](#branch-pickers) for more explanation.
-* `conflict_analyser_type`: How clauses should be learnt during a conflict. Can be "uip". Please see [Conflict Analysers](#conflict-analysers) for more explanation.
+* `pick_branching_type`: "seq". Please see [Branch Pickers](#branch-pickers) for more explanation.
+* `conflict_analyser_type`: "single_uip", "no_uip", "direct", or "roots". Please see [Conflict Analysers](#conflict-analysers) for more explanation.
 
 #### Branch Pickers
 We have various implementations of how the solver picks the next variable for assignment. 
@@ -34,7 +34,10 @@ We have various implementations of how the solver picks the next variable for as
 
 #### Conflict Analysers
 We have various implementations of how the solver learns clauses while analysing conflicts. 
-* `uip`: Get the literals that directly lead to the conflict site, then perform resolution until there is only one literal in the learnt clause that is at the conflict decision level. Please refer to [Section 4.4.3 in this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf) to find out more.
+* `single_uip`: Get the literals that directly lead to the conflict site, then perform resolution until there is only one literal in the learnt clause that is at the conflict decision level. Please refer to [Section 4.4.3 in this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf) to find out more.
+* `no_uip`: Get the literals that directly lead to the conflict site, then perform resolution until there are no literals in the learnt clause that is at the conflict decision level. Please refer to [Section 4.4.1 in this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf) to find out more.
+* `direct`: Get the literals that directly lead to the conflict site, and use that as the learnt clause.
+* `roots`: Use the ancestors of the conflicting nodes as the learnt clause.
 
 ## Developer Guide
 ### Installation
@@ -51,7 +54,9 @@ No other special installations are required.
 4. Add documentation in the [User Guide](#branch-pickers).
 
 ### Adding a Conflict Analyzer
-1. Add a new class in `src/main/java/conflict_analysers`. This class needs to **extend** the `ConflictAnalyserExtended.java` abstract class.
+1. Add a new class in `src/main/java/conflict_analysers`. 
+    1. For UIP based conflict analysers, this class needs to **extend** the `UIPConflictAnalyser.java` abstract class. The class should also be in `src/main/java/conflict_analysers/uip`.
+    2. For other conflict analysers, **extend** the `ExtendedConflictAnalyser.java` abstract class.
 2. Add a new enum field in `ConflictAnalyserType.java` for your new conflict analyser.
 3. In `Parser.java`, add your conflict analyser to the `switch` statement in `setConflictAnalyser`.
 4. Add documentation in the [User Guide](#conflict-analysers).

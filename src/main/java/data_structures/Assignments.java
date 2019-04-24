@@ -45,6 +45,7 @@ public class Assignments {
     }
 
     public void removeAssignment(Variable variable) {
+        this.getImplicationGraphNodes().get(variable).clearAncestors();
         removeNode(variable);
         removeRoot(variable);
         removeVariableAssignment(variable);
