@@ -11,13 +11,13 @@ import java.io.File;
 import java.util.*;
 
 import static branch_pickers.BranchPickerType.SEQ;
-import static conflict_analysers.ConflictAnalyserType.UIP;
+import static conflict_analysers.ConflictAnalyserType.SINGLE_UIP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IntegrationTest {
     // NOTE: if you want to test against full suite of test files, change the following to false.
     private static final boolean QUICK_TESTS_MODE = true;
-    private static final int QUICK_TESTS_SIZE = 1;
+    private static final int QUICK_TESTS_SIZE = 5;
 
     private static final String UNSAT_DIRECTORY_PATH = "input/unsat/";
     private static final String SAT_DIRECTORY_PATH = "input/sat/";
@@ -44,11 +44,6 @@ public class IntegrationTest {
         }
     }
 
-    //@Test
-    void test() {
-        assertEquals(false, runSatSolverTest("input/unsat/uuf50-01.cnf", "seq", "roots"));
-    }
-
     private List<File> getTestFiles(File directory) {
         List<File> testFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
         if (QUICK_TESTS_MODE) {
@@ -61,7 +56,7 @@ public class IntegrationTest {
     private void runSatSolverTests(String testInput, boolean expectedOutput) {
         // Try all types of branch picking
         for (BranchPickerType branchPickerType : BranchPickerType.values()) {
-            assertEquals(expectedOutput, runSatSolverTest(testInput, branchPickerType.getType(), UIP.getType()), "Wrong output for " + testInput + " using " + branchPickerType.getType() + " as pick branching");
+            assertEquals(expectedOutput, runSatSolverTest(testInput, branchPickerType.getType(), SINGLE_UIP.getType()), "Wrong output for " + testInput + " using " + branchPickerType.getType() + " as pick branching");
         }
 
         // Try all types of conflict analysers

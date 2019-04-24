@@ -87,13 +87,16 @@ public class Parser {
 
     private void setConflictAnalyser(String conflictAnalyserType) {
         switch (Enum.valueOf(ConflictAnalyserType.class, conflictAnalyserType.toUpperCase())) {
-            case ROOTS:
-                conflictAnalyser = new RootsConflictAnalyser();
+            case DIRECT:
+                conflictAnalyser = new DirectCutConflictAnalyser();
                 break;
-            case BASIC:
+            case ROOTS:
+                conflictAnalyser = new RootsCutConflictAnalyser();
+                break;
+            case NO_UIP:
                 conflictAnalyser = new NoUIPConflictAnalyser();
                 break;
-            case UIP:
+            case SINGLE_UIP:
             default:
                 conflictAnalyser = new SingleUIPConflictAnalyser();
         }

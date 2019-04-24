@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static branch_pickers.BranchPickerType.SEQ;
-import static conflict_analysers.ConflictAnalyserType.UIP;
+import static conflict_analysers.ConflictAnalyserType.SINGLE_UIP;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTest {
@@ -16,7 +16,7 @@ public class ParserTest {
     @DisplayName("Parses a valid cnf.")
     void validParseTest() {
         String filePath = "input/valid_input1.cnf";
-        Parser testParser = new Parser(new String[]{filePath, SEQ.getType(), UIP.getType()});
+        Parser testParser = new Parser(new String[]{filePath, SEQ.getType(), SINGLE_UIP.getType()});
         Set<Clause> listOfClause = testParser.getClauses().getClauses();
 
         assertEquals(2, listOfClause.size());
