@@ -121,7 +121,7 @@ public class Parser {
 
         String[] tokens = line.trim().split("\\s+");
 
-        if (Integer.parseInt(tokens[3]) != 0) {
+        if (Integer.parseInt(tokens[tokens.length - 1]) != 0) {
             // Line did not end with 0. Unexpected format
             throw new IllegalArgumentException("Format of clause is incorrect. Last number of the line should be 0.");
         }
