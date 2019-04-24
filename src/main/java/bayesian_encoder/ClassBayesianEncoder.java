@@ -108,11 +108,12 @@ public class ClassBayesianEncoder extends BayesianEncoder{
                     // Right implication
                     // Px1x2x3.. -> Ix1
                     int indicatorVariable;
+                    int variableId = variables.get(integerBits.length - 1 - j);
                     // Mapping Integer bits to its respective Indicator Variable.
                     if (integerBits[j])
-                        indicatorVariable = 2 * variables.get(integerBits.length - 1 - j);
+                        indicatorVariable = 2 * variableId;
                     else {
-                        indicatorVariable = 2 * variables.get(integerBits.length - 1 - j + 1);
+                        indicatorVariable = 2 * variableId + 1;
                     }
                     String rightImplication = "-" + parameterVariableID + " " + indicatorVariable + CNF_ENDER;
                     encoderWriter.write(rightImplication);
