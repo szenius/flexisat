@@ -61,8 +61,8 @@ No other special installations are required.
 3. In `Parser.java`, add your conflict analyser to the `switch` statement in `setConflictAnalyser`.
 4. Add documentation in the [User Guide](#conflict-analysers).
 
-## CNF Generator
-**MORE INSTRUCTIONS COMING SOON**
+## CNF Generator 
+`java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator <num_variables> <num_clauses>`
 
 ### Check CNF on CrytoMiniSat
 `cat myfile.cnf | docker run --rm -i msoos/cryptominisat`

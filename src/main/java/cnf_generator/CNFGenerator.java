@@ -7,6 +7,9 @@ import java.io.IOException;
 public class CNFGenerator {
 
     public static void main(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Missing program arguments.");
+        }
         String numVariables = args[0];
         String numClauses = args[1];
         if (numVariables.equals("") || numClauses.equals("")) {
