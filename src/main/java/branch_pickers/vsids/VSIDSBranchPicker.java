@@ -59,7 +59,6 @@ public class VSIDSBranchPicker extends BranchPicker {
         }
         if (updateOnResolvedClause()) {
             variablesToUpdate.addAll(result.getVariablesResolved());
-            throw new IllegalArgumentException("YAS UPDATED");
         }
 
         for (Variable variable : variablesToUpdate) {
