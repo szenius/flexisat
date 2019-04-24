@@ -8,13 +8,11 @@ import data_structures.Variable;
 import java.util.*;
 
 public class VSIDSBranchPicker extends BranchPicker {
-    private Map<Variable, Integer> variableWeights;
-    private int maxWeight;
+    private Map<Variable, Double> variableWeights;
     private double decayChance;
 
     public VSIDSBranchPicker(Set<Variable> variables, double decayChance) {
         super(variables);
-        this.maxWeight = 0;
         this.decayChance = decayChance;
         variableWeights = new HashMap<>();
         initVariableWeights();
@@ -22,22 +20,42 @@ public class VSIDSBranchPicker extends BranchPicker {
 
     @Override
     public Variable pick(Assignments assignments) {
-        List<Variable> highestWeightedVariables = new ArrayList<>();
+        int numHighestWeightedVariables = 0;
+        double highestWeight = Integer.MIN_VALUE;
+        Variable chosenHighestWeightedVariable = null;
         for (Variable variable : variableWeights.keySet()) {
-            if (variableWeights.get(variable) == maxWeight) {
-                highestWeightedVariables.add(variable);
+            if (assignments.hasAssignedVariable(variable)) {
+                // Cannot pick variables that have already been assigned
+                continue;
+            }
+            double weight = variableWeights.get(variable);
+            if (weight == highestWeight) {
+                numHighestWeightedVariables++;
+                if (Math.random() <= 1.0 / numHighestWeightedVariables) {
+                    // Given equal chance, this highest weighted variable should be chosen
+                    chosenHighestWeightedVariable = variable;
+                }
+            } else if (weight > highestWeight) {
+                // Reset number of highest weighted variables and highest weight
+                numHighestWeightedVariables = 1;
+                highestWeight = weight;
+                chosenHighestWeightedVariable = variable;
+
             }
         }
-        Collections.shuffle(highestWeightedVariables);
-        return highestWeightedVariables.get(0);
+        if (chosenHighestWeightedVariable == null) {
+            assignments.printVariableAssignments();
+            throw new NullPointerException("num variables: " + numHighestWeightedVariables);
+        }
+        return chosenHighestWeightedVariable;
     }
 
     @Override
     public void updateWeights(Clause newClause) {
         for (Literal literal : newClause.getLiterals()) {
-            int newWeight = variableWeights.get(literal.getVariable()) + 1;
-            variableWeights.put(literal.getVariable(), newWeight);
-            maxWeight = Math.max(maxWeight, newWeight);
+            Variable variable = literal.getVariable();
+            double newWeight = variableWeights.get(variable) + 1;
+            variableWeights.put(variable, newWeight);
         }
     }
 
@@ -45,15 +63,14 @@ public class VSIDSBranchPicker extends BranchPicker {
     public void decayWeights() {
         if (Math.random() < decayChance) {
             for (Variable variable : variableWeights.keySet()) {
-                variableWeights.put(variable, variableWeights.get(variable) / 2);
+                variableWeights.put(variable, variableWeights.get(variable) / 2.0);
             }
-            maxWeight = maxWeight / 2;
         }
     }
 
     private void initVariableWeights() {
         for (Variable variable : getVariables()) {
-            variableWeights.put(variable, 0);
+            variableWeights.put(variable, 0.0);
         }
     }
 }

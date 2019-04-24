@@ -24,27 +24,32 @@ public class TwoClauseBranchPicker extends BranchPicker {
         }
 
         // Count number of occurrences of each literal
-        int mostOccurringLiteralCount = 0;
-        Map<Literal, Integer> literalCounts = new HashMap<>();
+        int mostOccurringVariableCount = 0;
+        Map<Variable, Integer> variableCounts = new HashMap<>();
         for (List<Literal> clause : twoClauses) {
             for (Literal literal : clause) {
-                int count = literalCounts.getOrDefault(literal, 0);
+                Variable variable = literal.getVariable();
+                int count = variableCounts.getOrDefault(variable, 0);
                 count++;
-                literalCounts.put(literal, count);
-                mostOccurringLiteralCount = Math.max(mostOccurringLiteralCount, count);
+                variableCounts.put(variable, count);
+                mostOccurringVariableCount = Math.max(mostOccurringVariableCount, count);
             }
         }
 
         // Find the literal that occurs the most number of times and return
         // If there are more than one of such literals, pick a random one
-        List<Literal> mostOccurringLiterals = new ArrayList<>();
-        for (Literal literal : literalCounts.keySet()) {
-            if (literalCounts.get(literal) == mostOccurringLiteralCount) {
-                mostOccurringLiterals.add(literal);
+        int numMostOccurringVariables = 0;
+        Variable chosenMostOccurringVariable = null;
+        for (Variable variable : variableCounts.keySet()) {
+            if (variableCounts.get(variable) == mostOccurringVariableCount) {
+                numMostOccurringVariables++;
+                if (Math.random() <= (1.0 / numMostOccurringVariables)) {
+                    // Given equal chance, this highest weighted variable should be chosen
+                    chosenMostOccurringVariable  = variable;
+                }
             }
         }
-        Collections.shuffle(mostOccurringLiterals);
-        return mostOccurringLiterals.get(0).getVariable();
+        return chosenMostOccurringVariable;
     }
 
     @Override
