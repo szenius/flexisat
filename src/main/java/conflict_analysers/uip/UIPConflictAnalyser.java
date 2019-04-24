@@ -1,5 +1,6 @@
-package conflict_analysers;
+package conflict_analysers.uip;
 
+import conflict_analysers.ExtendedConflictAnalyser;
 import data_structures.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

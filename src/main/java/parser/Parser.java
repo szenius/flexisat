@@ -4,6 +4,8 @@ import branch_pickers.BranchPicker;
 import branch_pickers.BranchPickerType;
 import branch_pickers.SequentialBranchPicker;
 import conflict_analysers.*;
+import conflict_analysers.uip.NoUIPConflictAnalyser;
+import conflict_analysers.uip.SingleUIPConflictAnalyser;
 import data_structures.Clause;
 import data_structures.Clauses;
 import data_structures.Literal;

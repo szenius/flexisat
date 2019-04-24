@@ -1,4 +1,4 @@
-package conflict_analysers;
+package conflict_analysers.uip;
 
 public class NoUIPConflictAnalyser extends UIPConflictAnalyser {
 
