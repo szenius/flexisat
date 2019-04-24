@@ -1,11 +1,13 @@
 package data_structures;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class Node {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Node.class);
+
     private Variable variable;
     private int decisionLevel;
     private List<Edge> inEdges;
@@ -42,6 +44,10 @@ public class Node {
 
     public void addAncestor(Node ancestor) {
         if (ancestor != null) this.ancestors.add(ancestor);
+    }
+
+    public void addAncestors(Set<Node> ancestors) {
+        this.ancestors.addAll(ancestors);
     }
 
     public void clearAncestors() {
@@ -102,7 +108,19 @@ public class Node {
         }
     }
 
-    public void addAncestors(Set<Node> ancestors) {
-        this.ancestors.addAll(ancestors);
+    /**********************************/
+    /** HELPER METHODS FOR DEBUGGING **/
+    /**********************************/
+
+    public void printAncestors() {
+        LOGGER.debug("{} <- {}", toString(), getNodeSetString(ancestors));
+    }
+
+    private static String getNodeSetString(Set<Node> nodes) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Node node : nodes) {
+            joiner.add(node.toString());
+        }
+        return joiner.toString();
     }
 }

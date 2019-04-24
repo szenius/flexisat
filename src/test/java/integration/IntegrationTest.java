@@ -44,6 +44,11 @@ public class IntegrationTest {
         }
     }
 
+    //@Test
+    void test() {
+        assertEquals(false, runSatSolverTest("input/unsat/uuf50-01.cnf", "seq", "roots"));
+    }
+
     private List<File> getTestFiles(File directory) {
         List<File> testFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
         if (QUICK_TESTS_MODE) {
