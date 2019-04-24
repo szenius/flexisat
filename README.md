@@ -48,7 +48,7 @@ We built this project with Gradle. To import this project in your IDE, choose th
 No other special installations are required.
 
 ### Adding a Branch Picker
-1. Add a new class in `src/main/java/branch_pickers`. This class needs to **implement** the `BranchPicker.java` interface.
+1. Add a new class in `src/main/java/branch_pickers`. This class needs to **extend** the `BranchPicker.java` abstract class.
 2. Add a new enum field in `BranchPickerType.java` for your new branch picker.
 3. In `Parser.java`, add your branch picker to the `switch` statement in `setBranchPicker`.
 4. Add documentation in the [User Guide](#branch-pickers).

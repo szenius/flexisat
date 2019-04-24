@@ -1,6 +1,7 @@
 package branch_pickers;
 
 public enum BranchPickerType {
+    RANDOM("random"),
     SEQ("seq");
 
     private String type;

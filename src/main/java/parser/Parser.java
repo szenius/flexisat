@@ -2,6 +2,7 @@ package parser;
 
 import branch_pickers.BranchPicker;
 import branch_pickers.BranchPickerType;
+import branch_pickers.RandomBranchPicker;
 import branch_pickers.SequentialBranchPicker;
 import conflict_analysers.*;
 import conflict_analysers.uip.NoUIPConflictAnalyser;
@@ -104,6 +105,9 @@ public class Parser {
 
     private void setBranchPicker(String branchPickerType) {
         switch (Enum.valueOf(BranchPickerType.class, branchPickerType.toUpperCase())) {
+            case RANDOM:
+                branchPicker = new RandomBranchPicker(variables);
+                break;
             case SEQ:
             default:
                 branchPicker = new SequentialBranchPicker(variables);
