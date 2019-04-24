@@ -20,23 +20,53 @@ import java.util.Set;
 public class Parser {
     private static final Logger LOGGER = LoggerFactory.getLogger(Parser.class);
 
+    private static final int FILENAME_ARGS_INDEX = 0;
+    private static final int BRANCH_PICKER_ARGS_INDEX = 1;
+    private static final int CONFLICT_ANALYSER_ARGS_INDEX = 2;
+    private static final int OPTIONAL_PARAMS_START_INDEX = 3;
+
     private Clauses clauses;
     private Set<Variable> variables;
     private BranchPicker branchPicker;
     private ConflictAnalyser conflictAnalyser;
 
+    private double decayChance;
+
     public Parser(String[] args) {
         if (args.length != 3) {
-            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type>");
+            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type> <branching_decay_chance>");
         }
         this.variables = new HashSet<>();
-
-        parse(args[0]);
-        setBranchPicker(args[1]);
-        setConflictAnalyser(args[2]);
+        init(args);
     }
 
-    private Clauses parse(String filename) {
+    // DO NOT CHANGE ORDER IN THIS METHOD
+    private void init(String[] args) {
+        setOptionalParameters(args);
+        parseCnfFile(args[FILENAME_ARGS_INDEX]);
+        setBranchPicker(args[BRANCH_PICKER_ARGS_INDEX]);
+        setConflictAnalyser(args[CONFLICT_ANALYSER_ARGS_INDEX]);
+    }
+
+    private void setOptionalParameters(String[] args) {
+        for (int i = OPTIONAL_PARAMS_START_INDEX; i < args.length; i++) {
+            String[] tokens = args[i].trim().split("=");
+
+            if (tokens.length != 2) {
+                throw new IllegalArgumentException("Wrong format for optional parameters! Expected format: key=value");
+            }
+
+            switch(tokens[0]) {
+                case "decay":
+                    decayChance = Double.parseDouble(tokens[1]);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid optional parameter key " + tokens[0]);
+            }
+        }
+    }
+
+    private Clauses parseCnfFile(String filename) {
         File file = new File(filename);
         FileInputStream fis = null;
         try {
@@ -109,8 +139,11 @@ public class Parser {
                 branchPicker = new SequentialBranchPicker(variables);
                 break;
             case TWO_CLAUSE:
-            default:
                 branchPicker = new TwoClauseBranchPicker(variables, clauses);
+                break;
+            case VSIDS:
+            default:
+                branchPicker = new VSIDSBranchPicker(variables, decayChance);
         }
     }
 

@@ -8,14 +8,14 @@ import data_structures.Variable;
 import java.util.*;
 
 public class VSIDSBranchPicker extends BranchPicker {
-    private static final double DECAY_CHANCE = 0.2;
+    private Map<Variable, Integer> variableWeights;
+    private int maxWeight;
+    private double decayChance;
 
-    Map<Variable, Integer> variableWeights;
-    int maxWeight;
-
-    public VSIDSBranchPicker(Set<Variable> variables) {
+    public VSIDSBranchPicker(Set<Variable> variables, double decayChance) {
         super(variables);
-        maxWeight = 0;
+        this.maxWeight = 0;
+        this.decayChance = decayChance;
         variableWeights = new HashMap<>();
         initVariableWeights();
     }
@@ -43,7 +43,7 @@ public class VSIDSBranchPicker extends BranchPicker {
 
     @Override
     public void decayWeights() {
-        if (Math.random() < DECAY_CHANCE) {
+        if (Math.random() < decayChance) {
             for (Variable variable : variableWeights.keySet()) {
                 variableWeights.put(variable, variableWeights.get(variable) / 2);
             }

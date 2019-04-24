@@ -3,7 +3,8 @@ package branch_pickers;
 public enum BranchPickerType {
     RANDOM("random"),
     SEQ("seq"),
-    TWO_CLAUSE("two_clause");
+    TWO_CLAUSE("two_clause"),
+    VSIDS("vsids");
 
     private String type;
 
