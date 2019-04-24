@@ -4,7 +4,9 @@ public enum BranchPickerType {
     RANDOM("random"),
     SEQ("seq"),
     TWO_CLAUSE("two_clause"),
-    VSIDS("vsids");
+    VSIDS("vsids"),
+    CHAFF("chaff"),
+    MINISAT("minisat");
 
     private String type;
 

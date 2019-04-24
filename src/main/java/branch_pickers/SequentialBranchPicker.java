@@ -1,7 +1,7 @@
 package branch_pickers;
 
 import data_structures.Assignments;
-import data_structures.Clause;
+import data_structures.ConflictAnalyserResult;
 import data_structures.Variable;
 
 import java.util.Collections;
@@ -21,13 +21,18 @@ public class SequentialBranchPicker extends BranchPicker {
     }
 
     @Override
-    public void updateWeights(Clause newClause) {
+    public void updateWeights(ConflictAnalyserResult result) {
         // Do nothing for static branch pickers
     }
 
     @Override
     public void decayWeights() {
         // Do nothing for static branch pickers
+    }
+
+    @Override
+    public boolean updateOnResolvedClause() {
+        return false;
     }
 
 }

@@ -29,6 +29,8 @@ public abstract class UIPConflictAnalyser extends ExtendedConflictAnalyser {
         Queue<Edge> cutEdges = new LinkedList<>(conflictingNode.getInEdges());
         cutEdges.addAll(inferredNode.getInEdges());
 
+        Set<Variable> variablesResolved = new HashSet<>();
+
         // Find the nodes leading to conflict site
         Set<Node> candidates = new HashSet<>();
         while (!cutEdges.isEmpty()) {
@@ -56,12 +58,13 @@ public abstract class UIPConflictAnalyser extends ExtendedConflictAnalyser {
                 continue;
             }
             candidates = resolve(candidates, assignments.getNodes(cutEdge.getDueToClause()), cutEdge.getToNode().getVariable());
+            variablesResolved.add(cutEdge.getToNode().getVariable());
             numLiteralsAtDecisionLevel = countNodesAtDecisionLevel(candidates, conflictDecisionLevel);
             cutEdges.addAll(cutEdge.getFromNode().getInEdges());
         }
 
         // Build result with learnt clause and assertion level
-        ConflictAnalyserResult result = buildConflictAnalyserResult(candidates, assignments);
+        ConflictAnalyserResult result = buildConflictAnalyserResult(candidates, assignments, variablesResolved);
         LOGGER.debug("LEARNT new clause {}", result.getLearntClause().toString());
 
         // Remove assignment of the conflicting node which came second

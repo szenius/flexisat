@@ -36,15 +36,16 @@ public class TwoClauseBranchPicker extends BranchPicker {
             }
         }
 
-        // Find the literal that occurs the most number of times and return
-        // If there are more than one of such literals, pick a random one
+        // Find the variable that occurs the most number of times and return
+        // If there are more than one of such variables, pick a random one
         int numMostOccurringVariables = 0;
         Variable chosenMostOccurringVariable = null;
         for (Variable variable : variableCounts.keySet()) {
             if (variableCounts.get(variable) == mostOccurringVariableCount) {
+                // Found another candidate which is most occurring
                 numMostOccurringVariables++;
                 if (Math.random() <= (1.0 / numMostOccurringVariables)) {
-                    // Given equal chance, this highest weighted variable should be chosen
+                    // Give equal chance for this candidate to be chosen
                     chosenMostOccurringVariable  = variable;
                 }
             }
@@ -53,12 +54,17 @@ public class TwoClauseBranchPicker extends BranchPicker {
     }
 
     @Override
-    public void updateWeights(Clause newClause) {
+    public void updateWeights(ConflictAnalyserResult result) {
         // Do nothing for static branch pickers
     }
 
     @Override
     public void decayWeights() {
         // Do nothing for static branch pickers
+    }
+
+    @Override
+    public boolean updateOnResolvedClause() {
+        return false;
     }
 }

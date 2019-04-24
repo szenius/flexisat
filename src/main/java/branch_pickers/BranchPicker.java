@@ -2,6 +2,7 @@ package branch_pickers;
 
 import data_structures.Assignments;
 import data_structures.Clause;
+import data_structures.ConflictAnalyserResult;
 import data_structures.Variable;
 
 import java.util.ArrayList;
@@ -12,8 +13,9 @@ public abstract class BranchPicker {
     private Set<Variable> variables;
 
     public abstract Variable pick(Assignments assignments);
-    public abstract void updateWeights(Clause clause);
+    public abstract void updateWeights(ConflictAnalyserResult result);
     public abstract void decayWeights();
+    public abstract boolean updateOnResolvedClause();
 
     public BranchPicker(Set<Variable> variables) {
         this.variables = variables;

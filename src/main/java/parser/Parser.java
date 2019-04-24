@@ -1,6 +1,9 @@
 package parser;
 
 import branch_pickers.*;
+import branch_pickers.vsids.ChaffVSIDSBranchPicker;
+import branch_pickers.vsids.MiniSATVSIDSBranchPicker;
+import branch_pickers.vsids.VSIDSBranchPicker;
 import conflict_analysers.*;
 import conflict_analysers.uip.NoUIPConflictAnalyser;
 import conflict_analysers.uip.SingleUIPConflictAnalyser;
@@ -30,7 +33,9 @@ public class Parser {
     private BranchPicker branchPicker;
     private ConflictAnalyser conflictAnalyser;
 
-    private double decayChance;
+    private double decayFactor;
+    private int bump;
+    private int decayInterval;
 
     public Parser(String[] args) {
         if (args.length != 3) {
@@ -49,6 +54,12 @@ public class Parser {
     }
 
     private void setOptionalParameters(String[] args) {
+        // Default configurations
+        decayFactor = 0.5;
+        decayInterval = 1;
+        bump = 1;
+
+        // Replace with user configurations, if any
         for (int i = OPTIONAL_PARAMS_START_INDEX; i < args.length; i++) {
             String[] tokens = args[i].trim().split("=");
 
@@ -57,8 +68,14 @@ public class Parser {
             }
 
             switch(tokens[0]) {
-                case "decay":
-                    decayChance = Double.parseDouble(tokens[1]);
+                case "decay_factor":
+                    decayFactor = Double.parseDouble(tokens[1]);
+                    break;
+                case "decay_interval":
+                    decayInterval = Integer.parseInt(tokens[1]);
+                    break;
+                case "bump":
+                    bump = Integer.parseInt(tokens[1]);
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid optional parameter key " + tokens[0]);
@@ -125,8 +142,10 @@ public class Parser {
                 conflictAnalyser = new NoUIPConflictAnalyser();
                 break;
             case SINGLE_UIP:
-            default:
                 conflictAnalyser = new SingleUIPConflictAnalyser();
+                break;
+            default:
+                throw new IllegalArgumentException("Conflict Analyser " + conflictAnalyserType + " does not exist!");
         }
     }
 
@@ -142,8 +161,16 @@ public class Parser {
                 branchPicker = new TwoClauseBranchPicker(variables, clauses);
                 break;
             case VSIDS:
+                branchPicker = new VSIDSBranchPicker(variables, decayFactor, bump, decayInterval);
+                break;
+            case CHAFF:
+                branchPicker = new ChaffVSIDSBranchPicker(variables);
+                break;
+            case MINISAT:
+                branchPicker = new MiniSATVSIDSBranchPicker(variables);
+                break;
             default:
-                branchPicker = new VSIDSBranchPicker(variables, decayChance);
+                throw new IllegalArgumentException("Branch Picker " + branchPickerType + " does not exist!");
         }
     }
 
