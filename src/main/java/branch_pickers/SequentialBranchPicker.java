@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 public class SequentialBranchPicker extends BranchPicker {
-    private Set<Variable> variables;
-
     public SequentialBranchPicker(Set<Variable> variables) {
         super(variables);
     }
