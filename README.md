@@ -22,7 +22,7 @@ In the project root directory, run this:
 java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <conflict_analsyer_type>
 
 # e.g.
-# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq uip
+# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip
 ```
 * `filename`: A CNF file following the DIMACS format
 * `pick_branching_type`: "seq". Please see [Branch Pickers](#branch-pickers) for more explanation.
