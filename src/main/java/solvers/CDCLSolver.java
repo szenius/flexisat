@@ -113,7 +113,12 @@ public class CDCLSolver implements Solver {
      */
     private int conflictAnalysis(UnitResolutionResult conflict) {
         ConflictAnalyserResult result = conflictAnalyser.learnClause(conflict, assignments);
-        clauses.addClause(result.getLearntClause());
+
+        Clause learntClause = result.getLearntClause();
+        clauses.addClause(learntClause);
+        branchPicker.updateWeights(learntClause);
+        branchPicker.decayWeights();
+
         return result.getAssertionLevel();
     }
 

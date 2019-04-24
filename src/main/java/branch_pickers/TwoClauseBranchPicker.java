@@ -46,4 +46,14 @@ public class TwoClauseBranchPicker extends BranchPicker {
         Collections.shuffle(mostOccurringLiterals);
         return mostOccurringLiterals.get(0).getVariable();
     }
+
+    @Override
+    public void updateWeights(Clause newClause) {
+        // Do nothing for static branch pickers
+    }
+
+    @Override
+    public void decayWeights() {
+        // Do nothing for static branch pickers
+    }
 }
