@@ -4,13 +4,26 @@ import java.util.*;
 
 public class Clause {
     private List<Literal> literals;
+    private boolean isLearnt;
 
     public Clause(List<Literal> literals) {
         this.literals = literals;
     }
 
+    public Clause(List<Literal> literals, boolean isLearnt) {
+        this.literals = literals;
+        this.isLearnt = isLearnt;
+    }
+
     public List<Literal> getLiterals() {
         return literals;
+<<<<<<< HEAD
+=======
+    }
+
+    public boolean isLearnt() {
+        return isLearnt;
+>>>>>>> master
     }
 
     public int size() {
