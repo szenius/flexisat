@@ -151,7 +151,7 @@ public class EinsteinGeneratorHelper {
         //writer.write(DEBUG + "TYPE 8\n");
         for (int i = 0 ; i < 5 ; i++ ) {
             for (int j = 0 ; j < 5; j++) {
-                int leftIndicatorVar = colourOffset + (j*5) + (i*25) + 1;
+                int leftIndicatorVar = gCigarOffset + (j*5) + (i*25) + 1;
                 int rightIndicatorVar = petOffset + (j*5) + (i*25) + 2;
                 writeBidirectionalImplication(writer, leftIndicatorVar, rightIndicatorVar);
             }
