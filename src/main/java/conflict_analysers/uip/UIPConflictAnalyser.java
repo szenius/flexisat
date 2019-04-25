@@ -65,7 +65,7 @@ public abstract class UIPConflictAnalyser extends ExtendedConflictAnalyser {
 
         // Build result with learnt clause and assertion level
         ConflictAnalyserResult result = buildConflictAnalyserResult(candidates, assignments, variablesResolved);
-        LOGGER.info("LEARNT new clause {}", result.getLearntClause().toString());
+        LOGGER.debug("LEARNT new clause {}", result.getLearntClause().toString());
 
         // Remove assignment of the conflicting node which came second
         removeConflictingNodeFromGraph(inferredNode);
