@@ -35,52 +35,36 @@ public class EinsteinGeneratorHelper {
         mapVariablesToId(writer, beverage);
 
         // Rule 1: Brit lives in Red House
-        //writer.write("Rule 1 \n");
         addEquals(writer, "Brit", "Red");
         // Rule 2: Swede keeps dogs
-        //writer.write("Rule 2 \n");
         addEquals(writer, "Swede", "Dog");
         // Rule 3: Dane drinks tea
-        //writer.write("Rule 3 \n");
         addEquals(writer, "Dane", "Tea");
         // Rule 4: Green house on left of white house
-        //writer.write("Rule 4 \n");
         addLeft(writer, "Green", "White");
         // Rule 5: Green house owner drinks Coffee
-        //writer.write("Rule 5 \n");
         addEquals(writer, "Green", "Coffee");
         // Rule 6: The person who smokes Pall Mall rears bird.
-        //writer.write("Rule 6 \n");
         addEquals(writer, "Pall Mall", "Bird");
         // Rule 7: Owner of yellow house smokes Dunhill.
-        //writer.write("Rule 7 \n");
         addEquals(writer, "Yellow", "Dunhill");
         // Rule 8: Man living in centre drinks milk. **
-        //writer.write("Rule 8 \n");
         addTruePosition(writer, "Milk", 3);
         // Rule 9: Norwegian lives in first house
-        //writer.write("Rule 9 \n");
         addTruePosition(writer, "Norwegian", 1);
         // Rule 10: Man who smokes Blends live next to the one who keeps cats
-        //writer.write("Rule 10 \n");
         addBesideOneAnother(writer, "Blends", "Cat");
         // Rule 11: Man who keeps Horse live next to man who smokes Dunhill
-        //writer.write("Rule 11 \n");
         addBesideOneAnother(writer, "Horse", "Dunhill");
         // Rule 12: Man who smokes Bluemasters drink beer.
-        //writer.write("Rule 12 \n");
         addEquals(writer, "Bluemasters", "Beer");
         // Rule 13: The German smokes Prince.
-        //writer.write("Rule 13 \n");
         addEquals(writer, "German", "Prince");
         // Rule 14: The Norwegian lives next to the blue house.
-        //writer.write("Rule 14 \n");
         addBesideOneAnother(writer,"Norwegian", "Blue");
         // Rule 15: Man who smokes Blends has a neighbour who drinks water.
-        //writer.write("Rule 15 \n");
         addBesideOneAnother(writer, "Blends", "Water");
         // Rule 16: Someone must own the fish
-        //writer.write("Rule 16 \n");
         int fishId = this.variables.get("Fish");
         StringBuilder clause = new StringBuilder();
         for (int i = 0 ; i < 5; i++) {
@@ -99,10 +83,10 @@ public class EinsteinGeneratorHelper {
         for (int i = 1 ; i < 4; i++) {
             int idFirst = firstObjId + i;
             writer.write("-" + idFirst + " " + (secondObjId + i - 1) + " " + (secondObjId + i + 1) + " 0\n");
+            writer.write("-" + (secondObjId + i) + " " + (idFirst - 1) + " " + (idFirst + 1) + " 0\n");
             //writer.write("-" + (secondObjId + i - 1) + " " + idFirst + " 0\n");
             //writer.write("-" + (secondObjId + i + 1) + " " + idFirst + " 0\n");
         }
-
         // i == 0
         writer.write("-" + firstObjId + " " + (secondObjId + 1) + " 0\n");
         writer.write("-" + (secondObjId + 1) + " " + firstObjId + " 0\n");
@@ -169,7 +153,16 @@ public class EinsteinGeneratorHelper {
             createOnlyOneClauses(writer, this.varId);
             this.varId += 5;
         }
-
+        // Have to make them distinct
+        StringBuilder clause = new StringBuilder();
+        for (int i = 0 ; i < 5 ; i++ ){
+            clause.append(this.variables.get(variablesToMap[0]) + i).append(" ")
+                    .append(this.variables.get(variablesToMap[1]) + i).append(" ")
+                    .append(this.variables.get(variablesToMap[2]) + i).append(" ")
+                    .append(this.variables.get(variablesToMap[3]) + i).append(" ")
+                    .append(this.variables.get(variablesToMap[4]) + i).append(" 0\n");
+        }
+        writer.write(clause.toString());
     }
 
     // Create constraints and to make sure only 1 position exists.
@@ -189,5 +182,6 @@ public class EinsteinGeneratorHelper {
             clause += (startingId + i) + " ";
         }
         writer.write(clause + "0\n");
+
     }
 }
