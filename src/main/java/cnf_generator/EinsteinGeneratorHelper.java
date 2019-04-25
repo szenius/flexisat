@@ -3,6 +3,8 @@ package cnf_generator;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EinsteinGeneratorHelper {
 
@@ -13,315 +15,179 @@ public class EinsteinGeneratorHelper {
 
     private static String DEBUG = "==========================DEBUG===================== ";
 
-    // Every house can only have one Colour, Beverage, Pet and Cigar.
-    public static void writeType1Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 1\n");
-        int[] types = {colourOffset, beverageOffset, petOffset, gCigarOffset};
-        for (int type = 0 ; type < types.length ; type++ ) {
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                    for (int k = 0; k < 5; k++) {
-                        int leftVar = types[type] + (i*25) + (j*5) + (k+1);
-                        StringBuilder leftImplication = new StringBuilder();
-                        leftImplication.append(leftVar).append(" ");
+    Map<String, Integer> variables;
+    int varId = 1;
 
-                        for (int x = 0 ; x < 5; x++) {
-                            int rightVar = 0;
-                            // Not conflict with j
-                            if (x != k) {
-                                rightVar = types[type] + (i*25) + (j*5) + (x+1);
-                                leftImplication.append(rightVar).append(" ");
-                                writer.write("-" + leftVar + " -" + rightVar + " 0\n");
-                            }
-                        }
-                        writer.write(leftImplication.append("0\n").toString());
-                    }
-                }
-            }
-        }
-    }
+    // The CNFs are simply trying to order the values inside the solution...
+    // Each CNF literal is a box entry in the 3D space.
+    public void createUniqueConstraints(FileWriter writer) throws IOException {
+        this.variables = new HashMap<>();
+        String[] nationality = {"Brit", "Swede", "Dane", "Norwegian", "German"};
+        String[] colour = {"Red", "Green", "White", "Yellow", "Blue"};
+        String[] pet = {"Dog", "Bird", "Cat", "Horse", "Fish"};
+        String[] smoke = {"Pall Mall", "Dunhill", "Blends", "Bluemasters", "Prince"};
+        String[] beverage = {"Tea", "Coffee", "Beer", "Water", "Milk"};
 
+        mapVariablesToId(writer, nationality);
+        mapVariablesToId(writer, colour);
+        mapVariablesToId(writer, pet);
+        mapVariablesToId(writer, smoke);
+        mapVariablesToId(writer, beverage);
 
-    // Every Nationality can only be matched to one House Order
-    public static void writeType2Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 2\n");
-        int[] types = {colourOffset, beverageOffset, petOffset, gCigarOffset};
-        for (int type = 0 ; type < types.length ; type++ ) {
-            for (int i = 0 ; i < 5; i++) {
-                for (int j = 0 ; j < 5 ; j++) {
-                    for (int k = 0 ; k < 5; k++) {
-                        int leftVar = types[type] + (i*25) + (j*5) + (k+1);
-
-                        StringBuilder leftImplication = new StringBuilder();
-                        leftImplication.append(leftVar).append(" ");
-
-                        for (int x = 0 ; x < 5; x++) {
-                            int rightVar = 0;
-                            // Not conflict with j
-                            if (x != j) {
-                                rightVar = types[type] + (i*25) + (x*5) + (k+1);
-                                leftImplication.append(rightVar).append(" ");
-                                writer.write("-" + leftVar + " -" + rightVar + " 0\n");
-                            }
-                            // Not conflict with i
-                            // TODO: Is this correct?
-                            if (x != i) {
-                                rightVar = types[type] + (x*25) + (j*5) + (k+1);
-                                leftImplication.append(rightVar).append(" ");
-                                writer.write("-" + leftVar + " -" + rightVar + " 0\n");
-                            }
-
-                        }
-                        writer.write(leftImplication.append("0\n").toString());
-                    }
-                }
-            }
-        }
-    }
-
-    // The Brit lives in the red house
-    public static void writeType3Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 3\n");
+        // Rule 1: Brit lives in Red House
+        //writer.write("Rule 1 \n");
+        addEquals(writer, "Brit", "Red");
+        // Rule 2: Swede keeps dogs
+        //writer.write("Rule 2 \n");
+        addEquals(writer, "Swede", "Dog");
+        // Rule 3: Dane drinks tea
+        //writer.write("Rule 3 \n");
+        addEquals(writer, "Dane", "Tea");
+        // Rule 4: Green house on left of white house
+        //writer.write("Rule 4 \n");
+        addLeft(writer, "Green", "White");
+        // Rule 5: Green house owner drinks Coffee
+        //writer.write("Rule 5 \n");
+        addEquals(writer, "Green", "Coffee");
+        // Rule 6: The person who smokes Pall Mall rears bird.
+        //writer.write("Rule 6 \n");
+        addEquals(writer, "Pall Mall", "Bird");
+        // Rule 7: Owner of yellow house smokes Dunhill.
+        //writer.write("Rule 7 \n");
+        addEquals(writer, "Yellow", "Dunhill");
+        // Rule 8: Man living in centre drinks milk. **
+        //writer.write("Rule 8 \n");
+        addTruePosition(writer, "Milk", 3);
+        // Rule 9: Norwegian lives in first house
+        //writer.write("Rule 9 \n");
+        addTruePosition(writer, "Norwegian", 1);
+        // Rule 10: Man who smokes Blends live next to the one who keeps cats
+        //writer.write("Rule 10 \n");
+        addBesideOneAnother(writer, "Blends", "Cat");
+        // Rule 11: Man who keeps Horse live next to man who smokes Dunhill
+        //writer.write("Rule 11 \n");
+        addBesideOneAnother(writer, "Horse", "Dunhill");
+        // Rule 12: Man who smokes Bluemasters drink beer.
+        //writer.write("Rule 12 \n");
+        addEquals(writer, "Bluemasters", "Beer");
+        // Rule 13: The German smokes Prince.
+        //writer.write("Rule 13 \n");
+        addEquals(writer, "German", "Prince");
+        // Rule 14: The Norwegian lives next to the blue house.
+        //writer.write("Rule 14 \n");
+        addBesideOneAnother(writer,"Norwegian", "Blue");
+        // Rule 15: Man who smokes Blends has a neighbour who drinks water.
+        //writer.write("Rule 15 \n");
+        addBesideOneAnother(writer, "Blends", "Water");
+        // Rule 16: Someone must own the fish
+        //writer.write("Rule 16 \n");
+        int fishId = this.variables.get("Fish");
         StringBuilder clause = new StringBuilder();
-        for (int j = 0 ; j < 5 ; j++) {
-            int literal = (0*25) + (j*5) + 1;
-            clause.append(literal).append(" ");
-
+        for (int i = 0 ; i < 5; i++) {
+            int id = fishId + i;
+            clause.append(id).append(" ");
         }
         writer.write(clause.append("0\n").toString());
+
     }
 
-    // The Swede keeps dogs as pets
-    public static void writeType4Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 4\n");
-        StringBuilder clause = new StringBuilder();
-        for (int j = 0 ; j < 5 ; j++) {
-            int literal = petOffset + (1*25) + (j*5) + 1;
-            clause.append(literal).append(" ");
-
+    private void addBesideOneAnother(FileWriter writer, String firstObj, String secondObj) throws IOException{
+        // First object can be on the left or the right of the other object
+        int firstObjId = this.variables.get(firstObj);
+        int secondObjId = this.variables.get(secondObj);
+        // [firstObj <> secondObj] AND[secondObj <> firstObj] AND ... (continue for rest of positions)
+        for (int i = 1 ; i < 4; i++) {
+            int idFirst = firstObjId + i;
+            writer.write("-" + idFirst + " " + (secondObjId + i - 1) + " " + (secondObjId + i + 1) + " 0\n");
+            //writer.write("-" + (secondObjId + i - 1) + " " + idFirst + " 0\n");
+            //writer.write("-" + (secondObjId + i + 1) + " " + idFirst + " 0\n");
         }
-        writer.write(clause.append("0\n").toString());
+
+        // i == 0
+        writer.write("-" + firstObjId + " " + (secondObjId + 1) + " 0\n");
+        writer.write("-" + (secondObjId + 1) + " " + firstObjId + " 0\n");
+        //i == 4
+        writer.write("-" + (firstObjId+4) + " " + (secondObjId + 3) + " 0\n");
+        writer.write("-" + (secondObjId + 3) + " " + (firstObjId+4) + " 0\n");
+
     }
 
-    // The Dane drinks tea
-    public static void writeType5Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 5\n");
-        StringBuilder clause = new StringBuilder();
-        for (int j = 0 ; j < 5 ; j++) {
-            int literal = beverageOffset + (2*25) + (j*5) + 1;
-            clause.append(literal).append(" ");
-
-        }
-        writer.write(clause.append("0\n").toString());
-    }
-
-    // The Green house is on the left of the White house
-    public static void writeType6Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 6\n");
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 4; j++) {
-                // Right implication
-                int leftIndicatorVar = (i * 25) + (j * 5) + 2;
-                int rightIndicatorVar = (i * 25) + ((j+1)*5) + 3;
-                writeBidirectionalImplication(writer, leftIndicatorVar, rightIndicatorVar);
-            }
-        }
-
-        for (int i = 0; i < 5; i++) {
-            int indicatorVariable = (i * 25) + (4*5) + 2;
-            String clause = "-" + indicatorVariable + " 0\n";
+    private void addLeft(FileWriter writer, String leftObj, String rightObj) throws IOException{
+        int leftVarId = this.variables.get(leftObj);
+        int rightVarId = this.variables.get(rightObj);
+        // EG: 1 <-> 2, 2<->3, 3
+        for (int leftIndex = 0 ; leftIndex < 4; leftIndex++) {
+            // Right implication
+            String clause = "-" + (leftVarId + leftIndex) + " " + (rightVarId+leftIndex+1) + " 0\n";
+            writer.write(clause);
+            // Left implication
+            clause = "-" + (rightVarId+leftIndex+1) + " " + (leftVarId+leftIndex) + " 0\n";
             writer.write(clause);
         }
+        // Right object cannot be at position 0.
+        writer.write("-" + rightVarId + " 0\n");
+        // Left object cannot be at position 5.
+        writer.write("-" + (leftVarId+5) + " 0\n");
     }
 
-    // The Green house's owner drinks coffee
-    public static void writeType7Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 7\n");
-        for (int i = 0 ; i < 5 ; i++) {
-            for (int j = 0 ; j < 5 ; j++) {
-                int leftIndicatorVar = colourOffset + (j*5) + (i*25) + 2;
-                int rightIndicatorVar = beverageOffset + (j*5) + (i*25) + 2;
-                writeBidirectionalImplication(writer, leftIndicatorVar, rightIndicatorVar);
-            }
-        }
-    }
 
-    // The person who smokes Pall Mall rears bird
-    public static void writeType8Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 8\n");
-        for (int i = 0 ; i < 5 ; i++ ) {
-            for (int j = 0 ; j < 5; j++) {
-                int leftIndicatorVar = gCigarOffset + (j*5) + (i*25) + 1;
-                int rightIndicatorVar = petOffset + (j*5) + (i*25) + 2;
-                writeBidirectionalImplication(writer, leftIndicatorVar, rightIndicatorVar);
-            }
-        }
-    }
-
-    // The owner of the yellow house smokes Dunhill
-    public static void writeType9Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 9\n");
+    private void addEquals(FileWriter writer, String stringOne, String stringTwo) throws IOException{
+        // Map all 5 variables of the two ids. Means if 1 is true the other has to be true.
+        // Ix <-> Iy
         for (int i = 0 ; i < 5; i++) {
-            for (int j = 0 ; j < 5 ; j++) {
-                int leftIndicator = colourOffset + (i*25) + (j*5) + 4;
-                int rightIndicator = gCigarOffset + (i*25) + (j*5) + 2;
-                writeBidirectionalImplication(writer, leftIndicator, rightIndicator);
-            }
-        }
-    }
-
-    // The man living in the center house drinks milk
-    public static void writeType10Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 10\n");
-        StringBuilder clause = new StringBuilder();
-        for (int i = 0 ; i < 5; i++) {
-            int indicatorVariable = beverageOffset + (i * 25) + (2*5) + 5;
-            clause.append(indicatorVariable).append(" ");
-        }
-        writer.write(clause.append("0\n").toString());
-    }
-
-    // The Norwegian lives in the first house
-    public static void writeType11Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 11\n");
-        StringBuilder clause = new StringBuilder();
-        for (int k = 0 ; k < 5; k++) {
-            int indicatorVariable = colourOffset + (3 * 25) + (0*5) + k;
-            clause.append(indicatorVariable).append(" ");
-        }
-        writer.write(clause.append("0\n").toString());
-    }
-
-    // The man who smokes Blends lives next to the one who keeps cats
-    public static void writeType12Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 12\n");
-        writeNextToConstraints(writer, gCigarOffset, petOffset, 3, 3);
-    }
-
-    // The man who keeps the horse lives next to the man who smokes Dunhill
-    public static void writeType13Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 13\n");
-        writeNextToConstraints(writer, petOffset, gCigarOffset, 4, 2);
-    }
-
-    // The owner who smokes Bluemasters drink beer
-    public static void writeType14Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 14\n");
-        for (int i = 0 ; i < 5 ; i++ ){
-            for (int j = 0 ; j < 5 ; j++ ){
-                int leftIndicator = gCigarOffset + (i * 25) + (j * 5) + 4;
-                int rightIndicator = beverageOffset + (i * 25) + (j * 5) + 3;
-                writeBidirectionalImplication(writer, leftIndicator, rightIndicator);
-            }
-        }
-    }
-
-    // The German smokes Prince
-    public static void writeType15Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 15\n");
-        StringBuilder constraint = new StringBuilder();
-        for (int j = 0 ; j < 5 ; j++) {
-            int indicator = gCigarOffset + (4*25) + (j*5) + 5;
-            constraint.append(indicator).append(" ");
-        }
-        writer.write(constraint.append("0\n").toString());
-    }
-
-    // The Norwegian lives next to the blue house
-    public static void writeType16Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 16\n");
-        // First type.
-        for (int k = 0 ; k < 5 ; k++) {
-            for (int j = 0; j < 5; j++) {
-                int leftVarTypeOne = colourOffset + (3*25) + (j*5) + (k+1);
-                StringBuilder rightImplicationTypeOne = new StringBuilder();
-
-                int leftVarTypeTwo = colourOffset + (k*25) + (j*5) + 5;
-                StringBuilder rightImplicationTypeTwo = new StringBuilder();
-
-                for (int x = 0 ; x < 5 ; x++){
-                    // This is for type one.
-                    if (x != 3) {
-                        int rightVarTypeOne;
-                        if (j != 0) {
-                            rightVarTypeOne = colourOffset + (x*25) + ((j-1)*5) + 5;
-                            rightImplicationTypeOne.append(rightVarTypeOne).append(" ");
-                        }
-                        if (j != 4) {
-                            rightVarTypeOne = colourOffset + (x*25) + ((j+1)*5) + 5;
-                            rightImplicationTypeOne.append(rightVarTypeOne).append(" ");
-                        }
-                    }
-                    // This is for type two.
-                    if (x != 4) {
-                        int rightVarTypeTwo;
-                        if (j != 0) {
-                            rightVarTypeTwo = colourOffset + (3*25) + ((j-1)*5) + (x+1);
-                            rightImplicationTypeTwo.append(rightVarTypeTwo).append(" ");
-                        }
-                        if (j != 4) {
-                            rightVarTypeTwo = colourOffset + (3*25) + ((j+1)*5) + (x+1);
-                            rightImplicationTypeTwo.append(rightVarTypeTwo).append(" ");
-                        }
-                    }
-                }
-                writer.write("-" + leftVarTypeOne + " " + rightImplicationTypeOne.append("0\n").toString());
-                writer.write("-" + leftVarTypeTwo + " " + rightImplicationTypeTwo.append("0\n").toString());
-            }
+            int firstId = this.variables.get(stringOne) + i;
+            int secondId = this.variables.get(stringTwo) + i;
+            String clauseOne = "-" + firstId + " " + secondId + " 0\n";
+            String clauseTwo = "-" + secondId + " " + firstId + " 0\n";
+            writer.write(clauseOne);
+            writer.write(clauseTwo);
         }
     }
 
 
-    // The man who smokes Blends has a neighbour who drinks water
-    public static void writeType17Constraints(FileWriter writer) throws IOException {
-        //writer.write(DEBUG + "TYPE 17\n");
-        writeNextToConstraints(writer, gCigarOffset, beverageOffset, 3, 4);
-    }
-
-
-    // Used for Constraint 12, 13, 17
-    private static void writeNextToConstraints(FileWriter writer, int typeOneOffset, int typeTwoOffset,
-                                               int leftkOffset, int rightkOffset ) throws IOException {
+    // Since we already know the position of this object, we can make it a clause by itself and negate
+    // every position that is not pos.
+    private void addTruePosition(FileWriter writer, String object, int pos) throws IOException{
+        int varId = this.variables.get(object);
         for (int i = 0 ; i < 5 ; i++) {
-            for (int j = 0 ; j < 5; j++) {
-                int leftVarTypeOne = typeOneOffset + (i*25) + (j*5) + leftkOffset;
-                StringBuilder typeOneImplication = new StringBuilder();
-                typeOneImplication.append("-").append(leftVarTypeOne).append(" ");
-
-                int leftVarTypeTwo = typeTwoOffset + (i*25) + (j*5) + rightkOffset;
-                StringBuilder typeTwoImplication = new StringBuilder();
-                typeTwoImplication.append("-").append(leftVarTypeTwo).append(" ");
-
-                for (int x = 0 ; x < 5 ; x++) {
-                    if (x != i) {
-                        if (j < 4) {
-                            int rightVarTypeOne = typeTwoOffset + (x*25) + ((j+1)*5) + rightkOffset;
-                            typeOneImplication.append(rightVarTypeOne).append(" ");
-
-                            int rightVarTypeTwo = typeOneOffset + (x*25) + ((j+1)*5) + leftkOffset;
-                            typeTwoImplication.append(rightVarTypeTwo).append(" ");
-                        }
-                        if (j > 0) {
-                            int rightVarTypeOne = typeTwoOffset + (x*25) + ((j-1)*5) + rightkOffset;
-                            typeOneImplication.append(rightVarTypeOne).append(" ");
-
-                            int rightVarTypeTwo = typeOneOffset + (x*25) + ((j-1)*5) + leftkOffset;
-                            typeTwoImplication.append(rightVarTypeTwo).append(" ");
-                        }
-                    }
-                }
-                writer.write(typeOneImplication.append("0\n").toString());
-                writer.write(typeTwoImplication.append("0\n").toString());
+            if ((pos-1) != i) {
+                String clause = "-" + (varId+i);
+                writer.write(clause + " 0\n");
+            } else {
+                String clause = Integer.toString(varId+i);
+                writer.write(clause + " 0\n");
             }
         }
     }
 
-    private static void writeBidirectionalImplication(FileWriter writer,
-                                              int leftIndicator, int rightIndicator) throws IOException{
-        String clause = "-" + leftIndicator + " " + rightIndicator + " 0\n";
-        writer.write(clause);
-        clause = "-" + rightIndicator + " " + leftIndicator + " 0\n";
-        writer.write(clause);
+
+    private void mapVariablesToId(FileWriter writer, String[] variablesToMap) throws IOException{
+        // The 5 ids must be unique.
+        for (String variable : variablesToMap) {
+            this.variables.put(variable, varId);
+            // Create 5 ids for each variable where each id represents a position.
+            createOnlyOneClauses(writer, this.varId);
+            this.varId += 5;
+        }
+
     }
 
+    // Create constraints and to make sure only 1 position exists.
+    private void createOnlyOneClauses(FileWriter writer, int startingId) throws IOException{
+        // 1<>-2-3-4-5 == (-1 -2) (-1 -3) (-1 -4) (-1 -5) (1 2 3 4 5)
+
+        // Right implication
+        for (int i = 0 ; i < 4; i++){
+            for (int j = i+1; j < 5; j++) {
+                String clause = "-" + (startingId+i) + " -" + (j+startingId) + " 0\n";
+                writer.write(clause);
+            }
+        }
+        // Left implication
+        String clause = "";
+        for (int i = 0 ; i < 5; i++) {
+            clause += (startingId + i) + " ";
+        }
+        writer.write(clause + "0\n");
+    }
 }

@@ -85,23 +85,26 @@ public class CNFGenerator {
         // Indicator Variables will take up literal Ids from 1 - numIndicatorVariables
         try {
             System.out.println("Generating Einstein Constraints now.");
-            EinsteinGeneratorHelper.writeType1Constraints(writer);
-            EinsteinGeneratorHelper.writeType2Constraints(writer);
-            EinsteinGeneratorHelper.writeType3Constraints(writer);
-            EinsteinGeneratorHelper.writeType4Constraints(writer);
-            EinsteinGeneratorHelper.writeType5Constraints(writer);
-            EinsteinGeneratorHelper.writeType6Constraints(writer);
-            EinsteinGeneratorHelper.writeType7Constraints(writer);
-            EinsteinGeneratorHelper.writeType8Constraints(writer);
-            EinsteinGeneratorHelper.writeType9Constraints(writer);
-            EinsteinGeneratorHelper.writeType10Constraints(writer);
-            EinsteinGeneratorHelper.writeType11Constraints(writer);
-            EinsteinGeneratorHelper.writeType12Constraints(writer);
-            EinsteinGeneratorHelper.writeType13Constraints(writer);
-            EinsteinGeneratorHelper.writeType14Constraints(writer);
-            EinsteinGeneratorHelper.writeType15Constraints(writer);
-            EinsteinGeneratorHelper.writeType16Constraints(writer);
-            EinsteinGeneratorHelper.writeType17Constraints(writer);
+            EinsteinGeneratorHelper generator = new EinsteinGeneratorHelper();
+            generator.createUniqueConstraints(writer);
+            //EinsteinGeneratorHelper.writeType1Constraints(writer);
+            //EinsteinGeneratorHelper.writeType2Constraints(writer);
+            //EinsteinGeneratorHelper.writeType3Constraints(writer);
+            //EinsteinGeneratorHelper.writeType4Constraints(writer);
+            //EinsteinGeneratorHelper.writeType5Constraints(writer);
+            //EinsteinGeneratorHelper.writeType6Constraints(writer);
+            //EinsteinGeneratorHelper.writeType7Constraints(writer);
+            //EinsteinGeneratorHelper.writeType8Constraints(writer);
+            //EinsteinGeneratorHelper.writeType9Constraints(writer);
+            //EinsteinGeneratorHelper.writeType10Constraints(writer);
+            //EinsteinGeneratorHelper.writeType11Constraints(writer);
+            //EinsteinGeneratorHelper.writeType12Constraints(writer);
+            //EinsteinGeneratorHelper.writeType13Constraints(writer);
+            //EinsteinGeneratorHelper.writeType14Constraints(writer);
+            //EinsteinGeneratorHelper.writeType15Constraints(writer);
+            //EinsteinGeneratorHelper.writeType16Constraints(writer);
+            //EinsteinGeneratorHelper.writeType17Constraints(writer);
+            //EinsteinGeneratorHelper.writeType18Constraints(writer);
             System.out.println("Finished generating Einstein constraints.");
         } catch (IOException e){
             e.printStackTrace();
