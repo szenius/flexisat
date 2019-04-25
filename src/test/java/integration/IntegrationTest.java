@@ -10,6 +10,7 @@ import solvers.CDCLSolver;
 import java.io.File;
 import java.util.*;
 
+import static branch_pickers.BranchPickerType.CHAFF;
 import static branch_pickers.BranchPickerType.SEQ;
 import static conflict_analysers.ConflictAnalyserType.SINGLE_UIP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,7 +62,7 @@ public class IntegrationTest {
 
         // Try all types of conflict analysers
         for (ConflictAnalyserType conflictAnalyserType : ConflictAnalyserType.values()) {
-            assertEquals(expectedOutput, runSatSolverTest(testInput, SEQ.getType(), conflictAnalyserType.getType()), "Wrong output for " + testInput + " using " + conflictAnalyserType.getType() + " as conflict analysis");
+            assertEquals(expectedOutput, runSatSolverTest(testInput, CHAFF.getType(), conflictAnalyserType.getType()), "Wrong output for " + testInput + " using " + conflictAnalyserType.getType() + " as conflict analysis");
         }
     }
 
