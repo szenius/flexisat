@@ -28,19 +28,19 @@ public class Experiment {
         for (File testFile : testFiles) {
             // Test different branching heuristics
             for (BranchPickerType branchPickerType : BranchPickerType.values()) {
-                LOGGER.warn("Running {} against {} and {}", testFile.getName(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType());
+                LOGGER.info("Running {} against {} and {}", testFile.getName(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType());
                 SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType()});
                 String resultString = buildResultString(testFile.getName(), result, branchPickerType, DEFAULT_CONFLICT_ANALYSER_TYPE);
-                LOGGER.warn("COMPLETED: {}", resultString);
+                LOGGER.info("COMPLETED: {}", resultString);
                 results.add(resultString);
             }
 
             // Test different conflict analyser
             for (ConflictAnalyserType conflictAnalyserType : ConflictAnalyserType.values()) {
-                LOGGER.warn("Running {} against {} and {}", testFile.getName(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType());
+                LOGGER.info("Running {} against {} and {}", testFile.getName(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType());
                 SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType()});
                 String resultString = buildResultString(testFile.getName(), result, DEFAULT_BRANCH_PICKER_TYPE, conflictAnalyserType);
-                LOGGER.warn("COMPLETED: {}", resultString);
+                LOGGER.info("COMPLETED: {}", resultString);
                 results.add(resultString);
             }
         }

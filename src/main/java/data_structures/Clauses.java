@@ -1,10 +1,13 @@
 package data_structures;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class Clauses {
+    private static final int CLAUSE_SIZE_THRESHOLD = 5;
+    private static final int UNASSIGNED_LITERALS_THRESHOLD = 5;
     private Set<Clause> clauses;
     public Clauses(Set<Clause> clauses) {
         this.clauses = clauses;
@@ -36,5 +39,17 @@ public class Clauses {
             }
         }
         return false;
+    }
+
+    public void filterClauses(Assignments assignments) {
+        Set<Clause> clausesToDelete = new HashSet<>();
+        for (Clause clause : clauses) {
+            if (clause.size() > CLAUSE_SIZE_THRESHOLD) {
+                if (clause.getUnassignedLiterals(assignments).size() > UNASSIGNED_LITERALS_THRESHOLD) {
+                    clausesToDelete.add(clause);
+                }
+            }
+        }
+        clauses.removeAll(clausesToDelete);
     }
 }
