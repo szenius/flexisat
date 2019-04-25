@@ -29,7 +29,7 @@ public class DirectCutConflictAnalyser extends ExtendedConflictAnalyser {
 
         // Build result with learnt clause and assertion level
         ConflictAnalyserResult result = buildConflictAnalyserResult(candidates, assignments);
-        LOGGER.debug("LEARNT new clause {}", result.getLearntClause().toString());
+        LOGGER.info("LEARNT new clause {}", result.getLearntClause().toString());
 
         // Remove assignment of the conflicting node which came second
         removeConflictingNodeFromGraph(inferredNode);

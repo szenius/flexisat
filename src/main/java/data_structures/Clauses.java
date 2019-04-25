@@ -46,10 +46,11 @@ public class Clauses {
         return false;
     }
 
-    public void filterClauses(Assignments assignments) {
+    public void filterClauses(Assignments assignments, Clause learntClause) {
         Set<Clause> clausesToDelete = new HashSet<>();
         for (Clause clause : clauses) {
-            if (clause.size() > CLAUSE_SIZE_THRESHOLD && clause.getUnassignedLiterals(assignments).size() > UNASSIGNED_LITERALS_THRESHOLD) {
+            if (!clause.equals(learntClause) && clause.size() > CLAUSE_SIZE_THRESHOLD
+                    && clause.getUnassignedLiterals(assignments).size() > UNASSIGNED_LITERALS_THRESHOLD) {
                     clausesToDelete.add(clause);
                     LOGGER.debug("DELETING clause {}", clause);
             }

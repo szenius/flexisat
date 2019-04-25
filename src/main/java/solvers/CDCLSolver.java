@@ -103,7 +103,6 @@ public class CDCLSolver implements Solver {
             // Remove all assignments made beyond assertion level
             assignments.removeAssignmentsBeyondLevel(assertionLevel);
         }
-        clauses.filterClauses(assignments);
     }
 
     /**
@@ -119,6 +118,8 @@ public class CDCLSolver implements Solver {
         clauses.addClause(learntClause);
         branchPicker.updateWeights(result);
         branchPicker.decayWeights();
+
+        clauses.filterClauses(assignments, learntClause);
 
         return result.getAssertionLevel();
     }
