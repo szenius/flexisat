@@ -28,6 +28,8 @@ public class Parser {
     private static final int CONFLICT_ANALYSER_ARGS_INDEX = 2;
     private static final int OPTIONAL_PARAMS_START_INDEX = 3;
 
+    private int numClauses;
+    private int numVariables;
     private Clauses clauses;
     private Set<Variable> variables;
     private BranchPicker branchPicker;
@@ -105,7 +107,8 @@ public class Parser {
 
             // First line after comment lines should start with "p"
             String[] tokens = line.trim().split("\\s+");
-            int numClauses = Integer.parseInt(tokens[3]);
+            numVariables = Integer.parseInt(tokens[2]);
+            numClauses = Integer.parseInt(tokens[3]);
 
             // Read in clauses
             Set<Clause> clauseSet = new HashSet<>();
@@ -226,5 +229,13 @@ public class Parser {
 
     public ConflictAnalyser getConflictAnalyser() {
         return conflictAnalyser;
+    }
+
+    public int getNumClauses() {
+        return numClauses;
+    }
+
+    public int getNumVariables() {
+        return numVariables;
     }
 }

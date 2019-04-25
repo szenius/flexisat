@@ -1,9 +1,9 @@
 package data_structures;
 
 public class SolverResult {
-    boolean sat;
+    private boolean sat;
     private int numPickBranching;
-    long timeTaken;
+    private long timeTaken;
 
     public SolverResult(boolean sat, int numPickBranching, long timeTaken) {
         this.sat = sat;
