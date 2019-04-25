@@ -4,30 +4,13 @@ import java.util.*;
 
 public class Clause {
     private List<Literal> literals;
-    private boolean isLearnt;
-    private int headPtr;
-    private int tailPtr;
 
     public Clause(List<Literal> literals) {
         this.literals = literals;
-        this.isLearnt = false;
-        this.headPtr = 0;
-        this.tailPtr = literals.size() - 1;
-    }
-
-    public Clause(List<Literal> literals, boolean isLearnt) {
-        this.literals = literals;
-        this.isLearnt = isLearnt;
-        this.headPtr = 0;
-        this.tailPtr = literals.size() - 1;
     }
 
     public List<Literal> getLiterals() {
         return literals;
-    }
-
-    public boolean isLearnt() {
-        return isLearnt;
     }
 
     public int size() {
