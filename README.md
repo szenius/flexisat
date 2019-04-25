@@ -93,3 +93,6 @@ No other special installations are required.
 
 ## References
 * [Conflict Driven Clause Learning Solvers](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf)
+* [Understanding VSIDS Branching Heuristics
+   in Conflict-Driven Clause-Learning SAT Solvers](https://arxiv.org/pdf/1506.08905.pdf)
+* [Understanding Modern SAT Solvers](http://fmv.jku.at/biere/talks/Biere-VTSA12-talk.pdf)

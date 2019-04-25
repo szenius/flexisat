@@ -17,13 +17,6 @@ public class Clause {
 
     public List<Literal> getLiterals() {
         return literals;
-<<<<<<< HEAD
-=======
-    }
-
-    public boolean isLearnt() {
-        return isLearnt;
->>>>>>> master
     }
 
     public int size() {
