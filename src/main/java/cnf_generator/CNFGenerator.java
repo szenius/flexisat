@@ -86,7 +86,7 @@ public class CNFGenerator {
         try {
             System.out.println("Generating Einstein Constraints now.");
             EinsteinGeneratorHelper.writeType1Constraints(writer);
-            //EinsteinGeneratorHelper.writeType2Constraints(writer);
+            EinsteinGeneratorHelper.writeType2Constraints(writer);
             EinsteinGeneratorHelper.writeType3Constraints(writer);
             EinsteinGeneratorHelper.writeType4Constraints(writer);
             EinsteinGeneratorHelper.writeType5Constraints(writer);

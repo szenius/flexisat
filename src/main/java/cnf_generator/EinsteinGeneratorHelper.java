@@ -41,6 +41,7 @@ public class EinsteinGeneratorHelper {
         }
     }
 
+
     // Every Nationality can only be matched to one House Order
     public static void writeType2Constraints(FileWriter writer) throws IOException {
         //writer.write(DEBUG + "TYPE 2\n");
@@ -63,6 +64,7 @@ public class EinsteinGeneratorHelper {
                                 writer.write("-" + leftVar + " -" + rightVar + " 0\n");
                             }
                             // Not conflict with i
+                            // TODO: Is this correct?
                             if (x != i) {
                                 rightVar = types[type] + (x*25) + (j*5) + (k+1);
                                 leftImplication.append(rightVar).append(" ");
@@ -303,7 +305,7 @@ public class EinsteinGeneratorHelper {
                             int rightVarTypeOne = typeTwoOffset + (x*25) + ((j-1)*5) + rightkOffset;
                             typeOneImplication.append(rightVarTypeOne).append(" ");
 
-                            int rightVarTypeTwo = typeOneOffset + (x*25) + ((j+1)*5) + leftkOffset;
+                            int rightVarTypeTwo = typeOneOffset + (x*25) + ((j-1)*5) + leftkOffset;
                             typeTwoImplication.append(rightVarTypeTwo).append(" ");
                         }
                     }
