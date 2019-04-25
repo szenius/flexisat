@@ -6,20 +6,32 @@ import java.io.IOException;
 
 public class CNFGenerator {
 
-    public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("Missing program arguments.");
-        }
-        String numVariables = args[0];
-        String numClauses = args[1];
-        if (numVariables.equals("") || numClauses.equals("")) {
-            System.out.println("Error. We require 2 arguments for numVariables and numClauses respectively.");
-            System.exit(1);
-        }
-        createCNFFile(numVariables, numClauses);
+    public enum GENERATOR_TYPE {
+        EINSTEIN, THREE_CNF,
     }
 
-    private static void createCNFFile(String numVariables, String numClauses) {
+    public static void main(String[] args) {
+        GENERATOR_TYPE generatorType = null;
+        System.out.println(args[0]);
+        if (args.length == 1 &&
+            args[0].equals("einstein")) {
+            generatorType = GENERATOR_TYPE.EINSTEIN;
+            createCNFFile("0", "0" , generatorType);
+        } else if (args.length != 2) {
+            System.out.println("Missing program arguments.");
+        } else {
+            generatorType = GENERATOR_TYPE.THREE_CNF;
+            String numVariables = args[0];
+            String numClauses = args[1];
+            if (numVariables.equals("") || numClauses.equals("")) {
+                System.out.println("Error. We require 2 arguments for numVariables and numClauses respectively.");
+                System.exit(1);
+            }
+            createCNFFile(numVariables, numClauses, generatorType);
+        }
+    }
+
+    private static void createCNFFile(String numVariables, String numClauses, GENERATOR_TYPE generatorType) {
         // Lazy way of creating file name
         String fileName = numVariables + "var-" + numClauses + ".cnf";
         File file = new File(fileName);
@@ -27,14 +39,32 @@ public class CNFGenerator {
         try {
             if (file.createNewFile()) {
                 FileWriter writer = new FileWriter(file);
-                String firstLine = "c Generated CNF file\n";
-                String secondLine = "p cnf " + numVariables + " " + numClauses + "\n";
-                writer.write(firstLine);
-                writer.write(secondLine);
-                for (int i = 0; i < Integer.parseInt(numClauses); i++) {
-                    String line = generate3CNFClause(Integer.parseInt(numVariables));
-                    writer.write(line);
+
+                switch (generatorType) {
+                    case THREE_CNF:
+                        String firstLine = "c Generated CNF file\n";
+                        String secondLine = "p cnf " + numVariables + " " + numClauses + "\n";
+                        writer.write(firstLine);
+                        writer.write(secondLine);
+                        for (int i = 0; i < Integer.parseInt(numClauses); i++) {
+                            String line = generate3CNFClause(Integer.parseInt(numVariables));
+                            writer.write(line);
+                        }
+                        break;
+                    case EINSTEIN:
+                        firstLine = "c Generated Einstein file \n";
+                        // TODO: Calculate
+                        secondLine = "p cnf " + numVariables + numClauses + "\n";
+                        writer.write(firstLine);
+                        writer.write(secondLine);
+                        generateEinsteinConstraints(writer);
+
+
+                        break;
+                    default:
+                        System.out.println("Invalid generator type. Please check.");
                 }
+
                 writer.close();
             } else {
                 System.out.println("File already exists.");
@@ -44,6 +74,40 @@ public class CNFGenerator {
             System.exit(1);
         }
     }
+
+    private static void generateEinsteinConstraints(FileWriter writer) {
+        // Indicator Variables will take up literal Ids from 1 - numIndicatorVariables
+        double numIndicatorVariables = 4 * Math.pow(5, 3);
+        try {
+            EinsteinGeneratorHelper.writeType1Constraints(writer, numIndicatorVariables);
+            EinsteinGeneratorHelper.writeType2Constraints(writer);
+            EinsteinGeneratorHelper.writeType3Constraints(writer);
+            EinsteinGeneratorHelper.writeType4Constraints(writer);
+            EinsteinGeneratorHelper.writeType5Constraints(writer);
+            EinsteinGeneratorHelper.writeType6Constraints(writer);
+            EinsteinGeneratorHelper.writeType7Constraints(writer);
+            EinsteinGeneratorHelper.writeType8Constraints(writer);
+            EinsteinGeneratorHelper.writeType9Constraints(writer);
+            EinsteinGeneratorHelper.writeType10Constraints(writer);
+            EinsteinGeneratorHelper.writeType11Constraints(writer);
+            EinsteinGeneratorHelper.writeType12Constraints(writer);
+            EinsteinGeneratorHelper.writeType13Constraints(writer);
+            EinsteinGeneratorHelper.writeType14Constraints(writer);
+            EinsteinGeneratorHelper.writeType15Constraints(writer);
+            EinsteinGeneratorHelper.writeType16Constraints(writer);
+            EinsteinGeneratorHelper.writeType17Constraints(writer);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+
+
+
+
 
     /**
      * This function generates a string line of clause randomly with equal probabilities across the
