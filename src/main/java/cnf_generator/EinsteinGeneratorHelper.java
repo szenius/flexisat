@@ -168,7 +168,6 @@ public class EinsteinGeneratorHelper {
     // Create constraints and to make sure only 1 position exists.
     private void createOnlyOneClauses(FileWriter writer, int startingId) throws IOException{
         // 1<>-2-3-4-5 == (-1 -2) (-1 -3) (-1 -4) (-1 -5) (1 2 3 4 5)
-
         // Right implication
         for (int i = 0 ; i < 4; i++){
             for (int j = i+1; j < 5; j++) {
