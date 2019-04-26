@@ -137,11 +137,8 @@ public class EinsteinGeneratorHelper {
     private void addTruePosition(FileWriter writer, String object, int pos) throws IOException{
         int varId = this.variables.get(object);
         for (int i = 0 ; i < 5 ; i++) {
-            if ((pos-1) != i) {
-                String clause = "-" + (varId+i);
-                writer.write(clause + " 0\n");
-            } else {
-                String clause = Integer.toString(varId+i);
+            if ((pos-1) == i) {
+                String clause = Integer.toString(varId + i);
                 writer.write(clause + " 0\n");
             }
         }
