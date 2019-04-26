@@ -1,4 +1,4 @@
-# SAT Solver
+# FlexiSAT Solver
 ## General Design
 This SAT Solver is a CDCL SAT Solver. The general design is adapted from [this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf). 
 
