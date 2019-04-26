@@ -1,4 +1,5 @@
 # SAT Solver
+## General Design
 This SAT Solver is a CDCL SAT Solver. The general design is adapted from [this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf). 
 
 For branch picking and conflict analysis, the implementation allows for flexible addition and choice of the desired heuristics. This is to allow ease of experimentation with different heuristics.

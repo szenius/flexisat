@@ -20,6 +20,8 @@ public class Experiment {
     private static final BranchPickerType DEFAULT_BRANCH_PICKER_TYPE = BranchPickerType.CHAFF;
     private static final ConflictAnalyserType DEFAULT_CONFLICT_ANALYSER_TYPE = ConflictAnalyserType.SINGLE_UIP;
 
+    private static final int NUM_REPEATS = 5;
+
     private static void run() throws IOException {
         File directory = new File(TEST_DIRECTORY);
         File[] testFiles = directory.listFiles();
@@ -28,20 +30,22 @@ public class Experiment {
         for (File testFile : testFiles) {
             // Test different branching heuristics
             for (BranchPickerType branchPickerType : BranchPickerType.values()) {
-                LOGGER.info("Running {} against {} and {}", testFile.getName(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType());
-                SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType()});
-                String resultString = buildResultString(testFile.getName(), result, branchPickerType, DEFAULT_CONFLICT_ANALYSER_TYPE);
-                LOGGER.info("COMPLETED: {}", resultString);
-                results.add(resultString);
+                for (int i = 0; i < NUM_REPEATS; i++) {
+                    SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), branchPickerType.getType(), DEFAULT_CONFLICT_ANALYSER_TYPE.getType()});
+                    String resultString = buildResultString(testFile.getName(), result, branchPickerType, DEFAULT_CONFLICT_ANALYSER_TYPE);
+                    LOGGER.info("COMPLETED: {}", resultString);
+                    results.add(resultString);
+                }
             }
 
             // Test different conflict analyser
             for (ConflictAnalyserType conflictAnalyserType : ConflictAnalyserType.values()) {
-                LOGGER.info("Running {} against {} and {}", testFile.getName(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType());
-                SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType()});
-                String resultString = buildResultString(testFile.getName(), result, DEFAULT_BRANCH_PICKER_TYPE, conflictAnalyserType);
-                LOGGER.info("COMPLETED: {}", resultString);
-                results.add(resultString);
+                for (int i = 0; i < NUM_REPEATS; i++) {
+                    SolverResult result = Main.run(new String[]{testFile.getAbsolutePath(), DEFAULT_BRANCH_PICKER_TYPE.getType(), conflictAnalyserType.getType()});
+                    String resultString = buildResultString(testFile.getName(), result, DEFAULT_BRANCH_PICKER_TYPE, conflictAnalyserType);
+                    LOGGER.info("COMPLETED: {}", resultString);
+                    results.add(resultString);
+                }
             }
         }
 
