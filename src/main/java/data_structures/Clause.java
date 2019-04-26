@@ -19,10 +19,6 @@ public class Clause {
         return literals;
     }
 
-    public boolean isLearnt() {
-        return isLearnt;
-    }
-
     public int size() {
         return this.getLiterals().size();
     }

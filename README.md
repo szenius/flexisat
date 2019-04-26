@@ -1,4 +1,16 @@
 # SAT Solver
+## General Design
+This SAT Solver is a CDCL SAT Solver. The general design is adapted from [this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf). 
+
+For branch picking and conflict analysis, the implementation allows for flexible addition and choice of the desired heuristics. This is to allow ease of experimentation with different heuristics.
+
+Other than the baselines of Random, Sequential, and 2Clause branch picking, we also implemented VSIDS branch picking, including the variants Chaff and MiniSAT. This is because VSIDS has been widely known to be the most effective dynamic branch picking heuristic. Although there are newer heuristics like the Conflict History Based branch picking and Learning Rate Based branch picking, these are not as widely used and hence there are less resources available to help us understand the implementation. 
+
+As for conflict analysis, we implemented both the commonly used resolution based conflict analysis method (no UIP in resolved clause) and the single UIP conflict analysis method. On top of that, we also tested using the roots of each conflict node as a new learnt clause, as well as using the nodes that lead directly to the conflict side as a new learnt clause. The latter two can be implemented without traversing the implication graph, and can hence allow analysis of whether the graph traversal time is significant.
+
+Clause deletion was also implemented according to a blend of the k-bounded learning and m-size relevance-based learning as discussed in [this book](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf). For our solver, k and m were arbitrarily chosen to be 10 and 5 respectively. We chose to implement clause deletion to prevent running into memory issues.
+
+We did not implement any lazy data structures to keep track of clause status as for the requirements of our project, we are mostly dealing with clauses of size 3. Hence, we did not think there will be a huge performance improvement.
 
 ## User Guide
 ### Prerequisites 
@@ -86,8 +98,8 @@ java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein
 ### Check CNF on CrytoMiniSat
 `cat myfile.cnf | docker run --rm -i msoos/cryptominisat`
 
-## Future Work
-**COMING SOON**
-
 ## References
 * [Conflict Driven Clause Learning Solvers](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf)
+* [Understanding VSIDS Branching Heuristics
+   in Conflict-Driven Clause-Learning SAT Solvers](https://arxiv.org/pdf/1506.08905.pdf)
+* [Understanding Modern SAT Solvers](http://fmv.jku.at/biere/talks/Biere-VTSA12-talk.pdf)

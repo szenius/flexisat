@@ -1,10 +1,18 @@
 package data_structures;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class Clauses {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Clauses.class);
+
+    private static final int CLAUSE_SIZE_THRESHOLD = 10;
+    private static final int UNASSIGNED_LITERALS_THRESHOLD = 5;
     private Set<Clause> clauses;
     public Clauses(Set<Clause> clauses) {
         this.clauses = clauses;
@@ -36,5 +44,17 @@ public class Clauses {
             }
         }
         return false;
+    }
+
+    public void filterClauses(Assignments assignments, Clause learntClause) {
+        Set<Clause> clausesToDelete = new HashSet<>();
+        for (Clause clause : clauses) {
+            if (!clause.equals(learntClause) && clause.size() > CLAUSE_SIZE_THRESHOLD
+                    && clause.getUnassignedLiterals(assignments).size() > UNASSIGNED_LITERALS_THRESHOLD) {
+                    clausesToDelete.add(clause);
+                    LOGGER.debug("DELETING clause {}", clause);
+            }
+        }
+        clauses.removeAll(clausesToDelete);
     }
 }

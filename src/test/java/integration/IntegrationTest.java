@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.*;
 
 import static branch_pickers.BranchPickerType.CHAFF;
-import static branch_pickers.BranchPickerType.SEQ;
 import static conflict_analysers.ConflictAnalyserType.SINGLE_UIP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

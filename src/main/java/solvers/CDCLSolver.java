@@ -119,6 +119,8 @@ public class CDCLSolver implements Solver {
         branchPicker.updateWeights(result);
         branchPicker.decayWeights();
 
+        clauses.filterClauses(assignments, learntClause);
+
         return result.getAssertionLevel();
     }
 
