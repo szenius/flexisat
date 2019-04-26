@@ -91,7 +91,7 @@ No other special installations are required.
 
 For generation of CNF for Einteins puzzle: 
 
-java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein
+`java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein`
 
  
  
