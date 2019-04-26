@@ -79,21 +79,24 @@ public class EinsteinGeneratorHelper {
         // First object can be on the left or the right of the other object
         int firstObjId = this.variables.get(firstObj);
         int secondObjId = this.variables.get(secondObj);
-        // [firstObj <> secondObj] AND[secondObj <> firstObj] AND ... (continue for rest of positions)
         for (int i = 1 ; i < 4; i++) {
             int idFirst = firstObjId + i;
+            // firstObjId(i) -> secondObjId(i-1) OR secondObjId(i+1)
             writer.write("-" + idFirst + " " + (secondObjId + i - 1) + " " + (secondObjId + i + 1) + " 0\n");
+            // secondObjId(i) -> firstObjId(i-1) OR firstObjId(i+1);
             writer.write("-" + (secondObjId + i) + " " + (idFirst - 1) + " " + (idFirst + 1) + " 0\n");
-            //writer.write("-" + (secondObjId + i - 1) + " " + idFirst + " 0\n");
-            //writer.write("-" + (secondObjId + i + 1) + " " + idFirst + " 0\n");
         }
         // i == 0
+        // firstObjId1 -> secondObjId2
         writer.write("-" + firstObjId + " " + (secondObjId + 1) + " 0\n");
-        writer.write("-" + (secondObjId + 1) + " " + firstObjId + " 0\n");
+        // secondObjId1 -> firstObjId2
+        writer.write("-" + secondObjId + " " + (firstObjId + 1) + " 0\n");
+        
         //i == 4
-        writer.write("-" + (firstObjId+4) + " " + (secondObjId + 3) + " 0\n");
-        writer.write("-" + (secondObjId + 3) + " " + (firstObjId+4) + " 0\n");
-
+        // firstObjId5 -> secondObjId4
+        writer.write("-" + (firstObjId + 4) + " " + (secondObjId + 3) + " 0\n");
+        // secondObjId5 -> firstObjId4
+        writer.write("-" + (secondObjID + 4) + " " + (firstObjId + 3) + " 0\n");
     }
 
     private void addLeft(FileWriter writer, String leftObj, String rightObj) throws IOException{
