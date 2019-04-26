@@ -89,6 +89,12 @@ No other special installations are required.
 ## CNF Generator 
 `java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator <num_variables> <num_clauses>`
 
+For generation of CNF for Einteins puzzle: 
+
+java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein
+
+ 
+ 
 ### Check CNF on CrytoMiniSat
 `cat myfile.cnf | docker run --rm -i msoos/cryptominisat`
 
