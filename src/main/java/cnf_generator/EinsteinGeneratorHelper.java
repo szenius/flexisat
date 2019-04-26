@@ -96,7 +96,7 @@ public class EinsteinGeneratorHelper {
         // firstObjId5 -> secondObjId4
         writer.write("-" + (firstObjId + 4) + " " + (secondObjId + 3) + " 0\n");
         // secondObjId5 -> firstObjId4
-        writer.write("-" + (secondObjID + 4) + " " + (firstObjId + 3) + " 0\n");
+        writer.write("-" + (secondObjId + 4) + " " + (firstObjId + 3) + " 0\n");
     }
 
     private void addLeft(FileWriter writer, String leftObj, String rightObj) throws IOException{

@@ -86,17 +86,28 @@ No other special installations are required.
 3. In `Parser.java`, add your conflict analyser to the `switch` statement in `setConflictAnalyser`.
 4. Add documentation in the [User Guide](#conflict-analysers).
 
-## CNF Generator 
-`java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator <num_variables> <num_clauses>`
+## CNF Tools
+We have also included several tools dealing with CNF formulas in this package.
 
-For generation of CNF for Einteins puzzle: 
+### General CNF Generator
+To generate a CNF formula in DIMACS format, please follow the instructions in [Prerequisites](#prerequisites), then run the following on your command line.
 
-`java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein`
+```
+java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator <num_variables> <num_clauses>
+```
 
- 
- 
-### Check CNF on CrytoMiniSat
-`cat myfile.cnf | docker run --rm -i msoos/cryptominisat`
+### Check CNF on CryptoMiniSat
+Given any CNF file, if you want to check whether it is SAT or UNSAT, do the following to check against CryptoMiniSAT. Please ensure that you have docker set up before you run the following. Only files in the DIMACS format are accepted.
+
+```
+cat mycnffile.cnf | docker run --rm -i msoos/cryptominisat
+```
+
+### Einstein's Logic Puzzle
+To generate the CNF formula for our Einstein's Logic Puzzle encoding, please follow the instructions in [Prerequisites](#prerequisites), then run the following on your command line.
+```
+java -cp build/libs/sat-solver-all-1.0.jar cnf_generator/CNFGenerator einstein
+```
 
 ## References
 * [Conflict Driven Clause Learning Solvers](https://www.cis.upenn.edu/~alur/CIS673/sat-cdcl.pdf)
