@@ -12,6 +12,7 @@ class Main {
 
     public static void main(String[] args) {
         SolverResult result = run(args);
+        System.out.println("Time Taken = " + result.getTimeTaken());
         if (result.isSat()) {
             System.out.println("SAT");
         } else {

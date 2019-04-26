@@ -16,7 +16,7 @@ public class CNFGenerator {
         if (args.length == 1 &&
             args[0].equals("einstein")) {
             generatorType = GENERATOR_TYPE.EINSTEIN;
-            createCNFFile("0", "0" , generatorType);
+            createCNFFile("125", "433" , generatorType);
         } else if (args.length != 2) {
             System.out.println("Missing program arguments.");
         } else {
@@ -59,8 +59,7 @@ public class CNFGenerator {
                     case EINSTEIN:
                         firstLine = "c Generated Einstein file \n";
                         // TODO: Calculate
-                        double numEinsteinVariables = 4 * Math.pow(5,3);
-                        secondLine = "p cnf " + (int)numEinsteinVariables + " " + numClauses + "\n";
+                        secondLine = "p cnf " + numVariables + " " + numClauses + "\n";
                         writer.write(firstLine);
                         writer.write(secondLine);
                         generateEinsteinConstraints(writer);
