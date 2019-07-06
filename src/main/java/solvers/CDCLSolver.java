@@ -19,12 +19,14 @@ public class CDCLSolver implements Solver {
     private BranchPicker branchPicker;
     private ConflictAnalyser conflictAnalyser;
     private int pickBranchingCount;
+    private boolean clauseDeletion;
 
     public CDCLSolver(Parser parser) {
         this.clauses = parser.getClauses();
         this.variables = parser.getVariables();
         this.branchPicker = parser.getBranchPicker();
         this.conflictAnalyser = parser.getConflictAnalyser();
+        this.clauseDeletion = parser.getClauseDeletion();
         this.assignments = new Assignments();
         this.pickBranchingCount = 0;
     }
@@ -119,7 +121,9 @@ public class CDCLSolver implements Solver {
         branchPicker.updateWeights(result);
         branchPicker.decayWeights();
 
-        clauses.filterClauses(assignments, learntClause);
+        if (clauseDeletion) {
+            clauses.filterClauses(assignments, learntClause);
+        }
 
         return result.getAssertionLevel();
     }
