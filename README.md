@@ -37,7 +37,7 @@ java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <co
 # java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip
 
 # e.g. with optional parameters (format: key=value)
-# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip bump=1 decay_factor=0.5 decay_interval=1
+# java -jar build/libs/sat-solver-all-1.0.jar input/sat/sat_input1.cnf seq single_uip bump=1 decay_factor=0.5 decay_interval=1 clause_deletion=true
 ```
 * `filename`: A CNF file following the DIMACS format
 * `pick_branching_type`: "seq", "random", "two_clause", "vsids", "chaff", "minisat". Please see [Branch Pickers](#branch-pickers) for more explanation.
@@ -45,6 +45,7 @@ java -jar build/libs/sat-solver-all-1.0.jar <filename> <pick_branching_type> <co
 * (Optional) `bump`: any integer that is at least 1. Used for `vsids` pick branching. Corresponds to the additive factor applied to the variable weights every time a conflict happens. 
 * (Optional) `decay_factor`: any double from 0 to 1. Used for `vsids` pick branching. Corresponds to the multiplicative factor applied to the variable weights.
 * (Optional) `decay_interval`: any integer that is at least 1. Used for `vsids` pick branching. Corresponds to the number of conflicts before a decay is applied to the variable weights.
+* (Optional) `clause_deletion`: true or false. Defaults to true. If true, after each conflict analysis, clauses of size more than 10 (default) or with more than 5 (default) unassigned literals will be deleted.
 
 #### Branch Pickers
 We have various implementations of how the solver picks the next variable for assignment. 

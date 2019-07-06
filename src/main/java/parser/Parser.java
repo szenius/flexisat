@@ -28,6 +28,7 @@ public class Parser {
     private static final int CONFLICT_ANALYSER_ARGS_INDEX = 2;
     private static final int OPTIONAL_PARAMS_START_INDEX = 3;
 
+
     private int numClauses;
     private int numVariables;
     private Clauses clauses;
@@ -38,10 +39,11 @@ public class Parser {
     private double decayFactor;
     private int bump;
     private int decayInterval;
+    private boolean clauseDeletion;
 
     public Parser(String[] args) {
-        if (args.length != 3) {
-            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type> <branching_decay_chance>");
+        if (args.length < 3) {
+            throw new IllegalArgumentException("Wrong input format.\nUsage: <filename> <pick_branching_type> <conflict_analyser_type> <optional_params>");
         }
         this.variables = new HashSet<>();
         init(args);
@@ -60,6 +62,7 @@ public class Parser {
         decayFactor = 0.5;
         decayInterval = 1;
         bump = 1;
+        clauseDeletion = true;
 
         // Replace with user configurations, if any
         for (int i = OPTIONAL_PARAMS_START_INDEX; i < args.length; i++) {
@@ -78,6 +81,9 @@ public class Parser {
                     break;
                 case "bump":
                     bump = Integer.parseInt(tokens[1]);
+                    break;
+                case "clause_deletion":
+                    clauseDeletion = Boolean.parseBoolean(tokens[1]);
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid optional parameter key " + tokens[0]);
@@ -237,5 +243,9 @@ public class Parser {
 
     public int getNumVariables() {
         return numVariables;
+    }
+
+    public boolean getClauseDeletion() {
+        return clauseDeletion;
     }
 }
